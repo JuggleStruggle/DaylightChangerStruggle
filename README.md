@@ -3,7 +3,7 @@ A fully-clientsided mod which changes the daylight cycle without the need of fid
 (Unless if your goal is to do that.)
 
 It is also compatible with Sodium and Iris as it changes the client's world lunar cycle/sky angle and
-disable the night vision effect.
+disables the night vision effect.
 
 ## Features
 * The ability to pick many different types of cycles (see Cycle Types), not just set the time
@@ -33,6 +33,11 @@ For starters, we offer the following types:
 * Low-to-High Height Time - Depending on your height (or the viewing entity's), you can decide the 
            minimum and maximum value and tie both of them with a set time
 * And more in the future
+
+## Getting Started
+* To show a user interface for the mod, bind the key "Open Time Changer Menu" to anything you'd like to 
+and when in-game press the key and the menu should be seen. 
+* Or if you want to use commands instead, type either `/daylightchanger`, `/dcs`, `/tcs` or `/timechanger`.
 
 ## TODOs
 * System Cycle - Support different timezones like UTC and create an offset for local timezone to 
