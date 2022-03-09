@@ -1,0 +1,15 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "jugglestruggle.timechangerstruggle.mixin.client",
+    "compatibilityLevel": "JAVA_17",
+    "client": 
+    [
+        "render.GameRendererMixin",
+        "world.ClientWorldMixin",
+        "widget.CyclingButtonWidgetBuilderAccessor"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

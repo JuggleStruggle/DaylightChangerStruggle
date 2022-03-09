@@ -1,0 +1,36 @@
+{
+	"schemaVersion": 1,
+	"id": "daylightchangerstruggle",
+	"version": "${version}",
+	"environment": "client",
+	
+	"name": "DaylightChangerStruggle",
+	"description": "Sometimes when you want not to bother with the world time so you resort to your own and call it a success.",
+	"authors": ["JuggleStruggle"],
+	
+	"contact": {
+	  "homepage": "https://github.com/JuggleStruggle/DaylightChangerStruggle",
+	  "sources": "https://github.com/JuggleStruggle/DaylightChangerStruggle",
+	  "issues": "https://github.com/JuggleStruggle/DaylightChangerStruggle/issues"
+	},
+	
+	"license": "MIT",
+	"icon": "assets/timechangerstruggle/icon.png",
+	
+	"entrypoints": 
+	{
+	  "main": ["jugglestruggle.timechangerstruggle.TimeChangerStruggle"],
+	  "client": ["jugglestruggle.timechangerstruggle.client.TimeChangerStruggleClient"],
+	  "modmenu": ["jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen"]
+	},
+	
+	"mixins": ["timechangerstruggle.client.mixins.json"],
+	"accessWidener": "timechangerstruggle.client.accesswidener",
+	
+	"depends": {
+	  "fabricloader": ">=0.12.12",
+	  "fabric": "*",
+	  "minecraft": "1.18.x",
+	  "java": ">=17"
+	}
+}

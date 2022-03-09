@@ -1,0 +1,40 @@
+{
+	"vertex": "rainbow_shader",
+	"fragment": "rainbow_shader",
+	
+	"samplers": [],
+	"attributes": ["aPosition", "aOffset", "aProgress"],
+	
+	"uniforms":
+	[
+        { 
+        	"name": "ModelViewMat", "type": "matrix4x4", "count": 16, 
+        	"values": [ 
+        		1.0, 0.0, 0.0, 0.0, 
+        		0.0, 1.0, 0.0, 0.0, 
+        		0.0, 0.0, 1.0, 0.0, 
+        		0.0, 0.0, 0.0, 1.0 
+        	] 
+        },
+        { 
+        	"name": "ProjMat", "type": "matrix4x4", "count": 16, 
+        	"values": [ 
+        		1.0, 0.0, 0.0, 0.0, 
+        		0.0, 1.0, 0.0, 0.0, 
+        		0.0, 0.0, 1.0, 0.0, 
+        		0.0, 0.0, 0.0, 1.0 
+        	] 
+        },
+        
+        { "name": "uStrokeWidth", "type": "float", "count": 1, "values": [ 0.2 ] },
+        { "name": "uTimeOffset", "type": "float", "count": 1, "values": [ 0.0 ] },
+        { "name": "uDashCount", "type": "float", "count": 1, "values": [ 2.0 ] }
+	],
+	
+	"blend": 
+	{
+        "func": "add",
+        "srcrgb": "srcalpha",
+        "dstrgb": "1-srcalpha"
+    }
+}
