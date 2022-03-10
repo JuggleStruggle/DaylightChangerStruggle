@@ -50,4 +50,4 @@ Make sure Gradle is using the Java version this project is using (or Minecraft v
 build it by doing `./gradlew build` in your terminal.
 
 ## License
-[MIT](LICENSE "MIT") 
+[LGPLv3](LICENSE "LGPLv3") 
