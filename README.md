@@ -40,10 +40,13 @@ and when in-game press the key and the menu should be seen.
 * Or if you want to use commands instead, type either `/daylightchanger`, `/dcs`, `/tcs` or `/timechanger`.
 
 ## TODOs
-* System Cycle - Support different timezones like UTC and create an offset for local timezone to 
-                 better represent that timezone's daylight (Example: EST is UTC-5 at 14:00 so it 
-                 would be 8000 + 5000 (5000 is the addition from the offset to UTC))
-* System Cycle - Add proper year support as it has to rely on day of the year alone
+* A lot for the new version: v0.1.0 (1.18 to 1.18.2 exclusive)
+  * It is estimated to take around weeks to get the mod done, mostly dependent on the motivation and free time
+* Soon add support for Quilt and 1.19 after v0.1.0 releases
+  * Ideally for Quilt, I would like to avoid using Fabric API and use its libraries for what it is since I want it to be full Quilt without Fabric dependency
+    * This does not mean that Fabric support will be dropped.
+    * Also since I intend to remain on Fabric over Quilt, it would be nice to know if there's anyone willing to test the Quilt version if they want to do so.
+  * Will also have to figure out a way to separate the main project and the rest of the versions, so if you have an idea, let me know!
 
 ## Building
 Make sure Gradle is using the Java version this project is using (or Minecraft version 1.18.1) then 
