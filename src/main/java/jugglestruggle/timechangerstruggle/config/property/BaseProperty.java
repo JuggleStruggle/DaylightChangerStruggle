@@ -7,7 +7,7 @@ import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -196,17 +196,6 @@ public abstract class BaseProperty<B extends BaseProperty<B, V>, V>
 		
 		return this;
 	}
-	
-	/*
-	public static <B extends BaseProperty<B, V>, V> void createProperty
-	(ImmutableSet.Builder<BaseProperty<?, ?>> builder, 
-	String propertyPredicate, String propertyName, Supplier<B> property)
-	{
-		if (propertyPredicate == null || propertyPredicate.equals(propertyName))
-			builder.add(property.get());
-	}
-	
-	 */
 	
 	public static interface ValueConsumer<B extends BaseProperty<B, V>, V> 
 	{

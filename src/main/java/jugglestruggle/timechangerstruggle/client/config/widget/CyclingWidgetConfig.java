@@ -13,12 +13,12 @@ import net.fabricmc.api.Environment;
 import java.util.List;
 import java.util.function.Function;
 
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
-import net.minecraft.client.gui.screen.ScreenTexts;
+import net.minecraft.screen.ScreenTexts;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
+import net.minecraft.client.option.SimpleOption.TooltipFactory;
 import net.minecraft.client.util.math.MatrixStack;
 
 import com.google.common.collect.ImmutableList;
@@ -47,8 +47,7 @@ implements WidgetConfigInterface<B, T>, SelfWidgetRendererInheritor<CyclingWidge
 	{
 		super(0, 0, width, height, message, optionText, 
 			index, value, values, valueToText, 
-			narrationMessageFactory, 
-			new SetPropertyValueCallback<B, T>(),
+			narrationMessageFactory, new SetPropertyValueCallback<B, T>(),
 			tooltipFactory, optionTextOmitted);
 		
 		this.property = property;
@@ -141,13 +140,13 @@ implements WidgetConfigInterface<B, T>, SelfWidgetRendererInheritor<CyclingWidge
 		final boolean falseTextIsNull = falseText == null;
 		
 		if (trueTextIsNull && falseTextIsNull)
-			valueToText = state -> { return LiteralText.EMPTY; };
+			valueToText = state -> Text.empty();
 		else if (trueTextIsNull)
-			valueToText = state -> { return falseText; };
+			valueToText = state -> falseText;
 		else if (falseTextIsNull)
-			valueToText = state -> { return trueText; };
+			valueToText = state -> trueText;
 		else
-			valueToText = state -> { return state ? trueText : falseText; };
+			valueToText = state -> state ? trueText : falseText;
 		
 		WidgetConfigBuilderBoolean wcbb = new WidgetConfigBuilderBoolean(
 			property, valueToText
@@ -162,9 +161,8 @@ implements WidgetConfigInterface<B, T>, SelfWidgetRendererInheritor<CyclingWidge
 	{
 		Function<EV, Text> valueToText = property.getVTT();
 		
-		if (valueToText == null) {
-			valueToText = value -> new LiteralText(value.toString());
-		}
+		if (valueToText == null)
+			valueToText = value -> Text.of(value.toString());
 		
 		WidgetConfigBuilderEnum<EV> wcbe = new WidgetConfigBuilderEnum<>(property, valueToText);
 		
@@ -184,8 +182,8 @@ implements WidgetConfigInterface<B, T>, SelfWidgetRendererInheritor<CyclingWidge
 		protected SetPropertyValueCallback() { }
 		
 		@Override
-		@SuppressWarnings({ "rawtypes", "unchecked" })
-		public void onValueChange(CyclingButtonWidget button, T value) {
+		@SuppressWarnings({ "unchecked" })
+		public void onValueChange(CyclingButtonWidget<T> button, T value) {
 			((CyclingWidgetConfig<B, T>)button).onValueChanged(value);
 		}
 	}
@@ -240,10 +238,12 @@ implements WidgetConfigInterface<B, T>, SelfWidgetRendererInheritor<CyclingWidge
 		}
 		
 		@Override
+		@Deprecated
 		public CyclingButtonWidget<V> build(int x, int y, int width, int height, Text optionText) {
 			return null;
 		}
 		@Override
+		@Deprecated
 		public CyclingButtonWidget<V> build(int x, int y, int width, int height, Text optionText, UpdateCallback<V> callback) {
 			return null;
 		}

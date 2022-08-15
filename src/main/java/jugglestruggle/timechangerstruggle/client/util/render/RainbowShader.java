@@ -4,29 +4,20 @@ import jugglestruggle.timechangerstruggle.TimeChangerStruggle;
 import jugglestruggle.timechangerstruggle.client.TimeChangerStruggleClient;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceImpl;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourcePack;
-import net.minecraft.util.Identifier;
+import java.util.Optional;
 
 import net.minecraft.client.gl.GlUniform;
 import net.minecraft.client.render.Shader;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormatElement;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.render.VertexFormatElement.DataType;
+import net.minecraft.client.render.VertexFormatElement.ComponentType;
 import net.minecraft.client.render.VertexFormatElement.Type;
+import net.minecraft.client.render.VertexFormats;
+import net.minecraft.resource.Resource;
+import net.minecraft.resource.ResourceFactory;
+import net.minecraft.util.Identifier;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 
 /**
  * 
@@ -41,7 +32,7 @@ public class RainbowShader extends Shader
 	
 	static
 	{
-		FLOAT_GENERIC = new VertexFormatElement(0, DataType.FLOAT, Type.GENERIC, 1);
+		FLOAT_GENERIC = new VertexFormatElement(0, ComponentType.FLOAT, Type.GENERIC, 1);
 		
 		ImmutableMap.Builder<String, VertexFormatElement> builder = ImmutableMap.builderWithExpectedSize(2);
 		
@@ -63,61 +54,30 @@ public class RainbowShader extends Shader
 
 	public RainbowShader() throws IOException
 	{
-		super(new ShaderResourceManager(), "rainbow_shader", RainbowShader.RAINBOW_SHADER_FORMAT);
+		super(new ShaderResourceFactory(), "rainbow_shader", RainbowShader.RAINBOW_SHADER_FORMAT);
 		
 		this.timeOffset  = super.getUniform("uTimeOffset");
 		this.strokeWidth = super.getUniform("uStrokeWidth");
 		this.stripeScale = super.getUniform("uDashCount");
 	}
 
-	static class ShaderResourceManager implements ResourceManager
+	static class ShaderResourceFactory implements ResourceFactory
 	{
 		static final String BASE_LOCATION = "/assets/"+TimeChangerStruggle.MOD_ID+"/";
 		
 		@Override
-		public Resource getResource(Identifier id) throws IOException
+		public Optional<Resource> getResource(Identifier id)
 		{
 			if (id.getNamespace().equals(Identifier.DEFAULT_NAMESPACE))
 			{
-				if (id.getPath().contains("shaders/core"))
+				if (id.getPath().contains("shaders/core")) 
 				{
-					InputStream resource = TimeChangerStruggleClient.class
-						.getResourceAsStream(BASE_LOCATION + id.getPath());
-					
-					if (resource != null) 
-					{
-						Identifier newId = new Identifier(TimeChangerStruggle.MOD_ID, id.getPath());
-						return new ResourceImpl(TimeChangerStruggle.MOD_ID, newId, resource, null);
-					}
+				    return Optional.of(new Resource(TimeChangerStruggle.MOD_ID, 
+				        () -> TimeChangerStruggleClient.class.getResourceAsStream(BASE_LOCATION + id.getPath())));
 				}
 			}
 			
-			return null;
-		}
-
-		@Override
-		public Set<String> getAllNamespaces() {
-			return ImmutableSet.of(TimeChangerStruggle.MOD_ID);
-		}
-
-		@Override
-		public boolean containsResource(Identifier id) {
-			return true;
-		}
-
-		@Override
-		public List<Resource> getAllResources(Identifier id) throws IOException {
-			return null;
-		}
-
-		@Override
-		public Collection<Identifier> findResources(String startingPath, Predicate<String> pathPredicate) {
-			return null;
-		}
-
-		@Override
-		public Stream<ResourcePack> streamResourcePacks() {
-			return null;
+			return Optional.empty();
 		}
 	}
 }

@@ -8,8 +8,9 @@ import jugglestruggle.timechangerstruggle.util.DaylightUtils;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 import java.util.Iterator;
 import java.util.Locale;
@@ -18,23 +19,20 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.UnaryOperator;
 
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.TimeArgumentType;
-import net.minecraft.network.MessageType;
+import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.ClickEvent;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.util.Util;
 import net.minecraft.world.World;
-
-import net.minecraft.client.gui.screen.ScreenTexts;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -58,17 +56,20 @@ public class Commands
 		if (this.commandsRegistered)
 			return;
 		
-		LiteralCommandNode<FabricClientCommandSource> baseCommand =
-			ClientCommandManager.DISPATCHER.register(this.getBaseCommand());
-		
-		for (String alias : this.getAliases())
-		{
-			ClientCommandManager.DISPATCHER.register
-			(ClientCommandManager.literal(alias).redirect(baseCommand));
-		}
-		
-		this.commandsRegistered = true;
+		ClientCommandRegistrationCallback.EVENT.register(this::register);
 	}
+	
+
+    private void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess access)
+    {
+        LiteralCommandNode<FabricClientCommandSource> baseCommand = dispatcher.register(this.getBaseCommand());
+
+        for (String alias : this.getAliases()) {
+            dispatcher.register(ClientCommandManager.literal(alias).redirect(baseCommand));
+        }
+        
+        this.commandsRegistered = true;
+    }
 	
 	public LiteralArgumentBuilder<FabricClientCommandSource> getBaseCommand()
 	{
@@ -130,8 +131,8 @@ public class Commands
 				// and formatted!
 				TimeChangerStruggleClient.getCachedCycleTypeBuilders().forEach(cycle -> 
 				{
-					LiteralText options = new LiteralText("[\u26A1]");
-					LiteralText useCycle = new LiteralText("[\u2192]");
+					MutableText options = Text.literal("[\u26A1]");
+					MutableText useCycle = Text.literal("[\u2192]");
 					
 					final String baseName = cycle.getKeyName();
 					final Text displayName = cycle.getTranslatableName();
@@ -143,7 +144,7 @@ public class Commands
 							.withColor(isCurrentCycle ? 0xFF5511 : 0x55FF11)
 							.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tcs cycle "+baseName))
 							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-								new TranslatableText("jugglestruggle.tcs.cmd.cycle.listing.use", displayName)))
+								Text.translatable("jugglestruggle.tcs.cmd.cycle.listing.use", displayName)))
 							.withBold(true);
 					});
 					
@@ -155,7 +156,7 @@ public class Commands
 						if (cycle.hasOptionsToEdit())
 						{
 							currentStyle = currentStyle.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-								new TranslatableText("jugglestruggle.tcs.cmd.cycle.listing.option", displayName)))
+								Text.translatable("jugglestruggle.tcs.cmd.cycle.listing.option", displayName)))
 							.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tcs cycle "+baseName+" option"));
 						}
 							
@@ -174,7 +175,7 @@ public class Commands
 							return style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, displayDesc));
 					});
 					
-					Commands.sendTextToChat(ctx, new TranslatableText("%1$s %2$s %3$s", options, useCycle, displayNameAsDisplay));
+					Commands.sendTextToChat(ctx, Text.translatable("%1$s %2$s %3$s", options, useCycle, displayNameAsDisplay));
 				});
 				
 				
@@ -204,9 +205,9 @@ public class Commands
 				TimeChangerStruggleClient.setTimeChanger((DayNightCycleBasis)null);
 				TimeChangerStruggleClient.config.writeIfModified();
 				
-				final TranslatableText cycleRemovedText = new TranslatableText
+				final MutableText cycleRemovedText = Text.translatable
 					("jugglestruggle.tcs.cmd.cycle.cycle", previousCycle.isPresent() ? previousCycle.get().getTranslatableName() : "??");
-				final TranslatableText worldTimeText = new TranslatableText("jugglestruggle.tcs.screen.toggleworldtime");
+				final MutableText worldTimeText = Text.translatable("jugglestruggle.tcs.screen.toggleworldtime");
 				
 				cycleRemovedText.styled(style -> style.withColor(0xFFDD33));
 				worldTimeText.styled(style -> style.withColor(0xFFCC22));
@@ -368,35 +369,35 @@ public class Commands
 			.then(this.generateOptionSubcommandBoolAction
 			(
 				"dateOverTicks", 
-				new TranslatableText("jugglestruggle.tcs.screen.toggledate"), 
+				Text.translatable("jugglestruggle.tcs.screen.toggledate"), 
 				() -> TimeChangerStruggleClient.dateOverTicks, 
 				currentValue -> TimeChangerStruggleClient.dateOverTicks = currentValue
 			))
 			.then(this.generateOptionSubcommandBoolAction
 			(
 				"butterySmoothCycle", 
-				new TranslatableText("jugglestruggle.tcs.screen.togglesmoothbutterdaylightcycle"), 
+				Text.translatable("jugglestruggle.tcs.screen.togglesmoothbutterdaylightcycle"), 
 				() -> TimeChangerStruggleClient.smoothButterCycle, 
 				currentValue -> TimeChangerStruggleClient.smoothButterCycle = currentValue
 			))
 			.then(this.generateOptionSubcommandBoolAction
 			(
 				"disableNightVisionEffect", 
-				new TranslatableText("jugglestruggle.tcs.cmd.option.disablenightvision"), 
+				Text.translatable("jugglestruggle.tcs.cmd.option.disablenightvision"), 
 				() -> TimeChangerStruggleClient.disableNightVisionEffect, 
 				currentValue -> TimeChangerStruggleClient.disableNightVisionEffect = currentValue
 			))
 			.then(this.generateOptionSubcommandBoolAction
 			(
 				"disableWorldTimeOnCycleUsage", 
-				new TranslatableText("jugglestruggle.tcs.cmd.option.disableworldtimeoncycleusage"), 
+				Text.translatable("jugglestruggle.tcs.cmd.option.disableworldtimeoncycleusage"), 
 				() -> TimeChangerStruggleClient.commandsDisableWorldTimeOnCycleUsage, 
 				currentValue -> TimeChangerStruggleClient.commandsDisableWorldTimeOnCycleUsage = currentValue
 			))
 			.then(this.generateOptionSubcommandBoolAction
 			(
 				"commandFeedbackOnLessImportant", 
-				new TranslatableText("jugglestruggle.tcs.cmd.option.commandfeedbackonlessimportant"), 
+				Text.translatable("jugglestruggle.tcs.cmd.option.commandfeedbackonlessimportant"), 
 				() -> TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant, 
 				currentValue -> TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant = currentValue
 			));
@@ -464,8 +465,8 @@ public class Commands
 	}
 	public static void sendTextToChat(CommandContext<FabricClientCommandSource> ctx, UnaryOperator<Style> styleUpdater, String key, Object... args)
 	{
-		final TranslatableText text = (args == null || args.length <= 0) ? 
-			new TranslatableText(key) : new TranslatableText(key, args);
+		final MutableText text = (args == null || args.length <= 0) ? 
+			Text.translatable(key) : Text.translatable(key, args);
 		
 		if (styleUpdater != null) {
 			text.styled(styleUpdater);
@@ -475,7 +476,7 @@ public class Commands
 	}
 	@SuppressWarnings("resource")
 	public static void sendTextToChat(CommandContext<FabricClientCommandSource> ctx, Text text) {
-		ctx.getSource().getClient().inGameHud.addChatMessage(MessageType.SYSTEM, text, Util.NIL_UUID);
+		ctx.getSource().getClient().inGameHud.getChatHud().addMessage(text);
 	}
 	
 	// Don't mind the silly method wording
@@ -512,19 +513,16 @@ public class Commands
 			
 			if (TimeChangerStruggleClient.useWorldTime() && setWorldTime == false)
 			{
-//				System.out.println("last child input: "+ctx.getLastChild().getInput());
-//				System.out.println("input cmd: "+starter);
-				
 				final String starterCommand = Commands.getStarterCommand(ctx);
 				final String realCmd = String.format("/%1$s cycle", starterCommand);
 				final String langCmd = "jugglestruggle.tcs.cmd.worldtime.set.warn";
 				
-				LiteralText clickableText = new LiteralText(realCmd);
+				MutableText clickableText = Text.literal(realCmd);
 				
 				clickableText.styled(style -> {
 					return style.withColor(0xDD44FF).withUnderline(true).withBold(false)
 						.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, realCmd))
-						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableText(langCmd + ".hover")));
+						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable(langCmd + ".hover")));
 				});
 				
 				Commands.sendTextToChat
@@ -564,7 +562,7 @@ public class Commands
 			
 			if (previousCycle.isPresent() && previousCycle.get().getKeyName().equals(this.cycleToUse.getKeyName()))
 			{
-				MutableText cycleText = new TranslatableText(langCmd+"cycle", 
+				MutableText cycleText = Text.translatable(langCmd+"cycle", 
 					this.cycleToUse.getTranslatableName().copy().styled(style -> style.withColor(0xFF22FF)));
 				
 				Commands.sendTextToChat
@@ -586,7 +584,7 @@ public class Commands
 			
 			if (TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant)
 			{
-				MutableText cycleText = new TranslatableText(langCmd+"cycle", 
+				MutableText cycleText = Text.translatable(langCmd+"cycle", 
 					this.cycleToUse.getTranslatableName().copy().styled(style -> style.withColor(0xFFFF22)));
 				
 				Commands.sendTextToChat
@@ -657,8 +655,8 @@ public class Commands
 							"jugglestruggle.tcs.cmd.time.replacedto", 
 							
 							cycleBuilder.isPresent() ? cycleBuilder.get().getTranslatableName() :
-							new TranslatableText("jugglestruggle.tcs.screen.switchcyclemenu.desc.using.none"),
-							new TranslatableText("jugglestruggle.tcs.dnt.statictime")
+							Text.translatable("jugglestruggle.tcs.screen.switchcyclemenu.desc.using.none"),
+							Text.translatable("jugglestruggle.tcs.dnt.statictime")
 						);
 					}
 					
@@ -719,9 +717,9 @@ public class Commands
 					final String langCmd = "jugglestruggle.tcs.cmd.time.";
 					final String modeName = this.mode.name().toLowerCase(Locale.ROOT);
 					
-					TranslatableText myTimeTicks = new TranslatableText(langCmd + "ticks", timeTicks);
-					TranslatableText totalTicks = new TranslatableText(langCmd + "ticks", totalTimeOfDay);
-					TranslatableText prevTicks = new TranslatableText(langCmd + "ticks", previousTimeOfDay);
+					MutableText myTimeTicks = Text.translatable(langCmd + "ticks", timeTicks);
+					MutableText totalTicks = Text.translatable(langCmd + "ticks", totalTimeOfDay);
+					MutableText prevTicks = Text.translatable(langCmd + "ticks", previousTimeOfDay);
 					
 					myTimeTicks.styled(style ->
 						style.withColor(0xFFDD22).withBold(false).withUnderline(true)

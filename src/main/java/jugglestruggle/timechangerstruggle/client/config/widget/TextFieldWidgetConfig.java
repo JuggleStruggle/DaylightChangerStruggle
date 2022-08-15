@@ -10,9 +10,8 @@ import net.fabricmc.api.Environment;
 import java.util.List;
 import java.util.function.Consumer;
 
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.OrderedText;
-
+import net.minecraft.text.Text;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 
@@ -37,7 +36,7 @@ implements WidgetConfigInterface<StringValue, String>, PositionedTooltip
 	public TextFieldWidgetConfig(TextRenderer textRenderer, int width, int height, 
 		StringValue property, boolean allowEmptyText) 
 	{
-		super(textRenderer, 0, 0, width, height, LiteralText.EMPTY);
+		super(textRenderer, 0, 0, width, height, Text.empty());
 		
 		this.property = property;
 		this.allowEmptyText = allowEmptyText;

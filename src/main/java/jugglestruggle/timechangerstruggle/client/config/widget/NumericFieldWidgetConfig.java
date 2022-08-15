@@ -8,9 +8,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.OrderedText;
-
+import net.minecraft.text.Text;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 
@@ -35,7 +34,7 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
 	
 	public NumericFieldWidgetConfig(TextRenderer textRenderer, int width, int height, BaseNumber<N> property) 
 	{
-		super(textRenderer, 18, 18, width, height, LiteralText.EMPTY);
+		super(textRenderer, 18, 18, width, height, Text.empty());
 		
 		this.property = property;
 		this.isNewTextValid = true;

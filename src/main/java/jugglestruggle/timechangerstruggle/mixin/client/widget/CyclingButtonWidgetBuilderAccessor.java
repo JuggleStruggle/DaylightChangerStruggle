@@ -10,12 +10,12 @@ import net.minecraft.text.Text;
 
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget.Values;
+import net.minecraft.client.option.SimpleOption;
 
 /**
  *
  * @author JuggleStruggle
- * @implNote
- * Created on 03-Feb-2022, Thursday
+ * @implNote Created on 03-Feb-2022, Thursday
  */
 @Mixin(CyclingButtonWidget.Builder.class)
 public interface CyclingButtonWidgetBuilderAccessor<T>
@@ -43,5 +43,5 @@ public interface CyclingButtonWidgetBuilderAccessor<T>
 	Function<CyclingButtonWidget<T>, MutableText> getNarrationMessageFactory();
 
 	@Accessor("tooltipFactory")
-	CyclingButtonWidget.TooltipFactory<T> getTooltipFactory();
+	SimpleOption.TooltipFactory<T> getTooltipFactory();
 }

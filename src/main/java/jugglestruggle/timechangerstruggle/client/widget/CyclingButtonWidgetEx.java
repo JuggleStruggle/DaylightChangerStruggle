@@ -9,12 +9,12 @@ import net.fabricmc.api.Environment;
 import java.util.List;
 import java.util.function.Function;
 
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
-import net.minecraft.client.gui.screen.ScreenTexts;
+import net.minecraft.screen.ScreenTexts;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
+import net.minecraft.client.option.SimpleOption.TooltipFactory;
 import net.minecraft.client.util.math.MatrixStack;
 
 import com.google.common.collect.ImmutableList;
@@ -74,7 +74,7 @@ implements SelfWidgetRendererInheritor<CyclingButtonWidgetEx<T>>
 		final boolean falseTextIsNull = falseText == null;
 		
 		if (trueTextIsNull && falseTextIsNull)
-			valueToText = state -> { return LiteralText.EMPTY; };
+			valueToText = state -> { return Text.empty(); };
 		else if (trueTextIsNull)
 			valueToText = state -> { return falseText; };
 		else if (falseTextIsNull)

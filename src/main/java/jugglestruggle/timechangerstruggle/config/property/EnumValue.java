@@ -10,7 +10,7 @@ import jugglestruggle.timechangerstruggle.util.InterchangeableFunction;
 import net.fabricmc.api.EnvType;
 
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -19,10 +19,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-
+import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 
 import com.google.common.collect.ImmutableSet;
@@ -134,20 +132,15 @@ public class EnumValue<EV extends Enum<EV>> extends BaseProperty<EnumValue<EV>, 
 		{
 			Text sectionText = owningSection.get();
 			
-			if (sectionText != null && sectionText instanceof TranslatableText)
+			if (sectionText != null && sectionText.getContent() instanceof TranslatableTextContent)
 			{
-				optionText = new TranslatableText(String.format("%1$s.%2$s",
-					((TranslatableText)sectionText).getKey(), this.property().toLowerCase(Locale.ROOT)));
+				optionText = Text.translatable(String.format("%1$s.%2$s",
+					((TranslatableTextContent)sectionText.getContent()).getKey(), this.property().toLowerCase(Locale.ROOT)));
 			}
 		}
 		
 		if (optionText == null)
-			optionText = new LiteralText(this.property());
-		
-//		if (this.propertyText == null)
-//			optionText = new LiteralText(this.property());
-//		else
-//			optionText = this.propertyText;
+			optionText = Text.of(this.property());
 		
 		return builder.build(20, 20, optionText, this.callback);
 	}

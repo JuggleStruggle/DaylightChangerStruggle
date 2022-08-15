@@ -47,7 +47,7 @@ loom {
 }
 
 jar {
-	from("LICENSE") {
+	from("LICENSE.txt") {
 		rename { "${project.archivesBaseName}-${it}"}
 	}
 }

@@ -8,15 +8,13 @@ import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 import java.util.Locale;
 
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-
-import net.minecraft.client.gui.screen.ScreenTexts;
+import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.screen.ScreenTexts;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 
 import com.google.gson.JsonElement;
@@ -78,15 +76,15 @@ public class BooleanValue extends BaseProperty<BooleanValue, Boolean>
 			{
 				Text sectionText = owningSection.get();
 				
-				if (sectionText != null && sectionText instanceof TranslatableText)
+				if (sectionText != null && sectionText.getContent() instanceof TranslatableTextContent)
 				{
-					optionText = new TranslatableText(String.format("%1$s.%2$s",
-						((TranslatableText)sectionText).getKey(), this.property().toLowerCase(Locale.ROOT)));
+					optionText = Text.translatable(String.format("%1$s.%2$s",
+						((TranslatableTextContent)sectionText.getContent()).getKey(), this.property().toLowerCase(Locale.ROOT)));
 				}
 			}
 			
 			if (optionText == null)
-				optionText = new LiteralText(this.property());
+				optionText = Text.of(this.property());
 		}
 		else
 			optionText = this.propertyText;

@@ -22,7 +22,6 @@ import java.util.function.Predicate;
 import java.util.Map.Entry;
 
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -266,20 +265,20 @@ public class RandomizedTime extends MovingTimeBasis
 		
 		final String sectLang = "jugglestruggle.tcs.dnt.randomizer.properties.";
 		
-		prop.add(new FancySectionProperty("seed", new TranslatableText(sectLang+"seed")));
+		prop.add(new FancySectionProperty("seed", Text.translatable(sectLang+"seed")));
 		prop.add(new StringValue("startingSeed", (this.startingSeed == null) ? "" : this.startingSeed).setEmptyTextAllowance(true));
 		
-		prop.add(new FancySectionProperty("daylightrandomtime", new TranslatableText(sectLang+"daylightrandomtime")));
+		prop.add(new FancySectionProperty("daylightrandomtime", Text.translatable(sectLang+"daylightrandomtime")));
 		prop.add(new LongValue("minimumRandomTime", this.minimumRandomTime, 0L, Long.MAX_VALUE));
 		prop.add(new LongValue("maximumRandomTime", this.maximumRandomTime, 0L, Long.MAX_VALUE));
 		
-		prop.add(new FancySectionProperty("ticksuntilnextrng", new TranslatableText(sectLang+"ticksuntilnextrng")));
+		prop.add(new FancySectionProperty("ticksuntilnextrng", Text.translatable(sectLang+"ticksuntilnextrng")));
 		prop.add(new BooleanValue("randomizeTicksUntilNextRNG", this.randomizeTicksUntilNextRNG));
 		prop.add(new LongValue("ticksUntilNextRNG", this.ticksUntilNextRNGBasis, 1L, Long.MAX_VALUE));
 		prop.add(new LongValue("ticksUntilNextRNGMin", this.ticksUntilNextRNGMin, 1L, Long.MAX_VALUE));
 		prop.add(new LongValue("ticksUntilNextRNGMax", this.ticksUntilNextRNGMax, 1L, Long.MAX_VALUE));
 		
-		prop.add(new FancySectionProperty("easings", new TranslatableText(sectLang+"easings")));
+		prop.add(new FancySectionProperty("easings", Text.translatable(sectLang+"easings")));
 		prop.add(new BooleanValue("randomizeEasingBetweenTicks", this.randomizeEasingBetweenTicks));
 		prop.add(new EnumValue<>("easingBetweenTicks", this.easingBetweenTicksBasis, Easings.LINEAR, Easings.values())
 			.setVTT(easing -> easing.getFormattedText()));
@@ -456,11 +455,11 @@ public class RandomizedTime extends MovingTimeBasis
 		
 		@Override
 		public Text getTranslatableName() {
-			return new TranslatableText("jugglestruggle.tcs.dnt.randomizer");
+			return Text.translatable("jugglestruggle.tcs.dnt.randomizer");
 		}
 		@Override
 		public Text getTranslatableDescription() {
-			return new TranslatableText("jugglestruggle.tcs.dnt.randomizer.description");
+			return Text.translatable("jugglestruggle.tcs.dnt.randomizer.description");
 		}
 		
 		@Override

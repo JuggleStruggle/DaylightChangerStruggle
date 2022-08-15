@@ -11,8 +11,6 @@ import net.fabricmc.api.Environment;
 import java.util.Calendar;
 
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-
 import net.minecraft.client.world.ClientWorld;
 
 /**
@@ -97,11 +95,11 @@ public class SystemTime implements DayNightCycleBasis
 		
 		@Override
 		public Text getTranslatableName() {
-			return new TranslatableText("jugglestruggle.tcs.dnt.systemtime");
+			return Text.translatable("jugglestruggle.tcs.dnt.systemtime");
 		}
 		@Override
 		public Text getTranslatableDescription() {
-			return new TranslatableText("jugglestruggle.tcs.dnt.systemtime.description");
+			return Text.translatable("jugglestruggle.tcs.dnt.systemtime.description");
 		}
 	}
 }

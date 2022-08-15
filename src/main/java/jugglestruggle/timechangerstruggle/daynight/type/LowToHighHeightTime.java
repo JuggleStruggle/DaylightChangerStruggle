@@ -12,8 +12,6 @@ import java.util.Set;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 
@@ -94,7 +92,7 @@ public class LowToHighHeightTime implements DayNightCycleBasis
 		
 		final String sectLang = "jugglestruggle.tcs.dnt.lowtohighheighttime.properties.";
 		
-		prop.add(new FancySectionProperty("minmaxheight", new TranslatableText(sectLang+"minmaxheight")));
+		prop.add(new FancySectionProperty("minmaxheight", Text.translatable(sectLang+"minmaxheight")));
 		prop.add(new DoubleValue("minHeight",     this.minHeight, (double)Long.MIN_VALUE, Double.MAX_VALUE));
 		prop.add(new LongValue  ("minHeightTime", this.minHeightTime, Long.MIN_VALUE, Long.MAX_VALUE));
 		prop.add(new DoubleValue("maxHeight",     this.maxHeight, (double)Long.MIN_VALUE, Double.MAX_VALUE));
@@ -148,11 +146,11 @@ public class LowToHighHeightTime implements DayNightCycleBasis
 		
 		@Override
 		public Text getTranslatableName() {
-			return new TranslatableText("jugglestruggle.tcs.dnt.lowtohighheighttime");
+			return Text.translatable("jugglestruggle.tcs.dnt.lowtohighheighttime");
 		}
 		@Override
 		public Text getTranslatableDescription() {
-			return new TranslatableText("jugglestruggle.tcs.dnt.lowtohighheighttime.description");
+			return Text.translatable("jugglestruggle.tcs.dnt.lowtohighheighttime.description");
 		}
 		
 		@Override

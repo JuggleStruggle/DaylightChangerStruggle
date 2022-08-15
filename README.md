@@ -1,7 +1,6 @@
-# Important
-Development for the mod has been halted until further notice. Typically I'd be continuing in the 
-development but unfortunately that's not the case. I am expecting to come back in August at least
-and work on the update.
+# Note
+This version uses v0.0.0's release code since for me it was easier to change incompatible code rather
+than to use the newly updated ones from v0.1.0! That version is in development! (as of 2022-08-15)
 
 # DaylightChangerStruggle
 A fully-clientsided mod which changes the daylight cycle without the need of fiddling around commands.
@@ -45,20 +44,10 @@ and when in-game press the key and the menu should be seen.
 * Or if you want to use commands instead, type either `/daylightchanger`, `/dcs`, `/tcs` or `/timechanger`.
 
 ## TODOs
-* A lot for the new version: v0.1.0 (1.18 to 1.18.2 exclusive)
-  * It is estimated to take around weeks to get the mod done, mostly dependent on the motivation and free 
-    time (see Important section)
-* Soon add support for Quilt and 1.19 after v0.1.0 releases
-  * Ideally for Quilt, I would like to avoid using Fabric API and use its libraries for what it is since 
-    I want it to be full Quilt without Fabric dependency
-    * This does not mean that Fabric support will be dropped.
-    * Also since I intend to remain on Fabric over Quilt, it would be nice to know if there's anyone 
-      willing to test the Quilt version if they want to do so.
-  * Will also have to figure out a way to separate the main project and the rest of the versions, so if 
-    you have an idea, let me know!
+See the dev branch.
 
 ## Building
-Make sure Gradle is using the Java version this project is using (or Minecraft version 1.18.1) then 
+Make sure Gradle is using the Java version this project is using (or Minecraft version 1.19.2) then 
 build it by doing `./gradlew build` in your terminal.
 
 ## License

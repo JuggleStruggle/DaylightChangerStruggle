@@ -7,6 +7,7 @@
 	"name": "DaylightChangerStruggle",
 	"description": "Sometimes when you want not to bother with the world time so you resort to your own and call it a success.",
 	"authors": ["JuggleStruggle"],
+    "contributors": [],
 	
 	"contact": {
 	  "homepage": "https://github.com/JuggleStruggle/DaylightChangerStruggle",
@@ -14,14 +15,12 @@
 	  "issues": "https://github.com/JuggleStruggle/DaylightChangerStruggle/issues"
 	},
 	
-	"license": "MIT",
+	"license": "LGPLv3",
 	"icon": "assets/timechangerstruggle/icon.png",
 	
-	"entrypoints": 
-	{
+	"entrypoints": {
 	  "main": ["jugglestruggle.timechangerstruggle.TimeChangerStruggle"],
-	  "client": ["jugglestruggle.timechangerstruggle.client.TimeChangerStruggleClient"],
-	  "modmenu": ["jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen"]
+	  "client": ["jugglestruggle.timechangerstruggle.client.TimeChangerStruggleClient"]
 	},
 	
 	"mixins": ["timechangerstruggle.client.mixins.json"],
@@ -30,7 +29,7 @@
 	"depends": {
 	  "fabricloader": ">=0.12.12",
 	  "fabric": "*",
-	  "minecraft": "1.18.x",
+	  "minecraft": "1.19.x",
 	  "java": ">=17"
 	}
 }

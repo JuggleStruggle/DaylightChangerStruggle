@@ -8,12 +8,12 @@ import jugglestruggle.timechangerstruggle.client.widget.PositionedTooltip;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 import java.util.Locale;
 
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.TranslatableTextContent;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
@@ -112,10 +112,10 @@ public class StringValue extends BaseProperty<StringValue, String>
 	{
 		if (widget instanceof PositionedTooltip && owningSection != null && owningSection.get() != null)
 		{
-			if (owningSection.get() instanceof TranslatableText)
+			if (owningSection.get().getContent() instanceof TranslatableTextContent)
 			{
-				Text tooltipDescText = new TranslatableText(String.format("%1$s.%2$s",
-					((TranslatableText)owningSection.get()).getKey(), property.property().toLowerCase(Locale.ROOT)));
+				Text tooltipDescText = Text.translatable(String.format("%1$s.%2$s",
+					((TranslatableTextContent)owningSection.get().getContent()).getKey(), property.property().toLowerCase(Locale.ROOT)));
 				
 				((PositionedTooltip)widget).updateTooltip(tooltipDescText, null, screen.getTextRenderer());
 			}
