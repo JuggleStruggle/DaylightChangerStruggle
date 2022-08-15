@@ -41,8 +41,8 @@ and when in-game press the key and the menu should be seen.
 
 ## TODOs
 * A lot for the new version: v0.1.0 (1.18 to 1.18.2 exclusive)
-  * It is estimated to take around weeks to get the mod done, mostly dependent on the motivation and free 
-    time (see Important section)
+  * It is estimated to take around weeks or even months to get the mod done, largely dependent on the
+    motivation and free time
 * Soon add support for Quilt Standard Libraries after v0.1.0 releases
   * Ideally for Quilt, I would like to avoid using Fabric API and use its libraries for what it is since 
     I want it to be full Quilt without Fabric dependency, which at the moment it requires Fabric API to do
