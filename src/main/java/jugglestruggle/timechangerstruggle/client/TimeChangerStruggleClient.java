@@ -357,7 +357,7 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 	{
 		// TODO: Is there a better way to call key events on press and releases without the need of ticking?
 		
-		if (client.currentScreen == null && client.world != null)
+		if (client.world != null)
 		{
 			if (Keybindings.timeChangerMenuKey.isPressed()) {
 				client.setScreen(new TimeChangerScreen());
