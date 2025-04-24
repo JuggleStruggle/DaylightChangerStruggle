@@ -1,4 +1,23 @@
 accessWidener	v1	named
+
+# Cycling Button Widget
 extendable class net/minecraft/client/gui/widget/CyclingButtonWidget$Values
 extendable method net/minecraft/client/gui/widget/CyclingButtonWidget <init> (IIIILnet/minecraft/text/Text;Lnet/minecraft/text/Text;ILjava/lang/Object;Lnet/minecraft/client/gui/widget/CyclingButtonWidget$Values;Ljava/util/function/Function;Ljava/util/function/Function;Lnet/minecraft/client/gui/widget/CyclingButtonWidget$UpdateCallback;Lnet/minecraft/client/option/SimpleOption$TooltipFactory;Z)V
+extendable method net/minecraft/client/gui/widget/CyclingButtonWidget refreshTooltip ()V
+
+# Entry List Widget
 extendable method net/minecraft/client/gui/widget/EntryListWidget getEntryAtPosition (DD)Lnet/minecraft/client/gui/widget/EntryListWidget$Entry;
+
+# Clickable Widget (1.21.5 made this final and is being removed to allow the list to self-render)
+# extendable method net/minecraft/client/gui/widget/ClickableWidget render (Lnet/minecraft/client/gui/DrawContext;IIF)V
+
+# Shader and Rendering 
+# > ShaderProgram: 1.21.5 made this private and is being removed to allow the shader to host itself without needing to mixin into other shader programs
+accessible method net/minecraft/client/gl/ShaderProgram <init> (ILjava/lang/String;)V
+# > MultiPhase: Make it open and accessible to avoid reinventing the wheel
+extendable class net/minecraft/client/render/RenderLayer$MultiPhase
+accessible method net/minecraft/client/render/RenderLayer$MultiPhase <init> (Ljava/lang/String;IZZLcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/render/RenderLayer$MultiPhaseParameters;)V
+# > VertexFormat: Get past the pointless limitation of registering Vertex Format Element IDs to avoid mod conflict
+extendable method com/mojang/blaze3d/vertex/VertexFormat <init> (Ljava/util/List;Ljava/util/List;Lit/unimi/dsi/fastutil/ints/IntList;I)V
+accessible field com/mojang/blaze3d/vertex/VertexFormat offsetsByElement [I
+extendable method com/mojang/blaze3d/vertex/VertexFormat$Builder <init> ()V

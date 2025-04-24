@@ -1,8 +1,9 @@
 package jugglestruggle.timechangerstruggle.client.config.widget;
 
-import jugglestruggle.timechangerstruggle.client.widget.PositionedTooltip;
+import jugglestruggle.timechangerstruggle.client.widget.WidgetPositionedTooltip;
 import jugglestruggle.timechangerstruggle.config.property.BaseNumber;
 import jugglestruggle.timechangerstruggle.config.property.BaseProperty.ValueConsumer;
+import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -19,7 +20,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
  * @implNote Created on 30-Jan-2022, Sunday
  */
 public class NumericFieldWidgetConfig<N extends Number> extends TextFieldWidget 
-implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
+implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 {
 	protected final BaseNumber<N> property;
 	protected N initialNumber;
@@ -45,7 +46,7 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
 		this.setText(this.property.get().toString());
 		this.initialNumber = this.property.get();
 		
-		this.setCursorToStart();
+		this.setCursorToStart(false);
 	}
 
 	@Override
@@ -173,9 +174,8 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
 			{
 				ValueConsumer<BaseNumber<N>, N> consumer = this.property.getConsumer();
 				
-				if (consumer != null) {
-					consumer.consume(this.property, parsedNumber);
-				}
+				if (consumer != null)
+					consumer.consume(this.property, parsedNumber, PropertyWriterSource.USER);
 				
 				this.property.set(parsedNumber);
 			}
@@ -237,17 +237,16 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
 		
 		try
 		{
-			if (n instanceof Integer) {
+			if (n instanceof Integer)
 				return (N)(Integer)Integer.parseInt(val);
-			} else if (n instanceof Long) {
+			else if (n instanceof Long)
 				return (N)(Long)Long.parseLong(val);
-			} else if (n instanceof Double) {
+			else if (n instanceof Double)
 				return (N)(Double)Double.parseDouble(val);
-			} else if (n instanceof Float) {
+			else if (n instanceof Float)
 				return (N)(Float)Float.parseFloat(val);
-			} else if (n instanceof Byte) {
+			else if (n instanceof Byte)
 				return (N)(Byte)Byte.parseByte(val);
-			}
 		}
 		catch (NumberFormatException nfe) {}
 		

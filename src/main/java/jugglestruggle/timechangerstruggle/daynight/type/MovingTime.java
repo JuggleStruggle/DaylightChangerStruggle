@@ -1,20 +1,18 @@
 package jugglestruggle.timechangerstruggle.daynight.type;
 
 import jugglestruggle.timechangerstruggle.client.config.property.FancySectionProperty;
+import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
 import jugglestruggle.timechangerstruggle.config.property.BaseProperty;
-import jugglestruggle.timechangerstruggle.config.property.EnumValue;
 import jugglestruggle.timechangerstruggle.config.property.IntValue;
-import jugglestruggle.timechangerstruggle.config.property.LongValue;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
-import jugglestruggle.timechangerstruggle.util.EasingType;
-import jugglestruggle.timechangerstruggle.util.Easings;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 import java.util.Set;
 
+import net.minecraft.client.gui.Element;
 import net.minecraft.text.Text;
 
 import com.google.common.collect.ImmutableSet;
@@ -29,6 +27,8 @@ import com.google.common.collect.ImmutableSet;
 @Environment(EnvType.CLIENT)
 public class MovingTime extends MovingTimeBasis
 {
+	final static String PROPERTIES_KEY = "jugglestruggle.tcs.dnt.movingtime.properties.";
+	
 	public int speedForImmediateCalls = 1;
 	public int speedForLaterCalls = 80;
 
@@ -42,8 +42,7 @@ public class MovingTime extends MovingTimeBasis
 			
 			super.cachedTime += this.speedForImmediateCalls;
 		}
-		else 
-		{
+		else {
 			super.updateCall();
 		}
 	}
@@ -57,80 +56,65 @@ public class MovingTime extends MovingTimeBasis
 		return Builder.class;
 	}
 	
+	@Override // Introduced in v0.0.1
+	public boolean saveOnWorldChange() {
+		return true;
+	}
+
+	@Override // Introduced in v0.0.1
+	public Element[] createQuickOptionElements(TimeChangerScreen screen)
+	{
+		return StaticTime.createQuickOptionElementsShared(screen, 
+			this.getMovingTimeBasisCategory(), this.getCachedTimeProp()
+		);
+	}
 
 	@Override
 	public Set<BaseProperty<?, ?>> createProperties()
 	{
-		ImmutableSet.Builder<BaseProperty<?, ?>> prop = ImmutableSet.builderWithExpectedSize(9);
+		ImmutableSet.Builder<BaseProperty<?, ?>> props = ImmutableSet.builderWithExpectedSize(10);
 		
-		final String sectLang = "jugglestruggle.tcs.dnt.movingtime.properties.";
+		props.add(new FancySectionProperty("updating", Text.translatable(PROPERTIES_KEY+"updating")));
+		props.add(this.getTicksUntilNextCallProp());
 		
-		prop.add(new FancySectionProperty("updating", Text.translatable(sectLang+"updating")));
-		prop.add(new LongValue("ticksUntilNextUpdate", super.ticksUntilNextCall, 0L, Long.MAX_VALUE));
-		
-		prop.add(new FancySectionProperty("speed", Text.translatable(sectLang+"speed")));
-		prop.add(new IntValue("immediateSpeed", this.speedForImmediateCalls, Integer.MIN_VALUE, Integer.MAX_VALUE));
-		prop.add(new IntValue("pausedSpeed", this.speedForLaterCalls, Integer.MIN_VALUE, Integer.MAX_VALUE));
+		props.add(new FancySectionProperty("speed", Text.translatable(PROPERTIES_KEY+"speed")));
+		props.add(new IntValue("immediateSpeed", this.speedForImmediateCalls, Integer.MIN_VALUE, Integer.MAX_VALUE));
+		props.add(new IntValue("pausedSpeed", this.speedForLaterCalls, Integer.MIN_VALUE, Integer.MAX_VALUE));
 
-		prop.add(new FancySectionProperty("easings", Text.translatable(sectLang+"easings")));
-		prop.add(new EnumValue<>("easingBetweenTicks", this.easingBetweenTicks, Easings.LINEAR, Easings.values())
-			.setVTT(easing -> easing.getFormattedText()));
-		prop.add(new EnumValue<>("easingTypeBetweenTicks", this.easingType, EasingType.BETWEEN, EasingType.values())
-			.setVTT(easing -> easing.getFormattedText()));
+		props.add(new FancySectionProperty("easings", Text.translatable(PROPERTIES_KEY+"easings")));
+		props.add(this.getEasingBetweenTicksProp());
+		props.add(this.getEasingTypeBetweenTicksProp());
 		
-		return prop.build();
+		props.add(this.getMovingTimeBasisCategory());
+		props.add(this.getCachedTimeProp());
+		props.add(this.getPrevCachedTimeProp());
+		props.add(this.getPrevInterpolatedTimeProp());
+		props.add(this.getNextInterpolatedTimeProp());
+		props.add(this.getTicksPassedProp());
+		
+		
+		return props.build();
 	}
 	
 	@Override
-	public void writePropertyValueToCycle(BaseProperty<?, ?> property)
+	public void writePropertyValueToCycle(BaseProperty<?, ?> property, PropertyWriterSource writer)
 	{
 		final String belongingKey = property.property();
 		
-		if (property instanceof LongValue)
+		if (property instanceof IntValue prop)
 		{
-			if (belongingKey.equals("ticksUntilNextUpdate")) {
-				this.ticksUntilNextCall = ((LongValue)property).get();
-			}
-		}
-		else if (property instanceof IntValue)
-		{
-			IntValue prop = (IntValue)property;
-			
 			switch (belongingKey)
 			{
-				case "immediateSpeed": 
-					this.speedForImmediateCalls = prop.get(); break;
-				case "pausedSpeed": 
-					this.speedForLaterCalls = prop.get(); break;
-			}
-		}
-		else if (property instanceof EnumValue<?>)
-		{
-			EnumValue<?> prop = (EnumValue<?>)property;
-			
-			if (prop.getDefaultValue() instanceof Easings)
-			{
-				switch (belongingKey)
-				{
-					case "easingBetweenTicks": 
-					{
-						this.easingBetweenTicks = (Easings)prop.get(); 
-						break;
-					}
+				case "immediateSpeed" -> {
+					this.speedForImmediateCalls = prop.get(); return;
 				}
-			}
-			else if (prop.getDefaultValue() instanceof EasingType)
-			{
-				switch (belongingKey)
-				{
-					case "easingTypeBetweenTicks": 
-					{
-						this.easingType = (EasingType)prop.get(); 
-						break;
-					}
+				case "pausedSpeed" -> {
+					this.speedForLaterCalls = prop.get(); return;
 				}
 			}
 		}
+		
+		this.writePropertyValueToCycleForBasis(property, writer);
 	}
 
 	public static class Builder implements DayNightCycleBuilder

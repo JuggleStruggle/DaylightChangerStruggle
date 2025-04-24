@@ -2,12 +2,11 @@ package jugglestruggle.timechangerstruggle.client.widget;
 
 import java.util.List;
 
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.util.math.MatrixStack;
 
 /**
  * 
@@ -15,19 +14,27 @@ import net.minecraft.client.util.math.MatrixStack;
  * @author JuggleStruggle
  * @implNote Created on 13-Feb-2022, Sunday
  */
-public class ButtonWidgetEx extends ButtonWidget 
-implements PositionedTooltip, SelfWidgetRendererInheritor<ButtonWidgetEx>
+public class ButtonWidgetEx extends ButtonWidget implements WidgetPositionedTooltip, 
+	SelfWidgetRendererInheritor<ButtonWidgetEx>
 {
 	private int tooltipWidth;
 	private int tooltipHeight;
 	private List<OrderedText> compiledTooltipText;
 	private final SelfWidgetRender<ButtonWidgetEx> renderer;
 	
-	public ButtonWidgetEx(int width, int height, Text message, Text tooltipDescText, Text tooltipText, 
-		TextRenderer renderer, PressAction onPress)
+	public ButtonWidgetEx(int width, int height, Text message, Text tooltipDescText, 
+		Text tooltipText, TextRenderer renderer, PressAction onPress)
 	{
-		super(0, 0, width, height, message, onPress, ButtonWidget.EMPTY);
+		super(0, 0, width, height, message, onPress, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
 		this.updateTooltip(tooltipDescText, tooltipText, renderer);
+		this.renderer = new SelfWidgetRender<>(this, renderer);
+	}
+	
+	public ButtonWidgetEx(int width, int height, Text message, 
+		List<OrderedText> compiledTooltip, TextRenderer renderer, PressAction onPress)
+	{
+		super(0, 0, width, height, message, onPress, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
+		this.compiledTooltipText = compiledTooltip;
 		this.renderer = new SelfWidgetRender<>(this, renderer);
 	}
 	
@@ -63,7 +70,7 @@ implements PositionedTooltip, SelfWidgetRendererInheritor<ButtonWidgetEx>
 	}
 	
 	@Override
-	public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		this.renderer.renderButton(matrices, mouseX, mouseY, delta);
+	public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) {
+		this.renderer.renderButton(ctx, mouseX, mouseY, delta);
 	}
 }

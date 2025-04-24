@@ -6,14 +6,13 @@
 
 uniform mat4 ModelViewMat;
 uniform mat4 ProjMat;
+
 uniform float uStrokeWidth;
 
-in vec3 aPosition;
-
 // Offset represents the direction in which this point should be shifted to form the border
-in vec3 aOffset;
-
 // Progress changes from 0.0 to 1.0 along the perimeter (does not account for scaling, not yet).
+in vec3 aPosition;
+in vec3 aOffset;
 in float aProgress;
 
 out float vProgress;

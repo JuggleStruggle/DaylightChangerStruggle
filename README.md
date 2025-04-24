@@ -1,7 +1,3 @@
-# Note
-This version uses v0.0.0's release code since for me it was easier to change incompatible code rather
-than to use the newly updated ones from v0.1.0! That version is in development! (as of 2022-08-15)
-
 # DaylightChangerStruggle
 A fully-clientsided mod which changes the daylight cycle without the need of fiddling around commands.
 (Unless if your goal is to do that.)
@@ -44,11 +40,11 @@ and when in-game press the key and the menu should be seen.
 * Or if you want to use commands instead, type either `/daylightchanger`, `/dcs`, `/tcs` or `/timechanger`.
 
 ## TODOs
-See the dev branch.
+See dev-1.18 branch.
 
 ## Building
 Make sure Gradle is using the Java version this project is using (or Minecraft version 1.19.2) then 
 build it by doing `./gradlew build` in your terminal.
 
 ## License
-[LGPLv3](LICENSE.txt "LGPLv3") 
+[LGPL-3.0-only](LICENSE.txt "LGPL-3.0-only")

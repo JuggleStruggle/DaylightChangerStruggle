@@ -15,18 +15,13 @@ import net.minecraft.client.world.ClientWorld;
  */
 public class ShrugTime implements DayNightCycleBasis
 {
-
 	@Override
-	public long getModifiedTime(ClientWorld world, DayNightGetterType executor, boolean previous)
-	{
-		// TODO Auto-generated method stub
+	public long getModifiedTime(ClientWorld world, DayNightGetterType executor, boolean previous) {
 		return 0;
 	}
 
 	@Override
-	public long getCachedTime()
-	{
-		// TODO Auto-generated method stub
+	public long getCachedTime() {
 		return 0;
 	}
 

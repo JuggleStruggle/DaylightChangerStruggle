@@ -4,6 +4,7 @@ import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
 import jugglestruggle.timechangerstruggle.config.property.LongValue;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
+import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
 import jugglestruggle.timechangerstruggle.util.DaylightUtils;
 
 import net.fabricmc.api.EnvType;
@@ -44,7 +45,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
  * 
  *
  * @author JuggleStruggle
- * @implNote Created on 27-Feb-2022, Sunday
+ * @implNote Created on 27-Feb-2022, Thursday
  */
 @Environment(EnvType.CLIENT)
 public class Commands
@@ -142,9 +143,9 @@ public class Commands
 					{
 						return style
 							.withColor(isCurrentCycle ? 0xFF5511 : 0x55FF11)
-							.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tcs cycle "+baseName))
-							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-								Text.translatable("jugglestruggle.tcs.cmd.cycle.listing.use", displayName)))
+							.withClickEvent(new ClickEvent.RunCommand("/tcs cycle "+baseName))
+							.withHoverEvent(new HoverEvent.ShowText(Text.translatable
+								("jugglestruggle.tcs.cmd.cycle.listing.use", displayName)))
 							.withBold(true);
 					});
 					
@@ -155,9 +156,9 @@ public class Commands
 						
 						if (cycle.hasOptionsToEdit())
 						{
-							currentStyle = currentStyle.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-								Text.translatable("jugglestruggle.tcs.cmd.cycle.listing.option", displayName)))
-							.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tcs cycle "+baseName+" option"));
+							currentStyle = currentStyle.withHoverEvent(new HoverEvent.ShowText
+								(Text.translatable("jugglestruggle.tcs.cmd.cycle.listing.option", displayName)))
+							.withClickEvent(new ClickEvent.RunCommand("/tcs cycle "+baseName+" option"));
 						}
 							
 						return currentStyle;
@@ -172,7 +173,7 @@ public class Commands
 						if (displayDesc == null)
 							return style;
 						else
-							return style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, displayDesc));
+							return style.withHoverEvent(new HoverEvent.ShowText(displayDesc));
 					});
 					
 					Commands.sendTextToChat(ctx, Text.translatable("%1$s %2$s %3$s", options, useCycle, displayNameAsDisplay));
@@ -205,8 +206,8 @@ public class Commands
 				TimeChangerStruggleClient.setTimeChanger((DayNightCycleBasis)null);
 				TimeChangerStruggleClient.config.writeIfModified();
 				
-				final MutableText cycleRemovedText = Text.translatable
-					("jugglestruggle.tcs.cmd.cycle.cycle", previousCycle.isPresent() ? previousCycle.get().getTranslatableName() : "??");
+				final MutableText cycleRemovedText = Text.translatable("jugglestruggle.tcs.cmd.cycle.cycle", 
+					previousCycle.isPresent() ? previousCycle.get().getTranslatableName() : "??");
 				final MutableText worldTimeText = Text.translatable("jugglestruggle.tcs.screen.toggleworldtime");
 				
 				cycleRemovedText.styled(style -> style.withColor(0xFFDD33));
@@ -224,16 +225,14 @@ public class Commands
 		);
 		
 		Iterator<DayNightCycleBuilder> cycleTypes = TimeChangerStruggleClient.getCachedCycleTypeBuilders().iterator();
-//		boolean temp1 = TimeChangerStruggleClient.getTimeChanger() != null && TimeChangerStruggleClient.getTimeChangerKey() != null;
 			
 		while (cycleTypes.hasNext())
 		{
 			final DayNightCycleBuilder cycle = cycleTypes.next();
 			final String cycleName = cycle.getKeyName();
 			
-			if (cycleName.toLowerCase(Locale.ROOT).equals("remove")) {
+			if (cycleName.toLowerCase(Locale.ROOT).equals("remove"))
 				continue;
-			}
 			
 			LiteralArgumentBuilder<FabricClientCommandSource> cycleArg = ClientCommandManager.literal(cycleName);
 			
@@ -244,115 +243,19 @@ public class Commands
 			// Only add "option" if the cycle supports or has any options
 			// Unfortunately, if there were a way to load the configs related to the cycle once we need them then
 			// we wouldn't already create an artificial barrier for this
-//			if (cycle.hasOptionsToEdit() && (temp1 && cycle.getKeyName().equals(TimeChangerStruggleClient.getTimeChangerKey())))
 			if (cycle.hasOptionsToEdit())
 			{
 				LiteralArgumentBuilder<FabricClientCommandSource> cycleOptionArg = ClientCommandManager.literal("option");
 				
 				cycleOptionArg.executes(ctx -> 
 				{
-					// TODO: This doesn't work when executing it directly; but from clicking in the chat logs/history for some weird reason does.
+					// TODO: This doesn't work when executing it directly. This is as a result of the chat history
+					// screen clearing its own screen when the TCS screen is set before that happens and as a result,
+					// it seems like nothing happened. Clicking on the chat history opens this screen without any issues.
 					ctx.getSource().getClient().setScreen(new TimeChangerScreen(cycle));
+					
 					return 1;
 				});
-				
-				// Unfortunately, attempting to register command options is met with futile attempts as
-				// they are registered during mod initialization and not when the user types the command
-				// which is a bummer especially considering that options are a runtime thing and are not
-				// pre-generated. 
-				//
-				// So the solution at the moment is to open the screen for an specific option and
-				// check if the cycle supports pregenerated options.
-				
-				/*
-				if (!cycle.hasDynamicOptions())
-				{
-					DayNightCycleBasis cycleBasis;
-					
-//					if (temp1 && cycle.getKeyName().equals(TimeChangerStruggleClient.getTimeChangerKey()))
-//					{
-//						cycleBasis = TimeChangerStruggleClient.getTimeChanger();
-//					}
-//					else
-//					{
-						cycleBasis = cycle.create();
-						
-						// Load its options from config; this is perhaps such a bad idea straight off the bat, so maybe we will have to
-						// resort to being sure that the actual cycle is loaded to avoid config creation on a bunch of cycles that we
-						// will likely never use on one run
-						TimeChangerStruggleClient.config.createOrModifyDaylightCycleConfig(cycleBasis, false);
-//					}
-						
-					// Then create our properties and make sure that there are actual properties; not just fancy sections 
-					// as that are not going to be used in a command-like setting
-					Set<BaseProperty<?, ?>> cycleProps = cycleBasis.createProperties();
-					
-					if (cycleProps != null && !cycleProps.isEmpty())
-					{
-						boolean nonSectionsAdded = false;
-						
-						
-						for (BaseProperty<?, ?> prop : cycleProps)
-						{
-							if (prop instanceof FancySectionProperty)
-								continue;
-							
-	
-							LiteralArgumentBuilder<FabricClientCommandSource> propArg = 
-								ClientCommandManager.literal(prop.property());
-							
-							if (prop.onCommandOptionNoValueShouldBeExecuted())
-							{
-								propArg.executes(ctx -> 
-								{
-									int returnValue = prop.onCommandOptionNoValueExecute(ctx);
-									
-									if (returnValue > 1)
-									{
-										cycleBasis.writePropertyValueToCycle(prop);
-										
-										if (returnValue > 2)
-										{
-											TimeChangerStruggleClient.config.createOrModifyDaylightCycleConfig(cycleBasis, true);
-											TimeChangerStruggleClient.config.writeIfModified();
-										}
-									}
-									
-									return returnValue;
-								});
-							}
-							
-							propArg.then
-							(
-								ClientCommandManager.argument("value", prop.onCommandOptionGetArgType())
-								.executes(ctx -> 
-								{
-									int returnValue = prop.onCommandOptionWithValueExecute(ctx);
-									
-									if (returnValue > 1)
-									{
-										cycleBasis.writePropertyValueToCycle(prop);
-										
-										if (returnValue > 2)
-										{
-											TimeChangerStruggleClient.config.createOrModifyDaylightCycleConfig(cycleBasis, true);
-											TimeChangerStruggleClient.config.writeIfModified();
-										}
-									}
-									
-									return returnValue;
-								})
-							);
-							
-							
-							cycleOptionArg.then(propArg);
-							
-							if (!nonSectionsAdded)
-								nonSectionsAdded = true;
-						}
-					}
-				}
-				 */
 					
 				cycleArg.then(cycleOptionArg);
 			}
@@ -400,6 +303,13 @@ public class Commands
 				Text.translatable("jugglestruggle.tcs.cmd.option.commandfeedbackonlessimportant"), 
 				() -> TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant, 
 				currentValue -> TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant = currentValue
+			))
+			.then(this.generateOptionSubcommandBoolAction
+			(
+				"allowWorldChangeCyclesToWriteToDisk", 
+				Text.translatable("jugglestruggle.tcs.cmd.option.allowworldchangecyclestowritetodisk"), 
+				() -> TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk, 
+				currentValue -> TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk = currentValue
 			));
 	}
 	
@@ -468,9 +378,8 @@ public class Commands
 		final MutableText text = (args == null || args.length <= 0) ? 
 			Text.translatable(key) : Text.translatable(key, args);
 		
-		if (styleUpdater != null) {
+		if (styleUpdater != null)
 			text.styled(styleUpdater);
-		}
 		
 		Commands.sendTextToChat(ctx, text);
 	}
@@ -503,10 +412,8 @@ public class Commands
 			boolean setWorldTime = this.toggleMode ? 
 				!TimeChangerStruggleClient.worldTime : BoolArgumentType.getBool(ctx, "enabled");
 			
-			if (setWorldTime == TimeChangerStruggleClient.worldTime) {
-				
+			if (setWorldTime == TimeChangerStruggleClient.worldTime)
 				return 0;
-			}
 			
 			TimeChangerStruggleClient.worldTime = setWorldTime;
 			
@@ -519,11 +426,11 @@ public class Commands
 				
 				MutableText clickableText = Text.literal(realCmd);
 				
-				clickableText.styled(style -> {
-					return style.withColor(0xDD44FF).withUnderline(true).withBold(false)
-						.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, realCmd))
-						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable(langCmd + ".hover")));
-				});
+				clickableText.styled(style -> style.withColor(0xDD44FF)
+					.withUnderline(true).withBold(false)
+					.withClickEvent(new ClickEvent.RunCommand(realCmd))
+					.withHoverEvent(new HoverEvent.ShowText(Text.translatable(langCmd + ".hover")))
+				);
 				
 				Commands.sendTextToChat
 				(
@@ -557,8 +464,7 @@ public class Commands
 		public int run(CommandContext<FabricClientCommandSource> ctx) throws CommandSyntaxException
 		{
 			final String langCmd = "jugglestruggle.tcs.cmd.cycle.";
-			final Optional<DayNightCycleBuilder> previousCycle = 
-				TimeChangerStruggleClient.getCurrentCycleBuilder();
+			final Optional<DayNightCycleBuilder> previousCycle = TimeChangerStruggleClient.getCurrentCycleBuilder();
 			
 			if (previousCycle.isPresent() && previousCycle.get().getKeyName().equals(this.cycleToUse.getKeyName()))
 			{
@@ -610,20 +516,12 @@ public class Commands
 				.executes(new StaticTimeSetCommand(null, mode))
 			);
 			
-			/*
-			.then(ClientCommandManager.literal(    "noon").executes(new StaticTimeSetCommand( 6000L, mode)))
-			.then(ClientCommandManager.literal("midnight").executes(new StaticTimeSetCommand(18000L, mode)))
-			.then(ClientCommandManager.literal( "sunrise").executes(new StaticTimeSetCommand(    0L, mode)))
-			.then(ClientCommandManager.literal(  "sunset").executes(new StaticTimeSetCommand(12000L, mode)))
-			.then(ClientCommandManager.literal(     "day").executes(new StaticTimeSetCommand( 1000L, mode)))
-			.then(ClientCommandManager.literal(   "night").executes(new StaticTimeSetCommand(13000L, mode)));
-			 */
-			
 			Lists.newArrayList(jugglestruggle.timechangerstruggle.daynight.type.StaticTime.PresetSetTimes.values())
-			.stream().filter(presetTime -> presetTime.shouldShowInCommand()).forEach(presetTime -> {
+			.stream().filter(presetTime -> presetTime.shouldShowInCommand())
+			.forEach(presetTime -> 
 				base.then(ClientCommandManager.literal(presetTime.name().toLowerCase(Locale.ROOT))
-					.executes(new StaticTimeSetCommand(presetTime.getTime(), mode)));
-			});
+					.executes(new StaticTimeSetCommand(presetTime.getTime(), mode)))
+			);
 			
 			return base;
 		}
@@ -640,12 +538,14 @@ public class Commands
 		{
 			long timeTicks = (this.timeToSet == null) ? (long)IntegerArgumentType.getInteger(ctx, "time") : this.timeToSet;
 			
-			if (TimeChangerStruggleClient.cachedCycleTypeExists("statictime")) 
+			if (TimeChangerStruggleClient.cachedCycleTypeExists("statictime") || 
+				TimeChangerStruggleClient.cachedCycleTypeExists("movingtime")) 
 			{
-				if (!TimeChangerStruggleClient.isCycleTypeCurrentCycle("statictime")) 
+				final boolean isMovingTime = TimeChangerStruggleClient.isCycleTypeCurrentCycle("movingtime");
+				
+				if (!(TimeChangerStruggleClient.isCycleTypeCurrentCycle("statictime") || isMovingTime)) 
 				{
-					Optional<DayNightCycleBuilder> cycleBuilder = 
-						TimeChangerStruggleClient.getCurrentCycleBuilder();
+					Optional<DayNightCycleBuilder> cycleBuilder = TimeChangerStruggleClient.getCurrentCycleBuilder();
 					
 					if (TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant)
 					{
@@ -663,8 +563,10 @@ public class Commands
 					TimeChangerStruggleClient.setTimeChanger("statictime");
 				}
 				
-				jugglestruggle.timechangerstruggle.daynight.type.StaticTime staticTime = 
-					(jugglestruggle.timechangerstruggle.daynight.type.StaticTime)TimeChangerStruggleClient.getTimeChanger();
+				jugglestruggle.timechangerstruggle.daynight.type.StaticTime staticTime = isMovingTime ? 
+					null : (jugglestruggle.timechangerstruggle.daynight.type.StaticTime)TimeChangerStruggleClient.getTimeChanger();
+				jugglestruggle.timechangerstruggle.daynight.type.MovingTime movingTime = isMovingTime ?
+					(jugglestruggle.timechangerstruggle.daynight.type.MovingTime)TimeChangerStruggleClient.getTimeChanger() : null;
 				
 				final World w = ctx.getSource().getWorld();
 				final long previousTimeOfDay = w.getTimeOfDay();
@@ -674,41 +576,37 @@ public class Commands
 				
 				switch (this.mode)
 				{
-					case SET:
+					case SET ->
 					{
 						totalTimeOfDay = 0;
 						timeToActuallySet = timeTicks;
-						
-						break;
 					}
-					case ADD:
+					case ADD ->
 					{
-						timeToActuallySet = totalTimeOfDay = 
-							staticTime.timeSet + timeTicks;
-						
-						break;
+						timeToActuallySet = totalTimeOfDay = (isMovingTime ? 
+							movingTime.getCachedTime() : staticTime.timeSet) + timeTicks;
 					}
-					case REMOVE:
+					case REMOVE ->
 					{
-						timeToActuallySet = totalTimeOfDay = 
-							staticTime.timeSet - timeTicks;
-						
-						break;
+						timeToActuallySet = totalTimeOfDay = (isMovingTime ? 
+							movingTime.getCachedTime() : staticTime.timeSet) - timeTicks;
 					}
 					
-					default:
+					default ->
 					{
 						totalTimeOfDay = 0;
-						timeToActuallySet = staticTime.timeSet;
-						break;
+						timeToActuallySet = (isMovingTime ? movingTime.getCachedTime() : staticTime.timeSet);
 					}
 				}
 
-				staticTime.writePropertyValueToCycle(new LongValue("worldtime", timeToActuallySet, null, null));
+				if (isMovingTime)
+					movingTime.writePropertyValueToCycle(new LongValue("cachedTime", timeToActuallySet, null, null), PropertyWriterSource.USER);
+				else
+					staticTime.writePropertyValueToCycle(new LongValue("worldtime", timeToActuallySet, null, null), PropertyWriterSource.USER);
 				
 				Commands.cycleSetAndWeNeedToKnowIfWeCanDisableWorldTime();
 				
-				TimeChangerStruggleClient.config.createOrModifyDaylightCycleConfig(staticTime, true);
+				TimeChangerStruggleClient.config.createOrModifyDaylightCycleConfig(isMovingTime ? movingTime : staticTime, true);
 				TimeChangerStruggleClient.config.writeIfModified();
 				
 				if (TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant)
@@ -723,18 +621,18 @@ public class Commands
 					
 					myTimeTicks.styled(style ->
 						style.withColor(0xFFDD22).withBold(false).withUnderline(true)
-						.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, 
-							String.format("/%1$s time %2$s %3$s", starterCommand, modeName, timeTicks)))
+						.withClickEvent(new ClickEvent.RunCommand(String.format
+							("/%1$s time %2$s %3$s", starterCommand, modeName, timeTicks)))
 					);
 					totalTicks.styled(style ->
 						style.withColor(0xFF22DD).withBold(false).withUnderline(true)
-						.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, 
-							String.format("/%1$s time set %2$s", starterCommand, totalTimeOfDay)))
-						);
+						.withClickEvent(new ClickEvent.RunCommand(String.format
+							("/%1$s time set %2$s", starterCommand, totalTimeOfDay)))
+					);
 					prevTicks.styled(style ->
 						style.withColor(0x22DDFF).withBold(false).withUnderline(true)
-						.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, 
-							String.format("/%1$s time set %2$s", starterCommand, previousTimeOfDay)))
+						.withClickEvent(new ClickEvent.RunCommand(String.format
+							("/%1$s time set %2$s", starterCommand, previousTimeOfDay)))
 					);
 					
 					Commands.sendTextToChat
@@ -748,12 +646,9 @@ public class Commands
 			}
 			else
 			{
-				
 				Commands.sendTextToChat
 				(
-					ctx, style -> {
-						return style.withColor(0xFF2222).withBold(true);
-					}, 
+					ctx, style -> style.withColor(0xFF2222).withBold(true), 
 					"jugglestruggle.tcs.cmd.time.error.statictimenotfound", 
 					new Object[0]
 				);
@@ -763,8 +658,7 @@ public class Commands
 		}
 	}
 	
-	public enum StaticTimeMode
-	{
+	public enum StaticTimeMode {
 		SET, ADD, REMOVE
 	}
 }

@@ -60,7 +60,7 @@ public abstract class BaseNumber<N extends Number> extends BaseProperty<BaseNumb
 		this.min = min;
 		this.max = max;
 		
-		this.softMin = max;
+		this.softMin = min;
 		this.softMax = max;
 	}
 
@@ -117,9 +117,8 @@ public abstract class BaseNumber<N extends Number> extends BaseProperty<BaseNumb
 				expectedNumber = true;
 			}
 			
-			if (expectedNumber) {
+			if (expectedNumber)
 				this.set((N)n);
-			}
 		}
 	}
 	@Override

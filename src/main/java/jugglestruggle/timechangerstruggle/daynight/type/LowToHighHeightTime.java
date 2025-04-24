@@ -10,10 +10,10 @@ import jugglestruggle.timechangerstruggle.daynight.DayNightGetterType;
 
 import java.util.Set;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
+import net.minecraft.text.Text;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -88,46 +88,38 @@ public class LowToHighHeightTime implements DayNightCycleBasis
 	@Override
 	public Set<BaseProperty<?, ?>> createProperties()
 	{
-		ImmutableSet.Builder<BaseProperty<?, ?>> prop = ImmutableSet.builderWithExpectedSize(5);
+		ImmutableSet.Builder<BaseProperty<?, ?>> props = ImmutableSet.builderWithExpectedSize(5);
 		
 		final String sectLang = "jugglestruggle.tcs.dnt.lowtohighheighttime.properties.";
 		
-		prop.add(new FancySectionProperty("minmaxheight", Text.translatable(sectLang+"minmaxheight")));
-		prop.add(new DoubleValue("minHeight",     this.minHeight, (double)Long.MIN_VALUE, Double.MAX_VALUE));
-		prop.add(new LongValue  ("minHeightTime", this.minHeightTime, Long.MIN_VALUE, Long.MAX_VALUE));
-		prop.add(new DoubleValue("maxHeight",     this.maxHeight, (double)Long.MIN_VALUE, Double.MAX_VALUE));
-		prop.add(new LongValue  ("maxHeightTime", this.maxHeightTime, Long.MIN_VALUE, Long.MAX_VALUE));
+		props.add(new FancySectionProperty("minmaxheight", Text.translatable(sectLang+"minmaxheight")));
+		props.add(new DoubleValue("minHeight",     this.minHeight, Double.MIN_VALUE, Double.MAX_VALUE));
+		props.add(new LongValue  ("minHeightTime", this.minHeightTime, Long.MIN_VALUE, Long.MAX_VALUE));
+		props.add(new DoubleValue("maxHeight",     this.maxHeight, Double.MIN_VALUE, Double.MAX_VALUE));
+		props.add(new LongValue  ("maxHeightTime", this.maxHeightTime, Long.MIN_VALUE, Long.MAX_VALUE));
 		
-		return prop.build();
+		return props.build();
 	}
 	
 	@Override
-	public void writePropertyValueToCycle(BaseProperty<?, ?> property)
+	public void writePropertyValueToCycle(BaseProperty<?, ?> property, PropertyWriterSource writer)
 	{
 		final String belongingKey = property.property();
 		
-		if (property instanceof LongValue)
+		if (property instanceof LongValue prop)
 		{
-			LongValue prop = (LongValue)property;
-			
 			switch (belongingKey)
 			{
-				case "minHeightTime": 
-					this.minHeightTime = prop.get(); break;
-				case "maxHeightTime": 
-					this.maxHeightTime = prop.get(); break;
+				case "minHeightTime" -> this.minHeightTime = prop.get();
+				case "maxHeightTime" -> this.maxHeightTime = prop.get(); 
 			}
 		}
-		else if (property instanceof DoubleValue)
+		else if (property instanceof DoubleValue prop)
 		{
-			DoubleValue prop = (DoubleValue)property;
-			
 			switch (belongingKey)
 			{
-				case "minHeight": 
-					this.minHeight = prop.get(); break;
-				case "maxHeight": 
-					this.maxHeight = prop.get(); break;
+				case "minHeight" -> this.minHeight = prop.get();
+				case "maxHeight" -> this.maxHeight = prop.get();
 			}
 		}
 	}

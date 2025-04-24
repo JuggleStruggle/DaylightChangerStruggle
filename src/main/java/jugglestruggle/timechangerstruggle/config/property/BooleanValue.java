@@ -5,6 +5,7 @@ import jugglestruggle.timechangerstruggle.client.config.widget.CyclingWidgetConf
 import jugglestruggle.timechangerstruggle.client.config.widget.WidgetConfigInterface;
 import jugglestruggle.timechangerstruggle.client.config.widget.CyclingWidgetConfig.WidgetConfigBuilderBoolean;
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
+import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -37,7 +38,7 @@ public class BooleanValue extends BaseProperty<BooleanValue, Boolean>
 	
 	private final CyclingButtonWidget.UpdateCallback<Boolean> callback = (button, value) -> { 
 		if (super.consumer != null)
-			super.consumer.consume(this, value);
+			super.consumer.consume(this, value, PropertyWriterSource.USER);
 	};
 	
 	public BooleanValue(String property, boolean value) {

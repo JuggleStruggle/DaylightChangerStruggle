@@ -21,8 +21,8 @@ public class LongValue extends BaseNumber<Long>
 	@Override
 	public boolean isWithinRange() 
 	{
-		final Long value = this.get();
-		return value != null && value >= this.getMin() && value <= this.getMax();
+		final Long v = this.get();
+		return v != null && v >= this.getMin() && v <= this.getMax();
 	}
 	@Override
 	public Long parseStringNumber(String toParse)
