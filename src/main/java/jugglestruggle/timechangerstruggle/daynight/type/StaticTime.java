@@ -19,9 +19,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 
@@ -92,8 +94,8 @@ public class StaticTime implements DayNightCycleBasis
 	}
 	
 	
-	// v0.0.1+1.21.5 port exclusive: make both Static and Moving Time use the same quick-options as
-	// they're not anymore different to what they do in their core functionality
+	// Introduced in v0.0.1+1.21.5 port: Make both Static and Moving Time use the same quick-options 
+	// as they're not anymore different to what they do with their core functionality.
 	public static Element[] createQuickOptionElementsShared(TimeChangerScreen screen, 
 		FancySectionProperty sectionProp, LongValue timeValue)
 	{
@@ -110,17 +112,24 @@ public class StaticTime implements DayNightCycleBasis
 		final String setPropsTooltip = PROPERTIES_KEY + "time.worldtime.";
 		final Iterator<PresetSetTimes> setTimesIterator = setTimes.iterator();
 		
+		MutableText lShiftKey = StaticTime.createQuickOptElemKey("shift");
+		MutableText lCtrlKey = StaticTime.createQuickOptElemKey(MinecraftClient.IS_SYSTEM_MAC ? "super" : "control");
+		MutableText lAltKey = StaticTime.createQuickOptElemKey("alt");
+		
 		int i; 
 		
 		List<OrderedText> howToUseTooltipsPreset = new ArrayList<>(4);
 		
 		for (i = 1; i <= 4; ++i) 
 		{
-			howToUseTooltipsPreset.addAll(screen.getTextRenderer()
-				.wrapLines(Text.translatable(setPropsTooltip + "tooltip." + i), 200));
+			howToUseTooltipsPreset.addAll(
+				screen.getTextRenderer().wrapLines(TimeChangerScreen.translateTextAsGrayColor(
+				setPropsTooltip + "tooltip." + i, lShiftKey, lCtrlKey, lAltKey), 200)
+			);
 		}
 		
 		i = 0;
+		ButtonWidgetEx bw;
 		
 		while (setTimesIterator.hasNext())
 		{
@@ -137,13 +146,11 @@ public class StaticTime implements DayNightCycleBasis
 			// Name of the tooltip text that belongs on the first line
 			tooltipsB.add(Text.translatable(setPropsTooltip + cycleName).asOrderedText());
 			
-			// How to use tooltip lines: 
+			// How to use tooltip lines 
 			if (enableAdditionOptions)
 				tooltipsB.addAll(howToUseTooltipsPreset);
 			
-			// add i + 1 before setting it as the index (e.g. we want to 
-			// add the button widget to index 1 instead of 0 even if i is 0)
-			itemsToAdd[++i] = new ButtonWidgetEx
+			bw = new ButtonWidgetEx
 			(
 				20, 20, displayText, tooltipsB.build(),
 				screen.getTextRenderer(), b -> 
@@ -175,6 +182,12 @@ public class StaticTime implements DayNightCycleBasis
 					timeWidget.setText(finalValue.toString());
 				}
 			);
+			
+			bw.setNarrationBuilder((bwx, b) -> bwx.appendNarrationTooltipLine(b, (byte)1, 1, 0));
+			
+			// add i + 1 before setting it as the index (e.g. we want to 
+			// add the button widget to index 1 instead of 0 even if i is 0)
+			itemsToAdd[++i] = bw;
 		}
 		
 		itemsToAdd[0] = timeWidget;
@@ -183,6 +196,15 @@ public class StaticTime implements DayNightCycleBasis
 		timeWidget.setHeight(20);
 		
 		return itemsToAdd;
+	}
+	
+	// v0.0.2
+	public static MutableText createQuickOptElemKey(String key)
+	{
+		MutableText keyText = Text.translatable("jugglestruggle.tcs.keytype." + key);	
+		keyText.styled(s -> s.withColor(0xBFFFBF).withBold(true));
+		
+		return keyText;
 	}
 	
 	public static enum PresetSetTimes

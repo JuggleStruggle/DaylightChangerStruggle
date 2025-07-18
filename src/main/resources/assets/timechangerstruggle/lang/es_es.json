@@ -102,9 +102,9 @@
 	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.sunrise": "Almanecer",
 	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.sunset": "Anochecer",
 	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.tooltip.1": "Mantén las sigiuente tecla(s) para añadir:",
-	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.tooltip.2": "SHIFT: Añade si CONTROL no es mantenido",
-	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.tooltip.3": "CONTROL: Haga que el valor añadida sea negativo",
-	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.tooltip.4": "ALT: Divide la adición por 2",
+	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.tooltip.2": "%1$s: Añade si %2$s no es mantenido",
+	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.tooltip.3": "%2$s: Haga que el valor añadida sea negativo",
+	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.tooltip.4": "%3$s: Divide la adición por 2",
 	
 	"jugglestruggle.tcs.dnt.movingtime.properties.updating": "Actualizaciones",
 	"jugglestruggle.tcs.dnt.movingtime.properties.updating.ticksuntilnextupdate": "Ticks Para la Siguiente Actualización (0 para imediato)",
@@ -133,7 +133,7 @@
 	"jugglestruggle.tcs.dnt.randomizer.properties.easings.easingtypebetweenticks": "Tipo de Easing",
 
 	"jugglestruggle.tcs.dnt.movingtimebasis.properties.basis": "Tiempo al Mover: Propiedades Constantemente Actualizando",
-	"jugglestruggle.tcs.dnt.movingtimebasis.properties.basis.cachedtime": "Tiempo ",
+	"jugglestruggle.tcs.dnt.movingtimebasis.properties.basis.cachedtime": "Tiempo",
 	"jugglestruggle.tcs.dnt.movingtimebasis.properties.basis.previouscachedtime": "Tiempo Captado",
 	
 	"jugglestruggle.tcs.dnt.lowtohighheighttime.properties.minmaxheight": "Altura Mínima y Máxima",
@@ -145,6 +145,11 @@
 	"jugglestruggle.tcs.keycategory.timechanger": "Cambiador de Tiempo del JuggleStruggle",
 	"jugglestruggle.tcs.key.toggleworldtime": "Intercambiar Tiempo del Mundo",
 	"jugglestruggle.tcs.key.timechangermenu": "Abrir Menú del Cambiador de Tiempo",
+
+	"jugglestruggle.tcs.keytype.shift": "Shift",
+	"jugglestruggle.tcs.keytype.alt": "Alt",
+	"jugglestruggle.tcs.keytype.control": "Control",
+	"jugglestruggle.tcs.keytype.super": "Super",
 
 	"modmenu.descriptionTranslation.timechangerstruggle": "Te permite a modificar el ciclo del tiempo para el cliente sin tener los permisos de operador. ¡También te permite ver cómo un mundo se ve en ese tiempo si eres usado(a) en ese tiempo!"
 }

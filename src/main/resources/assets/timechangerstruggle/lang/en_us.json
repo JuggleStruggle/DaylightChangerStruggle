@@ -1,7 +1,7 @@
 {
 	"jugglestruggle.tcs": "TimeChangerStruggle",
 	
-	"jugglestruggle.tcs.": "",
+	"jugglestruggle.tcs.screen": "DaylightChangerStruggle",
 	"jugglestruggle.tcs.screen.toggleworldtime": "World Time",
 	"jugglestruggle.tcs.screen.toggledate": "Date Over Ticks",
 	"jugglestruggle.tcs.screen.togglesmoothbutterdaylightcycle": "Buttery-Smooth Cycle",
@@ -102,9 +102,9 @@
 	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.sunrise": "Sunrise",
 	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.sunset": "Sunset",
 	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.tooltip.1": "Hold the following key(s) to add:",
-	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.tooltip.2": "SHIFT: Adds if CONTROL isn't held",
-	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.tooltip.3": "CONTROL: Turns the added value negative",
-	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.tooltip.4": "ALT: Divides the addition by 2",
+	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.tooltip.2": "%1$s: Adds if %2$s isn't held",
+	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.tooltip.3": "%2$s: Turns the added value negative",
+	"jugglestruggle.tcs.dnt.statictime.properties.time.worldtime.tooltip.4": "%3$s: Divides the addition by 2",
 	
 	"jugglestruggle.tcs.dnt.movingtime.properties.updating": "Updates",
 	"jugglestruggle.tcs.dnt.movingtime.properties.updating.ticksuntilnextupdate": "Ticks Until Next Update (0 for Immediate)",
@@ -145,6 +145,11 @@
 	"jugglestruggle.tcs.keycategory.timechanger": "JuggleStruggle's Time Changer",
 	"jugglestruggle.tcs.key.toggleworldtime": "Toggle World Time",
 	"jugglestruggle.tcs.key.timechangermenu": "Open Time Changer Menu",
+
+	"jugglestruggle.tcs.keytype.shift": "Shift",
+	"jugglestruggle.tcs.keytype.alt": "Alt",
+	"jugglestruggle.tcs.keytype.control": "Control",
+	"jugglestruggle.tcs.keytype.super": "Super",
 
 	"modmenu.descriptionTranslation.timechangerstruggle": "Allows you to modify the client's daylight cycle without ever needing to have operator permissions. It also allows you to see how a world would look like in that time!"
 }

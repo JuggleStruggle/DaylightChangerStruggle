@@ -10,13 +10,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import net.minecraft.client.render.GameRenderer;
 import net.minecraft.entity.LivingEntity;
 
-import net.minecraft.client.render.GameRenderer;
-
 /**
- * 
- *
  * @author JuggleStruggle
  * @implNote Created on 08-Mar-2022, Tuesday
  */
@@ -25,7 +22,7 @@ import net.minecraft.client.render.GameRenderer;
 public class GameRendererMixin
 {
 	@Inject(method = "getNightVisionStrength", at = @At(value = "HEAD"), cancellable = true)
-	private static void nightVisionStrengthCheck(LivingEntity entity, float delta, CallbackInfoReturnable<Float> info)
+	private static void daylightChangerStruggle_nightVisionStrengthCheck(LivingEntity entity, float delta, CallbackInfoReturnable<Float> info)
 	{
 		if (TimeChangerStruggleClient.disableNightVisionEffect) {
 			info.setReturnValue(0.0f); info.cancel();

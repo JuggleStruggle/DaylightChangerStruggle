@@ -1,16 +1,25 @@
 package jugglestruggle.timechangerstruggle.client.util.render;
 
-import jugglestruggle.timechangerstruggle.mixin.client.render.BufferBuilderAccessor;
 import jugglestruggle.timechangerstruggle.mixin.client.render.DrawContextAccessor;
 
+import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3x2f;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.lwjgl.system.MemoryUtil;
 
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.font.TextRenderer.GlyphDrawable;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.gui.render.state.ColoredQuadGuiElementRenderState;
+import net.minecraft.client.gui.render.state.SimpleGuiElementRenderState;
+import net.minecraft.client.gui.render.state.TextGuiElementRenderState;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.texture.TextureSetup;
+import net.minecraft.text.OrderedText;
+
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 
 /**
  *
@@ -22,15 +31,13 @@ public final class RenderUtils
 	public static void fillPointedGradient(DrawContext ctx, int startX, int startY, int endX, int endY,
 		int z, int topLeftColor, int topRightColor, int bottomLeftColor, int bottomRightColor)
 	{
-		final VertexConsumerProvider.Immediate vci = ((DrawContextAccessor)ctx).getVertexConsumerImmediate();
-		final BufferBuilder bb = (BufferBuilder)vci.getBuffer(RenderLayer.getGui());
+		DrawContextAccessor dca = (DrawContextAccessor)ctx;
 		
-		final Matrix4f mat = ctx.getMatrices().peek().getPositionMatrix();
-		
-		RenderUtils.fillPoint(mat, bb, endX, startY, z, topRightColor);
-		RenderUtils.fillPoint(mat, bb, startX, startY, z, topLeftColor);
-		RenderUtils.fillPoint(mat, bb, startX, endY, z, bottomLeftColor);
-		RenderUtils.fillPoint(mat, bb, endX, endY, z, bottomRightColor);
+		dca.getRenderState().addSimpleElement(new ColoredBordersGradientGuiElementRenderState(
+			new Matrix3x2f(ctx.getMatrices()), startX, startY, endX, endY, z, 
+			topLeftColor, topRightColor, bottomLeftColor, bottomRightColor, 
+			dca.getScissorStack().peekLast())
+		);
 	}
 	public static void fillPoint(Matrix4f mat, BufferBuilder bb, int x, int y, int z, int color) 
 	{
@@ -42,78 +49,67 @@ public final class RenderUtils
 		bb.vertex(mat, x, y, z).color(r, g, b, a);
 	}
 	
-	public static void fillRainbow
+
+	// Introduced in v0.0.2+1.21.6 port as the previous method of doing the vertices isn't there anymore.
+	// Based from the Vanilla's Colored Quad that doesn't allow the ability to color all edges individually.
+	public record ColoredBordersGradientGuiElementRenderState
 	(
-		DrawContext ctx, int startX, int startY, int endX, int endY, int z,
-		float offsetX, float offsetY, float offsetZ, float progress, boolean adv
-	)
+		RenderPipeline pipeline, TextureSetup textureSetup, Matrix3x2f pose,
+		int x1, int y1, int x2, int y2, int z, int tlCol, int trCol, int blCol, int brCol,
+		@Nullable ScreenRect scissorArea, @Nullable ScreenRect bounds
+		)
+	implements SimpleGuiElementRenderState 
 	{
-		final VertexConsumerProvider.Immediate vci = ((DrawContextAccessor)ctx).getVertexConsumerImmediate();
-		final BufferBuilder bb = (BufferBuilder)vci.getBuffer(RainbowShader.RAINBOW_RL);
-		// ((BufferBuilderAccessor)bb).
-		
-		final Matrix4f mat = ctx.getMatrices().peek().getPositionMatrix();
-		
-		float width  = endX - startX;
-		float height = endY - startY;
-		// Width over Height
-		float ratioW = width / height;
-		// Height over Width
-		float ratioH = height / width;
-		
-		float topLeftProgress = 0.0f;
-		float topRghtProgress = 0.5f;
-		float btmLeftProgress = 0.5f;
-		float btmRghtProgress = 1.0f;
-		
-		// Width is higher than height
-		if (ratioW > 1.0f) 
-		{
-			topRghtProgress = 0.5f * ratioW;
-			btmLeftProgress = 0.5f;
-			btmRghtProgress = topRghtProgress + 0.5f;
-		}
-		// Height is higher than width
-		else if (ratioW < 1.0f)
-		{
-			topRghtProgress = 0.5f;
-			btmLeftProgress = 0.5f * ratioH;
-			btmRghtProgress = btmLeftProgress + 0.5f;
+		public ColoredBordersGradientGuiElementRenderState(
+			Matrix3x2f pose, int x1, int y1, int x2, int y2, int z, 
+			int tlCol, int trCol, int blCol, int brCol, @Nullable ScreenRect scissorArea
+			) {
+			this(RenderPipelines.GUI, TextureSetup.empty(), pose, x1, y1, x2, y2, z, tlCol, trCol, blCol, brCol, 
+				scissorArea, ColoredQuadGuiElementRenderState.createBounds(x1, y1, x2, y2, pose, scissorArea));
 		}
 		
-		RenderUtils.fillRainbowPoint(mat, bb,   endX, startY, z, offsetX, offsetY, offsetZ, progress + topRghtProgress);
-		RenderUtils.fillRainbowPoint(mat, bb, startX, startY, z, offsetX, offsetY, offsetZ, progress + topLeftProgress);
-		RenderUtils.fillRainbowPoint(mat, bb, startX,   endY, z, offsetX, offsetY, offsetZ, progress + btmLeftProgress);
-		RenderUtils.fillRainbowPoint(mat, bb,   endX,   endY, z, offsetX, offsetY, offsetZ, progress + btmRghtProgress);
+		@Override
+		public void setupVertices(VertexConsumer v, float depth) 
+		{
+			v.vertex(this.pose, this.x2, this.y1, this.z + depth).color(this.trCol);
+			v.vertex(this.pose, this.x1, this.y1, this.z + depth).color(this.tlCol);
+			v.vertex(this.pose, this.x1, this.y2, this.z + depth).color(this.blCol);
+			v.vertex(this.pose, this.x2, this.y2, this.z + depth).color(this.brCol);
+		}
 	}
-	
-	public static void fillRainbowPoint(Matrix4f mat, BufferBuilder bb, int x, int y, int z, 
-		float offsetX, float offsetY, float offsetZ, float progress) 
+
+	// Introduced in v0.0.2+1.21.6 port as the previous method of doing the text rendering isn't there anymore.
+	// Force floats instead of integers to be used; this version couldn't be separated into its own class due 
+	// to certain draw call functions from the vanilla side of things requiring the superclass.
+	public static class TextGuiElementRenderStateDCS extends TextGuiElementRenderState
 	{
-		bb.vertex(mat, x, y, z);
-		RenderUtils.rainbowVertexPos(bb, mat, offsetX, offsetY, offsetZ);
-		RenderUtils.rainbowFloatGeneric(bb, progress);
-	}
-	
-	static void rainbowVertexPos(BufferBuilder bb, Matrix4f mat, float x, float y, float z)
-	{
-		BufferBuilderAccessor bba = (BufferBuilderAccessor)bb;
-		long l = bba.getBeginElement(RainbowShader.VFE_OFFSET);
+		public final float fX;
+		public final float fY;
 		
-		if (l == -1L)
-			return;
+		public TextGuiElementRenderStateDCS(TextRenderer textRenderer, OrderedText orderedText, Matrix3x2f mtx,
+			float x, float y, int color, int backgroundColor, boolean shadow, ScreenRect clipBounds)
+		{
+			super(textRenderer, orderedText, mtx, 0, 0, color, backgroundColor, shadow, clipBounds);
+			this.fX = x; this.fY = y;
+		}
 		
-		Vector3f v = mat.transformPosition(x, y, z, new Vector3f());
-		MemoryUtil.memPutFloat(l     , v.x());
-		MemoryUtil.memPutFloat(l + 4L, v.y());
-		MemoryUtil.memPutFloat(l + 8L, v.z());
-	}
-	
-	static void rainbowFloatGeneric(BufferBuilder bb, float v)
-	{
-		long pointer = ((BufferBuilderAccessor)bb).getBeginElement(RainbowShader.VFE_FLOAT_GENERIC);
-		
-		if (pointer != -1L)
-			MemoryUtil.memPutFloat(pointer, v);
+
+		@Override
+		public GlyphDrawable prepare() 
+		{
+			if (this.preparation == null) 
+			{
+				this.preparation = this.textRenderer.prepare(this.orderedText, this.fX, this.fY, this.color, this.shadow, this.backgroundColor);
+				ScreenRect screenRect = this.preparation.getScreenRect();
+			
+				if (screenRect != null) 
+				{
+					screenRect = screenRect.transformEachVertex(this.matrix);
+					this.bounds = this.clipBounds == null ? screenRect : this.clipBounds.intersection(screenRect);
+				}
+			}
+
+			return this.preparation;
+		}
 	}
 }

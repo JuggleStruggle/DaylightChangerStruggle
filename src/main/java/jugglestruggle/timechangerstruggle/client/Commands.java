@@ -363,7 +363,7 @@ public class Commands
 		
 		Commands.sendTextToChat
 		(
-			ctx, style -> style.withColor(0xFFDD22),
+			ctx, s -> s.withColor(0xFFDD22),
 			"jugglestruggle.tcs.cmd.time.use", 
 			w.getTimeOfDay(), DaylightUtils.getParsedTime(w, true)
 		);
@@ -383,7 +383,6 @@ public class Commands
 		
 		Commands.sendTextToChat(ctx, text);
 	}
-	@SuppressWarnings("resource")
 	public static void sendTextToChat(CommandContext<FabricClientCommandSource> ctx, Text text) {
 		ctx.getSource().getClient().inGameHud.getChatHud().addMessage(text);
 	}

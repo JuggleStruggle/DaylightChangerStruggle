@@ -8,16 +8,12 @@ extendable method net/minecraft/client/gui/widget/CyclingButtonWidget refreshToo
 # Entry List Widget
 extendable method net/minecraft/client/gui/widget/EntryListWidget getEntryAtPosition (DD)Lnet/minecraft/client/gui/widget/EntryListWidget$Entry;
 
-# Clickable Widget (1.21.5 made this final and is being removed to allow the list to self-render)
-# extendable method net/minecraft/client/gui/widget/ClickableWidget render (Lnet/minecraft/client/gui/DrawContext;IIF)V
-
-# Shader and Rendering 
-# > ShaderProgram: 1.21.5 made this private and is being removed to allow the shader to host itself without needing to mixin into other shader programs
-accessible method net/minecraft/client/gl/ShaderProgram <init> (ILjava/lang/String;)V
-# > MultiPhase: Make it open and accessible to avoid reinventing the wheel
-extendable class net/minecraft/client/render/RenderLayer$MultiPhase
-accessible method net/minecraft/client/render/RenderLayer$MultiPhase <init> (Ljava/lang/String;IZZLcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/render/RenderLayer$MultiPhaseParameters;)V
-# > VertexFormat: Get past the pointless limitation of registering Vertex Format Element IDs to avoid mod conflict
-extendable method com/mojang/blaze3d/vertex/VertexFormat <init> (Ljava/util/List;Ljava/util/List;Lit/unimi/dsi/fastutil/ints/IntList;I)V
-accessible field com/mojang/blaze3d/vertex/VertexFormat offsetsByElement [I
-extendable method com/mojang/blaze3d/vertex/VertexFormat$Builder <init> ()V
+# Shader and Rendering
+# > DrawContext: Allow the Scissor Stack to be publicly accessible
+extendable class net/minecraft/client/gui/DrawContext$ScissorStack
+# > ColoredQuad: Make its static method publicly accessible in order to avoid needlessly copying
+accessible method net/minecraft/client/gui/render/state/ColoredQuadGuiElementRenderState createBounds (IIIILorg/joml/Matrix3x2f;Lnet/minecraft/client/gui/ScreenRect;)Lnet/minecraft/client/gui/ScreenRect;
+# > TextGuiElementRenderState: Avoid using ints for its position and use floats instead (in fact, the textRenderer.prepare() uses x and y uses floats!)
+extendable class net/minecraft/client/gui/render/state/TextGuiElementRenderState
+accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState preparation Lnet/minecraft/client/font/TextRenderer$GlyphDrawable;
+accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState bounds Lnet/minecraft/client/gui/ScreenRect;

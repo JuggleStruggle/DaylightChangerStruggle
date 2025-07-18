@@ -7,12 +7,8 @@
 		"MinecraftClientMixin",
         "render.GameRendererMixin",
         "render.DrawContextAccessor",
-		"render.BufferBuilderAccessor",
-		"render.gl.GlBackendMixin",
-		"render.gl.GlBackendAccessor",
-		"render.gl.GlResourceManagerAccessor",
-		"render.gl.VertexFormatBuilderAccessor",
         "world.ClientWorldMixin",
+        "widget.CyclingButtonWidgetAccessor",
         "widget.CyclingButtonWidgetBuilderAccessor"
     ],
     "injectors": {

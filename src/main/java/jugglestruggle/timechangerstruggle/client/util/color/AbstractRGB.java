@@ -74,6 +74,5 @@ public abstract class AbstractRGB
 			b = 0xFF;
 		
 		return (a << 24) | (r << 16) | (g << 8) | b;
-		
 	}
 }

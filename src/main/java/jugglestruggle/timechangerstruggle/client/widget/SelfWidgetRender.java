@@ -1,10 +1,10 @@
 package jugglestruggle.timechangerstruggle.client.widget;
 
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
-import jugglestruggle.timechangerstruggle.client.util.color.AbstractRGB;
 import jugglestruggle.timechangerstruggle.client.util.color.RainbowRGB;
-import jugglestruggle.timechangerstruggle.client.util.render.RainbowShader;
 import jugglestruggle.timechangerstruggle.client.util.render.RenderUtils;
+import jugglestruggle.timechangerstruggle.util.EasingType;
+import jugglestruggle.timechangerstruggle.util.Easings;
 
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -12,7 +12,6 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.text.OrderedText;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 13-Feb-2022, Sunday
  */
@@ -21,35 +20,34 @@ public class SelfWidgetRender<W extends ClickableWidget>
 	private final W widget;
 	private TextRenderer textRenderer;
 
-	private AbstractRGB textColoring;
-	
-	private float stripeScale;
-	private float rainbowSpeed;
-	
-	private float rainbowOffset;
-	private float previousRainbowOffset;
-	
-	public boolean swapTextColoringWithRainbow;
-//	private AbstractRGB[] hoveredColor;
+	private RainbowRGB selectedTextRGB;
+	private RainbowRGB[] selectedRectRGB;
 	
 	public SelfWidgetRender(W widget, TextRenderer textRenderer)
 	{
 		this.widget = widget;
 		this.textRenderer = textRenderer;
 
-		/*
-		 this.hoveredColor = ChromaRGB.createColors
-		 	(0xFFFFFFFF, 0xFFFFFF00, 0xFF00FFFF, 0xFF00FFFF, 0xFFFF00FF);
-		 */
-		this.textColoring = RainbowRGB.createColors(0xFFFFFFFF)[0];
+		this.selectedTextRGB = new RainbowRGB(0xFFFFFFFF);
+		this.selectedRectRGB = new RainbowRGB[4];
 		
-		this.stripeScale = 2.0f;
-		this.rainbowSpeed = 1.0f;
-		this.rainbowOffset = 0.0f;
+		boolean isTopSide;
 		
-		// Non-functional; if you have an idea as to how we can render text
-		// using the rainbow shader then we can make this useful :D
-		this.swapTextColoringWithRainbow = false;
+		for (int i = 0; i < 4; ++i)
+		{
+			isTopSide = i < 2;
+			
+			this.selectedRectRGB[i] = new RainbowRGB
+			(
+				switch (i) { 
+					default -> 0xCCB0CD81; case 1 -> 0xCCB0E481; 
+					case 2 -> 0xAA00153E; case 3 -> 0xAA001558;
+				}, 
+				Easings.QUINT, 
+				isTopSide ? EasingType.IN : EasingType.OUT, 40, 
+				isTopSide ? (byte)2 : 4
+			);
+		}
 	}
 	
 	public void setTextRendering(TextRenderer renderer) {
@@ -60,63 +58,51 @@ public class SelfWidgetRender<W extends ClickableWidget>
 	{
 		if (this.widget.active && this.widget.isSelected())
 		{
-			this.textColoring.tick();
+			this.selectedTextRGB.tick();
 			
-//			float maxOffset = 76.0f;  // for scale 2 without any changes ( 6 colors)
-//			float maxOffset = 152.0f; // for scale 1 without any changes ( 6 colors)
-			float maxOffset = 302.0f; // for scale 1 without any changes (12 colors)
-			
-			if (this.stripeScale != 1.0f)
-				maxOffset /= this.stripeScale;
-			
-			if (this.rainbowOffset > maxOffset) 
-			{
-				this.previousRainbowOffset = 0f;
-				this.rainbowOffset = this.rainbowOffset - (maxOffset + 1.0f);
-			} 
-			else 
-			{
-				this.previousRainbowOffset = this.rainbowOffset;
-				this.rainbowOffset += this.rainbowSpeed;
-			}
+			for (int i = 0; i < 4; ++i)
+				this.selectedRectRGB[i].tick();
 		}
 	}
 	
 	public void renderButton(DrawContext ctx, int mouseX, int mouseY, float delta)
 	{
-		boolean stcwr = false;	
+		boolean renderNormalText = true;	
 		int textColor;
 		
 		if (this.widget.active && this.widget.isSelected())
 		{
-			if (this.swapTextColoringWithRainbow)
-			{
-				stcwr = true; textColor = 0xFF000000;
-				
-				ctx.fill(this.widget.getX(), this.widget.getY(), 
-					this.widget.getRight(), this.widget.getBottom(), textColor);
-			}
-			else
-			{
-				textColor = this.textColoring.getInterpolatedColor(delta);
-				this.fillMyRainbow(ctx, delta, false);
-			}
+			textColor = this.selectedTextRGB.getInterpolatedColor(delta);
+			
+			// v0.0.2+1.21.6 port change: Since Mojang is making changes to rendering side of things (as of June 2025), 
+			// the Rainbow Shader that was formerly used was completely removed. It will still be used in the future, 
+			// but not during minor ports to make porting quicker for newer versions of the game.
+			RenderUtils.fillPointedGradient
+			(
+				ctx, this.widget.getX(), this.widget.getY(), 
+				this.widget.getRight(), this.widget.getBottom(), 0, 
+			
+				this.selectedRectRGB[0].getInterpolatedColor(delta), 
+				this.selectedRectRGB[1].getInterpolatedColor(delta), 
+				this.selectedRectRGB[2].getInterpolatedColor(delta), 
+				this.selectedRectRGB[3].getInterpolatedColor(delta)
+			);
 		}
 		else
 		{
-			       textColor = this.widget.active ? 0xFFFFFF : 0xA0A0A0;
+			       textColor = this.widget.active ? 0xFFFFFFFF : 0xFFA0A0A0;
 			int enabledColor = this.widget.active ? 0xCC888888 : 0xCC333333;
 			
 			ctx.fill(this.widget.getX(), this.widget.getY(), 
 				this.widget.getRight(), this.widget.getBottom(), enabledColor);
 		}
 		
-		OrderedText message = this.widget.getMessage().asOrderedText();
-		int messageWidth = this.textRenderer.getWidth(message);
 		
-		
-		if (!stcwr)
+		if (renderNormalText)
 		{
+			OrderedText message = this.widget.getMessage().asOrderedText();
+			int messageWidth = this.textRenderer.getWidth(message);
+			
 			final float x = this.widget.getX() + (this.widget.getWidth() / 2) - (messageWidth / 2);
 			final float y = this.widget.getY() + ((this.widget.getHeight() - (this.textRenderer.fontHeight - 1)) / 2);
 
@@ -124,11 +110,16 @@ public class SelfWidgetRender<W extends ClickableWidget>
 		}
 	}
 	
+	/*
 	private void fillMyRainbow(DrawContext ctx, float delta, boolean adv)
 	{
 		RainbowShader.uStripeScale = 50.0f / 2.0f * this.stripeScale;
+		// RainbowShader.uStripeScale = 200.0f;
+		// RainbowShader.uStrokeWidth = 0.0f;
+		// RainbowShader.uTimeOffset = 1.0f;
 		RainbowShader.uStrokeWidth = 0.0f;
-		RainbowShader.uTimeOffset = 0.0f;
+		RainbowShader.uTimeOffset = 1.0f;
+		RainbowShader.updateUniforms();
 		
 		RenderUtils.fillRainbow
 		(
@@ -147,4 +138,5 @@ public class SelfWidgetRender<W extends ClickableWidget>
 			adv
 		);
 	}
+	 */
 }

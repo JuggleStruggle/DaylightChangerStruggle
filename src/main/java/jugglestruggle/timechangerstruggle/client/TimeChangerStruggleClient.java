@@ -166,7 +166,7 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 		TimeChangerStruggleClient.registerCycleBuilder(new StaticTime.Builder());
 		TimeChangerStruggleClient.registerCycleBuilder(new MovingTime.Builder());
 		TimeChangerStruggleClient.registerCycleBuilder(new RandomizedTime.Builder());
-		// TimeChangerStruggleClient.registerCycleBuilder(new ShrugTime.Builder()); (will not be used in v0.0.1 release since it does nothing)
+		// TimeChangerStruggleClient.registerCycleBuilder(new ShrugTime.Builder()); (will not be used at this time)
 		TimeChangerStruggleClient.registerCycleBuilder(new LowToHighHeightTime.Builder());
 	}
 	

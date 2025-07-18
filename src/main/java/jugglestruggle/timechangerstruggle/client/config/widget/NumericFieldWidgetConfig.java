@@ -4,15 +4,17 @@ import jugglestruggle.timechangerstruggle.client.widget.WidgetPositionedTooltip;
 import jugglestruggle.timechangerstruggle.config.property.BaseNumber;
 import jugglestruggle.timechangerstruggle.config.property.BaseProperty.ValueConsumer;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
+import jugglestruggle.timechangerstruggle.util.SimpleCharacterVisitor;
 
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.Text;
 
 /**
  *
@@ -66,16 +68,8 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 	@Override
 	public void setTextPredicate(Predicate<String> textPredicate)
 	{
-		Predicate<String> theNextPredicate = (text) -> 
-		{
-			if (!text.isBlank()) {
-				return NumericFieldWidgetConfig.canParseString(this.property.getDefaultValue(), text);
-			}
-			
-			return true;
-		};
-		
-		super.setTextPredicate(theNextPredicate);
+		super.setTextPredicate(text -> text.isBlank() ? true : 
+			NumericFieldWidgetConfig.canParseString(this.property.getDefaultValue(), text));
 	}
 	
 	
@@ -184,9 +178,8 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 		this.isNewTextValid = valid;
 		this.setEditableColor(valid ? DEFAULT_EDITABLE_COLOR : 0xE06060);
 		
-		if (this.textChangedListener != null) {
+		if (this.textChangedListener != null)
 			this.textChangedListener.accept(newText);
-		}
 	}
 	
 	
@@ -219,8 +212,18 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 	public void setOrderedTooltip(List<OrderedText> textToSet) {
 		this.compiledTooltipText = textToSet;
 	}
+
+	// @Override
+	// public void appendClickableNarrations(NarrationMessageBuilder builder) {
+	// 	builder.put(NarrationPart.TITLE, this.getNarrationMessage());
+	// }
 	
-	
+	@Override
+	protected MutableText getNarrationMessage()
+	{
+		MutableText mt = SimpleCharacterVisitor.asMutableText(0, -1, this.compiledTooltipText);
+		return Text.translatable("gui.narrate.editBox", mt, super.getText());
+	}
 	
 	
 	

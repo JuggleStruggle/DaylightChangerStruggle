@@ -58,7 +58,7 @@ public interface WidgetPositionedTooltip extends WidgetOrderedTooltip
 			);
 		}
 		
-		final int[] offsetPos = TimeChangerScreen.getTooltipForWidgetWidthHeight(compiledTooltipText, renderer);
+		final int[] offsetPos = TimeChangerScreen.getTooltipsSize(compiledTooltipText, renderer);
 		this.setTooltipWidth(offsetPos[0]); this.setTooltipHeight(offsetPos[1]); 
 		
 		this.setOrderedTooltip(compiledTooltipText);

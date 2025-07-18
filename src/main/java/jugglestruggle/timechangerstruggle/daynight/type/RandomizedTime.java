@@ -503,7 +503,7 @@ public class RandomizedTime extends MovingTimeBasis
 		public ResetSeedButton(RandomizedTime instance, TimeChangerScreen screen, WidgetOnlyProperty prop)
 		{
 			super(18, 18, Text.translatable(PROPERTIES_KEY + "seed.resettoinitial"), 
-				null, null, screen.getTextRenderer(), instance::onResetSeedPropClicked);
+				screen.getTextRenderer(), instance::onResetSeedPropClicked);
 			
 			this.instance = instance; this.prop = prop;
 		}
