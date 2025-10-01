@@ -10,11 +10,10 @@ import net.fabricmc.api.Environment;
 
 import java.util.Calendar;
 
-import net.minecraft.text.Text;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.text.Text;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 26-Jan-2022, Wednesday
  */

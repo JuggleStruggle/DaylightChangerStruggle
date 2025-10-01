@@ -10,13 +10,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import net.minecraft.client.render.GameRenderer;
 import net.minecraft.entity.LivingEntity;
 
-import net.minecraft.client.render.GameRenderer;
-
 /**
- * 
- *
  * @author JuggleStruggle
  * @implNote Created on 08-Mar-2022, Tuesday
  */

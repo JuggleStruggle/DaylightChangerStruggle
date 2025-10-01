@@ -1,6 +1,7 @@
 package jugglestruggle.timechangerstruggle;
 
 import net.fabricmc.api.ModInitializer;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

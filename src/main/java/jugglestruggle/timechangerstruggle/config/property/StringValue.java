@@ -4,7 +4,7 @@ import jugglestruggle.timechangerstruggle.client.config.property.FancySectionPro
 import jugglestruggle.timechangerstruggle.client.config.widget.TextFieldWidgetConfig;
 import jugglestruggle.timechangerstruggle.client.config.widget.WidgetConfigInterface;
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
-import jugglestruggle.timechangerstruggle.client.widget.PositionedTooltip;
+import jugglestruggle.timechangerstruggle.client.widget.WidgetPositionedTooltip;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -66,12 +66,7 @@ public class StringValue extends BaseProperty<StringValue, String>
 	@Override
 	public void readFromJson(JsonElement elem) 
 	{
-		if (!elem.isJsonPrimitive())
-			return;
-		
-		JsonPrimitive prim = elem.getAsJsonPrimitive();
-		
-		if (prim.isString())
+		if (elem instanceof JsonPrimitive prim && prim.isString())
 		{
 			String s = prim.getAsString();
 			
@@ -110,14 +105,14 @@ public class StringValue extends BaseProperty<StringValue, String>
 	public static <B extends BaseProperty<B, V>, V> void onCreateConfigElementAddTooltips
 	(B property, WidgetConfigInterface<B, V> widget, TimeChangerScreen screen, FancySectionProperty owningSection)
 	{
-		if (widget instanceof PositionedTooltip && owningSection != null && owningSection.get() != null)
+		if (widget instanceof WidgetPositionedTooltip wpt && owningSection != null && owningSection.get() != null)
 		{
-			if (owningSection.get().getContent() instanceof TranslatableTextContent)
+			if (owningSection.get().getContent() instanceof TranslatableTextContent ttc)
 			{
 				Text tooltipDescText = Text.translatable(String.format("%1$s.%2$s",
-					((TranslatableTextContent)owningSection.get().getContent()).getKey(), property.property().toLowerCase(Locale.ROOT)));
+					ttc.getKey(), property.property().toLowerCase(Locale.ROOT)));
 				
-				((PositionedTooltip)widget).updateTooltip(tooltipDescText, null, screen.getTextRenderer());
+				wpt.updateTooltip(tooltipDescText, null, screen.getTextRenderer());
 			}
 		}
 	}

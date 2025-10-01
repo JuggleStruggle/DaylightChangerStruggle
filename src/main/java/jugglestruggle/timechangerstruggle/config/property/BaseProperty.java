@@ -4,6 +4,7 @@ import jugglestruggle.timechangerstruggle.client.config.property.FancySectionPro
 import jugglestruggle.timechangerstruggle.client.config.widget.WidgetConfigInterface;
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
+import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,7 +15,6 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 31-Jan-2022, Monday
  */
@@ -156,7 +156,7 @@ public abstract class BaseProperty<B extends BaseProperty<B, V>, V>
 	public BaseProperty<B, V> consumer(DayNightCycleBasis cycle) 
 	{
 		if (cycle != null)
-			this.consumer = (prop, val) -> {cycle.writePropertyValueToCycle(prop);}; 
+			this.consumer = (prop, val, wr) -> cycle.writePropertyValueToCycle(prop, wr); 
 		
 		return this;
 	}
@@ -174,7 +174,7 @@ public abstract class BaseProperty<B extends BaseProperty<B, V>, V>
 	public final BaseProperty<B, V> consumerOnlyIfNotExists(DayNightCycleBasis cycle) 
 	{
 		if (cycle != null && this.consumer == null)
-			this.consumer((prop, val) -> {cycle.writePropertyValueToCycle(prop);}); 
+			this.consumer((prop, val, wr) -> cycle.writePropertyValueToCycle(prop, wr)); 
 		
 		return this;
 	}
@@ -182,23 +182,23 @@ public abstract class BaseProperty<B extends BaseProperty<B, V>, V>
 	 * Same as {@link #consumerOnlyIfNotExists(DayNightCycleBasis)} except
 	 * that it is on the screen to do the job instead.
 	 * 
-	 * @param cycle the screen which controls everything about the mod
+	 * @param screen the screen which controls everything about the mod
 	 * @return the same class but with an updated consumer, if it exists
 	 * 
 	 * @see #consumer(ValueConsumer)
 	 * @see #consumer(DayNightCycleBasis)
 	 * @see #consumerOnlyIfNotExists(DayNightCycleBasis)
 	 */
-	public final BaseProperty<B, V> consumerOnlyIfNotExists(TimeChangerScreen cycle) 
+	public final BaseProperty<B, V> consumerOnlyIfNotExists(TimeChangerScreen screen) 
 	{
-		if (cycle != null && this.consumer == null)
-			this.consumer(cycle::consumeChangedProperty); 
+		if (screen != null && this.consumer == null)
+			this.consumer(screen::consumeChangedProperty); 
 		
 		return this;
 	}
 	
 	public static interface ValueConsumer<B extends BaseProperty<B, V>, V> 
 	{
-		void consume(B owningProperty, V newValue);
+		void consume(B owningProperty, V newValue, PropertyWriterSource writer);
 	}
 }

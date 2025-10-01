@@ -14,20 +14,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.minecraft.util.math.MathHelper;
-
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.util.math.MathHelper;
 
 import com.google.common.collect.ImmutableSet;
 
 /**
- *
  * @author JuggleStruggle
- * @implNote
- * Created on 26-Jan-2022, Wednesday
+ * @implNote Created on 26-Jan-2022, Wednesday
  */
 @Environment(EnvType.CLIENT)
 public interface DayNightCycleBasis
@@ -117,7 +114,7 @@ public interface DayNightCycleBasis
 	 * @param property the property which was overriden to provide 
 	 * the new value. 
 	 * 
-	 * <p>The property string is obtained by using 
+	 * <p> The property string is obtained by using 
 	 * {@link BaseProperty#property()} and is instead used to allow
 	 * switch statements to be used for quicker value setting. To
 	 * verify that the type (like the property type obtained) is 
@@ -126,12 +123,24 @@ public interface DayNightCycleBasis
 	 * crash problems and it is also quicker that way.
 	 * 
 	 * @param <B> the base property, usually represents a type, 
-	 *             like {@link StringValue} or {@link IntValue}
+	 *        like {@link StringValue} or {@link IntValue}
 	 * @param <V> the type used from the property itself, like
-	 *             {@link String} or {@link Integer}
+	 *        {@link String} or {@link Integer}
 	 */
-//	default <B extends BaseProperty<B, V>, V> void writePropertyValueToCycle(B property) { }
-	default void writePropertyValueToCycle(BaseProperty<?, ?> property) { }
+	default void writePropertyValueToCycle(BaseProperty<?, ?> property, PropertyWriterSource writer) { }
+
+	/**
+	 * Whenever a world change happens, save the cycle's preferences
+	 * to disk so that certain values that constantly update aren't lost
+	 * on the next session. However, this only triggers if the world 
+	 * previously was not empty as to avoid saving when not needed.
+	 * 
+	 * @return a boolean value; by default it's set to {@code false}
+	 * on most cycles
+	 */
+	default boolean saveOnWorldChange() {
+		return false;
+	}
 	
 	/**
 	 * Rearranges {@link #createProperties()}'s given elements to 
@@ -139,9 +148,9 @@ public interface DayNightCycleBasis
 	 * helps in not having to do all of the elements on itself.
 	 * 
 	 * @param entry the entry to which is used to help make the 
-	 *         rows of the list
+	 *        rows of the list
 	 * @param elementsPerRow how many elements will there be for 
-	 *         each row
+	 *        each row
 	 * 
 	 * @return a doubled array of {@link Element} which represents
 	 * the following:
@@ -154,8 +163,6 @@ public interface DayNightCycleBasis
 	(Map.Entry<FancySectionProperty, List<WidgetConfigInterface<?, ?>>> entry, int elementsPerRow) 
 	{
 		final List<WidgetConfigInterface<?, ?>> elements = entry.getValue();
-		
-//		elementsPerRow = 2;
 
 		final int sectionElements = elements.size();
 		final int sectionElementsHalf = MathHelper.ceil((float)sectionElements / (float)elementsPerRow);
@@ -176,8 +183,8 @@ public interface DayNightCycleBasis
 		return sectionPartsToCreate;
 	}
 	
-	default void rearrangeCreatedOptionElements
-	(int x, int y, int entryWidth, int entryHeight, List<WidgetConfigInterface<?, ?>> myConfigElements) 
+	default void rearrangeCreatedOptionElements(int x, int y, int entryWidth, 
+		int entryHeight, List<WidgetConfigInterface<?, ?>> myConfigElements) 
 	{
 		final int halfWidth = (entryWidth / 2);
 		final int xCentered = x + halfWidth;
@@ -192,11 +199,15 @@ public interface DayNightCycleBasis
 				if (elem instanceof ClickableWidget) 
 				{
 					ClickableWidget elemClickable = (ClickableWidget)elem;
-					elemClickable.x = xCentered - (halfWidth - 4); elemClickable.y = y + 2;
+
+					elemClickable.setX(xCentered - (halfWidth - 4)); 
+					elemClickable.setY(y + 2);
+					elemClickable.setWidth(entryWidth - 10);
 					
 					if (elemClickable instanceof TextFieldWidget)
 					{
-						elemClickable.x += 1; elemClickable.y += 1;
+						elemClickable.setX(elemClickable.getX() + 1);
+						elemClickable.setY(elemClickable.getY() + 1);
 						elemClickable.setWidth(entryWidth - 12);
 					}
 					else
@@ -216,19 +227,18 @@ public interface DayNightCycleBasis
 					if (elem instanceof ClickableWidget) 
 					{
 						ClickableWidget elemClickable = (ClickableWidget)elem;
-//						elemClickable.x = xCentered - (halfWidth - 4) + (i * entryWidthDiv); 
-						elemClickable.x = xCentered + 1;
-						elemClickable.y = y + 2;
+						elemClickable.setX(xCentered + 1);
+						elemClickable.setY(y + 2);
 						
-						if (i % 2 == 0) {
-							elemClickable.x -= (halfWidth - 4);
-						} else { // 1
-							elemClickable.x += 2;
-						}
+						if (i % 2 == 0)
+							elemClickable.setX(elemClickable.getX() - (halfWidth - 4));
+						else // 1
+							elemClickable.setX(elemClickable.getX() + 2);
 						
 						if (elemClickable instanceof TextFieldWidget)
 						{
-							elemClickable.x += 1; elemClickable.y += 1;
+							elemClickable.setX(elemClickable.getX() + 1);
+							elemClickable.setY(elemClickable.getY() + 1);
 							elemClickable.setWidth(entryWidthDiv - 2);
 						}
 						else
@@ -254,12 +264,13 @@ public interface DayNightCycleBasis
 						
 						int xOffset = entryWidthDivSeparator * i;
 						
-						elemClickable.x = xCentered + xOffset - (int)((float)entryWidthDivSeparator * 1.5f);
-						elemClickable.y = y + 2;
+						elemClickable.setX(xCentered + xOffset - (int)((float)entryWidthDivSeparator * 1.5f));
+						elemClickable.setY(y + 2);
 						
 						if (elemClickable instanceof TextFieldWidget)
 						{
-							elemClickable.x += 1; elemClickable.y += 1;
+							elemClickable.setX(elemClickable.getX() + 1);
+							elemClickable.setY(elemClickable.getY() + 1);
 							elemClickable.setWidth(entryWidthDiv - 2);
 						}
 						else
@@ -271,5 +282,19 @@ public interface DayNightCycleBasis
 				break;
 			}
 		}
+	}
+	
+	/**
+	 * Used to know which source requested for a write. It is there to ensure that certain 
+	 * properties behave the way they should when it comes to user writing the property or 
+	 * if it was loaded from disk, which shouldn't write much else on certain cycles.
+	 *
+	 * @author JuggleStruggle
+	 * @implNote Implemented in v0.0.1
+	 */
+	public enum PropertyWriterSource
+	{
+		FROM_JSON,
+		USER
 	}
 }

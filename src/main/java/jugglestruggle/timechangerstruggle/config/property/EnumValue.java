@@ -2,13 +2,13 @@ package jugglestruggle.timechangerstruggle.config.property;
 
 import jugglestruggle.timechangerstruggle.client.config.property.FancySectionProperty;
 import jugglestruggle.timechangerstruggle.client.config.widget.CyclingWidgetConfig;
-import jugglestruggle.timechangerstruggle.client.config.widget.WidgetConfigInterface;
 import jugglestruggle.timechangerstruggle.client.config.widget.CyclingWidgetConfig.WidgetConfigBuilderEnum;
+import jugglestruggle.timechangerstruggle.client.config.widget.WidgetConfigInterface;
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
+import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
 import jugglestruggle.timechangerstruggle.util.InterchangeableFunction;
 
 import net.fabricmc.api.EnvType;
-
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
@@ -19,9 +19,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonElement;
@@ -49,7 +49,7 @@ public class EnumValue<EV extends Enum<EV>> extends BaseProperty<EnumValue<EV>, 
 	
 	private final CyclingButtonWidget.UpdateCallback<EV> callback = (button, value) -> { 
 		if (super.consumer != null)
-			super.consumer.consume(this, value);
+			super.consumer.consume(this, value, PropertyWriterSource.USER);
 	};
 	
 	@SuppressWarnings("unchecked")

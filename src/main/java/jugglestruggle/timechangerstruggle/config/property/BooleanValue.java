@@ -2,9 +2,10 @@ package jugglestruggle.timechangerstruggle.config.property;
 
 import jugglestruggle.timechangerstruggle.client.config.property.FancySectionProperty;
 import jugglestruggle.timechangerstruggle.client.config.widget.CyclingWidgetConfig;
-import jugglestruggle.timechangerstruggle.client.config.widget.WidgetConfigInterface;
 import jugglestruggle.timechangerstruggle.client.config.widget.CyclingWidgetConfig.WidgetConfigBuilderBoolean;
+import jugglestruggle.timechangerstruggle.client.config.widget.WidgetConfigInterface;
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
+import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -12,10 +13,10 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 import java.util.Locale;
 
+import net.minecraft.client.gui.widget.CyclingButtonWidget;
+import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
@@ -24,7 +25,6 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 31-Jan-2022, Monday
  */
@@ -37,7 +37,7 @@ public class BooleanValue extends BaseProperty<BooleanValue, Boolean>
 	
 	private final CyclingButtonWidget.UpdateCallback<Boolean> callback = (button, value) -> { 
 		if (super.consumer != null)
-			super.consumer.consume(this, value);
+			super.consumer.consume(this, value, PropertyWriterSource.USER);
 	};
 	
 	public BooleanValue(String property, boolean value) {
@@ -113,13 +113,8 @@ public class BooleanValue extends BaseProperty<BooleanValue, Boolean>
 	@Override
 	public void readFromJson(JsonElement elem) 
 	{
-		if (elem.isJsonPrimitive()) 
-		{
-			JsonPrimitive prim = elem.getAsJsonPrimitive();
-			
-			if (prim.isBoolean())
-				this.set(prim.getAsBoolean());
-		}
+		if (elem instanceof JsonPrimitive prim && prim.isBoolean()) 
+			this.set(prim.getAsBoolean());
 	}
 
 	@Override

@@ -4,8 +4,8 @@ import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
 import jugglestruggle.timechangerstruggle.daynight.DayNightGetterType;
 
-import net.minecraft.text.Text;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.text.Text;
 
 /**
  * ¯\_(ツ)_/¯

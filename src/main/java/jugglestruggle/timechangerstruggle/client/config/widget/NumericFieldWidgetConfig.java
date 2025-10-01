@@ -1,25 +1,27 @@
 package jugglestruggle.timechangerstruggle.client.config.widget;
 
-import jugglestruggle.timechangerstruggle.client.widget.PositionedTooltip;
+import jugglestruggle.timechangerstruggle.client.widget.WidgetPositionedTooltip;
 import jugglestruggle.timechangerstruggle.config.property.BaseNumber;
 import jugglestruggle.timechangerstruggle.config.property.BaseProperty.ValueConsumer;
+import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
+import jugglestruggle.timechangerstruggle.util.SimpleCharacterVisitor;
 
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.Text;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 30-Jan-2022, Sunday
  */
 public class NumericFieldWidgetConfig<N extends Number> extends TextFieldWidget 
-implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
+implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 {
 	protected final BaseNumber<N> property;
 	protected N initialNumber;
@@ -34,7 +36,7 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
 	
 	public NumericFieldWidgetConfig(TextRenderer textRenderer, int width, int height, BaseNumber<N> property) 
 	{
-		super(textRenderer, 18, 18, width, height, Text.empty());
+		super(textRenderer, 0, 0, width, height, Text.empty());
 		
 		this.property = property;
 		this.isNewTextValid = true;
@@ -65,16 +67,8 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
 	@Override
 	public void setTextPredicate(Predicate<String> textPredicate)
 	{
-		Predicate<String> theNextPredicate = (text) -> 
-		{
-			if (!text.isBlank()) {
-				return NumericFieldWidgetConfig.canParseString(this.property.getDefaultValue(), text);
-			}
-			
-			return true;
-		};
-		
-		super.setTextPredicate(theNextPredicate);
+		super.setTextPredicate(text -> text.isBlank() ? true : 
+			NumericFieldWidgetConfig.canParseString(this.property.getDefaultValue(), text));
 	}
 	
 	
@@ -173,9 +167,8 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
 			{
 				ValueConsumer<BaseNumber<N>, N> consumer = this.property.getConsumer();
 				
-				if (consumer != null) {
-					consumer.consume(this.property, parsedNumber);
-				}
+				if (consumer != null)
+					consumer.consume(this.property, parsedNumber, PropertyWriterSource.USER);
 				
 				this.property.set(parsedNumber);
 			}
@@ -184,9 +177,8 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
 		this.isNewTextValid = valid;
 		this.setEditableColor(valid ? DEFAULT_EDITABLE_COLOR : 0xE06060);
 		
-		if (this.textChangedListener != null) {
+		if (this.textChangedListener != null)
 			this.textChangedListener.accept(newText);
-		}
 	}
 	
 	
@@ -218,6 +210,17 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
 	@Override
 	public void setOrderedTooltip(List<OrderedText> textToSet) {
 		this.compiledTooltipText = textToSet;
+	}
+
+	@Override
+	protected MutableText getNarrationMessage()
+	{
+		MutableText mt = SimpleCharacterVisitor.asMutableText(0, -1, this.compiledTooltipText);
+		return Text.translatable("gui.narrate.editBox", mt, super.getText());
+	}
+	
+	public void setHeight(int height) {
+		this.height = height;
 	}
 	
 	

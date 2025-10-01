@@ -8,8 +8,7 @@ import net.minecraft.client.util.InputUtil;
 /**
  *
  * @author JuggleStruggle
- * @implNote
- * Created on 26-Jan-2022 Wednesday
+ * @implNote Created on 26-Jan-2022 Wednesday
  */
 public class Keybindings
 {

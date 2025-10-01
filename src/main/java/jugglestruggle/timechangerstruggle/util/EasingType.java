@@ -5,7 +5,6 @@ import java.util.Locale;
 import net.minecraft.text.Text;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 28-Jan-2022, Friday
  */
