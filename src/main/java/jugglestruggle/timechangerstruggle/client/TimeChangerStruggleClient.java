@@ -28,7 +28,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 26-Jan-2022, Wednesday
  * 
@@ -317,7 +316,6 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 	
 	
 	@Override
-	@SuppressWarnings("resource")
 	public void onInitializeClient()
 	{
 		// Register keybindings to client
@@ -352,8 +350,6 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 	
 	private void onClientTick(MinecraftClient client)
 	{
-		// TODO: Is there a better way to call key events on press and releases without the need of ticking?
-		
 		if (client.currentScreen == null && client.world != null)
 		{
 			if (Keybindings.timeChangerMenuKey.isPressed())

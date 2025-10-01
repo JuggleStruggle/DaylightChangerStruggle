@@ -30,7 +30,6 @@ import com.google.gson.Strictness;
 import com.google.gson.stream.JsonWriter;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 31-Jan-2022, Monday
  */
@@ -138,6 +137,7 @@ public class Configuration
 		this.configData.addProperty("applyOnPropertyListValueUpdate", TimeChangerStruggleClient.applyOnPropertyListValueUpdate);
 		this.configData.addProperty("commandFeedbackOnLessImportant", TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant);
 		this.configData.addProperty("disableWorldTimeOnCycleUsage", TimeChangerStruggleClient.commandsDisableWorldTimeOnCycleUsage);
+		this.configData.addProperty("allowWorldChangeCyclesToWriteToDisk", TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk);
 		
 		this.configData.addProperty("activeDaylightChanger", (TimeChangerStruggleClient.getTimeChangerKey() == null) ? "" : TimeChangerStruggleClient.getTimeChangerKey());
 		
@@ -324,9 +324,6 @@ public class Configuration
 		if (propertyElement != null && propertyElement.isJsonObject()) {
 			return new SimpleImmutableEntry<>(propertyElement.getAsJsonObject(), true);
 		} 
-//		else if (propertyElement != null) {
-//			this.configData.remove(propertyName);
-//		}
 		
 		JsonObject createdSection = new JsonObject();
 		sections.getAsJsonObject().add(propertyName, createdSection);
@@ -369,11 +366,11 @@ public class Configuration
 	private static <V> JsonPrimitive addExpectedPrimitive(JsonObject section, String propertyName, V value) 
 	{
 		JsonPrimitive primitive;
-		
-		if (value instanceof Number n)
-			primitive = new JsonPrimitive(n);
-		else if (value instanceof Boolean b)
-			primitive = new JsonPrimitive(b);
+
+		if (value instanceof Number)
+			primitive = new JsonPrimitive((Number)value);
+		else if (value instanceof Boolean)
+			primitive = new JsonPrimitive((Boolean)value);
 		else
 			primitive = new JsonPrimitive((String)value);
 		

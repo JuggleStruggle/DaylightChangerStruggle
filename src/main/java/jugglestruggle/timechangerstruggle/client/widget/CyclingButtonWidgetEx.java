@@ -12,6 +12,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.cursor.StandardCursors;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.screen.narration.NarrationPart;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
@@ -57,10 +58,8 @@ implements SelfWidgetRendererInheritor<CyclingButtonWidgetEx<T>>, WidgetOrderedT
 		// Return if the factory is null as this will be called before we even get the chance to 
 		// set the tooltip factory (due to the constructor's super call requirement and that calling
 		// this method).
-		if (this.tooltipFactoryEx == null)
-			return;
-		
-		this.cachedTooltipText = this.tooltipFactoryEx.apply(this.getValue());
+		if (this.tooltipFactoryEx != null)
+			this.cachedTooltipText = this.tooltipFactoryEx.apply(this.getValue());
 	}
 	
 	@Override
@@ -76,8 +75,12 @@ implements SelfWidgetRendererInheritor<CyclingButtonWidgetEx<T>>, WidgetOrderedT
 		return this.renderer;
 	}
 	@Override
-	public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) {
+	public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) 
+	{
 		this.renderer.renderButton(ctx, mouseX, mouseY, delta);
+		
+		if (this.isHovered())
+			ctx.setCursor(this.isInteractable() ? StandardCursors.POINTING_HAND : StandardCursors.NOT_ALLOWED);
 	}
 
 	@Override

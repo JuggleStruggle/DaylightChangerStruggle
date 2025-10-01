@@ -15,8 +15,6 @@ import net.minecraft.client.font.TextRenderer;
 import com.google.common.collect.ImmutableList;
 
 /**
- * 
- *
  * @author JuggleStruggle
  * @implNote Created on 06-Feb-2022, Sunday
  */

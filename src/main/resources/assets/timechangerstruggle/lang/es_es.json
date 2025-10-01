@@ -1,7 +1,7 @@
 {
 	"jugglestruggle.tcs": "TimeChangerStruggle",
-	
-	"jugglestruggle.tcs.": "",
+
+	"jugglestruggle.tcs.screen": "DaylightChangerStruggle",
 	"jugglestruggle.tcs.screen.toggleworldtime": "Tiempo del Mundo",
 	"jugglestruggle.tcs.screen.toggledate": "Fecha Sobre Ticks",
 	"jugglestruggle.tcs.screen.togglesmoothbutterdaylightcycle": "Cíclo Suaves",
@@ -62,7 +62,7 @@
 	"jugglestruggle.tcs.cmd.option.set": "%1$s puesto a: %2$s",
 	"jugglestruggle.tcs.cmd.option.set.error.equals": "El valor de %1$s es igual: %2$s",
 	
-	"jugglestruggle.tcs.easings.linear": "Líneo",
+	"jugglestruggle.tcs.easings.linear": "Lineal",
 	"jugglestruggle.tcs.easings.floor": "Piso",
 	"jugglestruggle.tcs.easings.ceiling": "Techo",
 	"jugglestruggle.tcs.easings.sine": "Sine",
@@ -142,7 +142,7 @@
 	"jugglestruggle.tcs.dnt.lowtohighheighttime.properties.minmaxheight.maxheight": "Altura Máxima",
 	"jugglestruggle.tcs.dnt.lowtohighheighttime.properties.minmaxheight.maxheighttime": "Tiempo para Altura Máxima",
 	
-	"jugglestruggle.tcs.keycategory.timechanger": "Cambiador de Tiempo del JuggleStruggle",
+	"key.category.timechangerstruggle.timechanger": "Cambiador de Tiempo del JuggleStruggle",
 	"jugglestruggle.tcs.key.toggleworldtime": "Intercambiar Tiempo del Mundo",
 	"jugglestruggle.tcs.key.timechangermenu": "Abrir Menú del Cambiador de Tiempo",
 

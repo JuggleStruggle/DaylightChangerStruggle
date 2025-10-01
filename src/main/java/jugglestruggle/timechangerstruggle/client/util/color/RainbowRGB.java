@@ -77,18 +77,7 @@ public class RainbowRGB extends AbstractRGB
 	public RainbowRGB setTicksForNextUpdate(int ticks) {
 		this.ticksForNextUpdate = ticks; return this;
 	}
-	
-	@Override
-	public void setColor(int color)
-	{
-		super.setColor(color);
-	}
-	@Override
-	public void setPrevColor(int color)
-	{
-		super.setPrevColor(color);
-	}
-	
+
 	@Override
 	public void tick() {
 		this.tickSelf(false);

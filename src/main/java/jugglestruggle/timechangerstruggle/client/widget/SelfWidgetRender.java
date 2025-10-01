@@ -109,34 +109,4 @@ public class SelfWidgetRender<W extends ClickableWidget>
 			TimeChangerScreen.renderTextD(ctx, this.textRenderer, message, x, y, textColor, true);
 		}
 	}
-	
-	/*
-	private void fillMyRainbow(DrawContext ctx, float delta, boolean adv)
-	{
-		RainbowShader.uStripeScale = 50.0f / 2.0f * this.stripeScale;
-		// RainbowShader.uStripeScale = 200.0f;
-		// RainbowShader.uStrokeWidth = 0.0f;
-		// RainbowShader.uTimeOffset = 1.0f;
-		RainbowShader.uStrokeWidth = 0.0f;
-		RainbowShader.uTimeOffset = 1.0f;
-		RainbowShader.updateUniforms();
-		
-		RenderUtils.fillRainbow
-		(
-			ctx, 
-			
-			this.widget.getX(), this.widget.getY(), 
-			this.widget.getRight(), this.widget.getBottom(),
-			
-			// z offset does not exist anymore in 1.21.5; skip it
-			0, // this.widget.getZOffset(),
-			
-			0.0f, 0.0f, 0.0f, 
-			
-			(this.previousRainbowOffset + (this.rainbowOffset - this.previousRainbowOffset) * delta) / 20.0f,
-			
-			adv
-		);
-	}
-	 */
 }

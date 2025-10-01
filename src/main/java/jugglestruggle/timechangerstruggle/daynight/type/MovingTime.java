@@ -72,7 +72,7 @@ public class MovingTime extends MovingTimeBasis
 	@Override
 	public Set<BaseProperty<?, ?>> createProperties()
 	{
-		ImmutableSet.Builder<BaseProperty<?, ?>> props = ImmutableSet.builderWithExpectedSize(10);
+		ImmutableSet.Builder<BaseProperty<?, ?>> props = ImmutableSet.builderWithExpectedSize(14);
 		
 		props.add(new FancySectionProperty("updating", Text.translatable(PROPERTIES_KEY+"updating")));
 		props.add(this.getTicksUntilNextCallProp());

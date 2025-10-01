@@ -25,7 +25,6 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 31-Jan-2022, Monday
  */
@@ -114,13 +113,8 @@ public class BooleanValue extends BaseProperty<BooleanValue, Boolean>
 	@Override
 	public void readFromJson(JsonElement elem) 
 	{
-		if (elem.isJsonPrimitive()) 
-		{
-			JsonPrimitive prim = elem.getAsJsonPrimitive();
-			
-			if (prim.isBoolean())
-				this.set(prim.getAsBoolean());
-		}
+		if (elem instanceof JsonPrimitive prim && prim.isBoolean()) 
+			this.set(prim.getAsBoolean());
 	}
 
 	@Override

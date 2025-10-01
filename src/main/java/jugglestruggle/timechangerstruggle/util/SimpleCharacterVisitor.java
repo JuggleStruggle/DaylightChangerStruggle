@@ -18,7 +18,6 @@ import net.minecraft.text.Text;
  * @author JuggleStruggle
  * @implNote Introduced in v0.0.2
  */
-
 public class SimpleCharacterVisitor implements CharacterVisitor
 {
 	char[] chars;

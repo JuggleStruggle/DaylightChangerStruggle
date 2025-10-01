@@ -17,7 +17,6 @@ import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 30-Jan-2022, Sunday
  */
@@ -213,11 +212,6 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 		this.compiledTooltipText = textToSet;
 	}
 
-	// @Override
-	// public void appendClickableNarrations(NarrationMessageBuilder builder) {
-	// 	builder.put(NarrationPart.TITLE, this.getNarrationMessage());
-	// }
-	
 	@Override
 	protected MutableText getNarrationMessage()
 	{

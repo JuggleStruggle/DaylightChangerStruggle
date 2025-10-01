@@ -42,8 +42,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 
 /**
- * 
- *
  * @author JuggleStruggle
  * @implNote Created on 27-Feb-2022, Thursday
  */
@@ -516,8 +514,7 @@ public class Commands
 			);
 			
 			Lists.newArrayList(jugglestruggle.timechangerstruggle.daynight.type.StaticTime.PresetSetTimes.values())
-			.stream().filter(presetTime -> presetTime.shouldShowInCommand())
-			.forEach(presetTime -> 
+			.stream().filter(presetTime -> presetTime.shouldShowInCommand()).forEach(presetTime -> 
 				base.then(ClientCommandManager.literal(presetTime.name().toLowerCase(Locale.ROOT))
 					.executes(new StaticTimeSetCommand(presetTime.getTime(), mode)))
 			);

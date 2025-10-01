@@ -73,9 +73,6 @@ public abstract class BaseNumber<N extends Number> extends BaseProperty<BaseNumb
 		super.value = value;
 	}
 	
-//	public boolean isWithinRange() {
-//		return this.get() >= this.getMin() && this.get() <= this.getMax();
-//	}
 	public abstract boolean isWithinRange();
 	public abstract N parseStringNumber(String toParse);
 	

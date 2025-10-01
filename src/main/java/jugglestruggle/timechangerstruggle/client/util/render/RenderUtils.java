@@ -5,6 +5,7 @@ import jugglestruggle.timechangerstruggle.mixin.client.render.DrawContextAccesso
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.font.TextRenderer.GlyphDrawable;
@@ -22,7 +23,6 @@ import net.minecraft.text.OrderedText;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 11-Feb-2022, Friday
  */
@@ -57,7 +57,7 @@ public final class RenderUtils
 		RenderPipeline pipeline, TextureSetup textureSetup, Matrix3x2f pose,
 		int x1, int y1, int x2, int y2, int z, int tlCol, int trCol, int blCol, int brCol,
 		@Nullable ScreenRect scissorArea, @Nullable ScreenRect bounds
-		)
+	)
 	implements SimpleGuiElementRenderState 
 	{
 		public ColoredBordersGradientGuiElementRenderState(
@@ -69,12 +69,19 @@ public final class RenderUtils
 		}
 		
 		@Override
-		public void setupVertices(VertexConsumer v, float depth) 
+		public void setupVertices(VertexConsumer v)
 		{
-			v.vertex(this.pose, this.x2, this.y1, this.z + depth).color(this.trCol);
-			v.vertex(this.pose, this.x1, this.y1, this.z + depth).color(this.tlCol);
-			v.vertex(this.pose, this.x1, this.y2, this.z + depth).color(this.blCol);
-			v.vertex(this.pose, this.x2, this.y2, this.z + depth).color(this.brCol);
+			this.vertex(v, this.x2, this.y1, this.z).color(this.trCol);
+			this.vertex(v, this.x1, this.y1, this.z).color(this.tlCol);
+			this.vertex(v, this.x1, this.y2, this.z).color(this.blCol);
+			this.vertex(v, this.x2, this.y2, this.z).color(this.brCol);
+		}
+		
+		// Introduced in v0.0.2+1.21.9 as the transformation for the Z axis was removed.
+		VertexConsumer vertex(VertexConsumer v, float x, float y, float z)
+		{
+			Vector2f vector2f = this.pose.transformPosition(x, y, new Vector2f());
+			return v.vertex(vector2f.x(), vector2f.y(), z);
 		}
 	}
 

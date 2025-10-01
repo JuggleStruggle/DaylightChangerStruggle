@@ -46,7 +46,7 @@ public class LowToHighHeightTime implements DayNightCycleBasis
 			return;
 		}
 		
-		double myY = camEntity.getPos().getY();
+		double myY = camEntity.getEntityPos().getY();
 		
 		this.cachedTimePrev = this.cachedTime;
 		
@@ -62,12 +62,6 @@ public class LowToHighHeightTime implements DayNightCycleBasis
 			
 			this.cachedTime = (long)((double)this.minHeightTime + (double)(this.maxHeightTime - this.minHeightTime) * res);
 		}
-		
-//		if (Keybindings.toggleWorldTimeKey.isPressed())
-//		{
-//			jugglestruggle.timechangerstruggle.TimeChangerStruggle.LOGGER
-//			.info("cached time: {} | prev: {}", this.cachedTime, this.cachedTimePrev);
-//		}
 	}
 	
 	@Override

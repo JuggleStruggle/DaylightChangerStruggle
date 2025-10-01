@@ -17,7 +17,6 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 30-Jan-2022, Sunday
  */

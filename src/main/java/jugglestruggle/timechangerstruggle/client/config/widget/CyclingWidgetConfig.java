@@ -1,7 +1,6 @@
 package jugglestruggle.timechangerstruggle.client.config.widget;
 
 import jugglestruggle.timechangerstruggle.client.widget.CyclingButtonWidgetEx;
-import jugglestruggle.timechangerstruggle.client.widget.CyclingButtonWidgetEx.TooltipFactoryEx;
 import jugglestruggle.timechangerstruggle.client.widget.SelfWidgetRender;
 import jugglestruggle.timechangerstruggle.client.widget.SelfWidgetRendererInheritor;
 import jugglestruggle.timechangerstruggle.config.property.BaseProperty;
@@ -16,6 +15,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.cursor.StandardCursors;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.MutableText;
@@ -48,10 +48,10 @@ implements WidgetConfigInterface<B, T>, SelfWidgetRendererInheritor<CyclingWidge
 	protected CyclingWidgetConfig(B property, int width, int height, Text message, Text optionText, 
 		int index, T value, Values<T> values, Function<T, Text> valueToText,
 		Function<CyclingButtonWidget<T>, MutableText> narrationMessageFactory, 
-		UpdateCallback<T> externalCallback, TooltipFactoryEx<T> tooltipFactory, boolean optionTextOmitted)
+		UpdateCallback<T> externalCallback, CyclingButtonWidgetEx.TooltipFactoryEx<T> tooltipFactory, 
+		boolean optionTextOmitted)
 	{
-		super(0, 0, width, height, message, optionText, 
-			index, value, values, valueToText, 
+		super(0, 0, width, height, message, optionText, index, value, values, valueToText, 
 			narrationMessageFactory, new SetPropertyValueCallback<B, T>(),
 			null, optionTextOmitted);
 		
@@ -69,10 +69,8 @@ implements WidgetConfigInterface<B, T>, SelfWidgetRendererInheritor<CyclingWidge
 	protected void refreshTooltip()
 	{
 		// See CyclingButtonWidgetEx's comment for this method.
-		if (this.tooltipFactoryEx == null)
-			return;
-		
-		this.cachedTooltipText = this.tooltipFactoryEx.apply(this.getValue());
+		if (this.tooltipFactoryEx != null)
+			this.cachedTooltipText = this.tooltipFactoryEx.apply(this.getValue());
 	}
 	
 	@Override
@@ -145,8 +143,12 @@ implements WidgetConfigInterface<B, T>, SelfWidgetRendererInheritor<CyclingWidge
 		return this.renderer;
 	}
 	@Override
-	public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) {
+	public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) 
+	{
 		this.renderer.renderButton(ctx, mouseX, mouseY, delta);
+		
+		if (this.isHovered())
+			ctx.setCursor(this.isInteractable() ? StandardCursors.POINTING_HAND : StandardCursors.NOT_ALLOWED);
 	}
 	
 	

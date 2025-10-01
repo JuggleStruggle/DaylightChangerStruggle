@@ -1,8 +1,8 @@
-package jugglestruggle.timechangerstruggle.config.property;
+package jugglestruggle.timechangerstruggle.client.config.property;
 
-import jugglestruggle.timechangerstruggle.client.config.property.FancySectionProperty;
 import jugglestruggle.timechangerstruggle.client.config.widget.WidgetConfigInterface;
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
+import jugglestruggle.timechangerstruggle.config.property.BaseProperty;
 
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 

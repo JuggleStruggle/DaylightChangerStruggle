@@ -1,6 +1,7 @@
 package jugglestruggle.timechangerstruggle.daynight.type;
 
 import jugglestruggle.timechangerstruggle.client.config.property.FancySectionProperty;
+import jugglestruggle.timechangerstruggle.client.config.property.WidgetOnlyProperty;
 import jugglestruggle.timechangerstruggle.client.config.widget.WidgetConfigInterface;
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
 import jugglestruggle.timechangerstruggle.client.widget.ButtonWidgetEx;
@@ -9,7 +10,6 @@ import jugglestruggle.timechangerstruggle.config.property.BooleanValue;
 import jugglestruggle.timechangerstruggle.config.property.EnumValue;
 import jugglestruggle.timechangerstruggle.config.property.LongValue;
 import jugglestruggle.timechangerstruggle.config.property.StringValue;
-import jugglestruggle.timechangerstruggle.config.property.WidgetOnlyProperty;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
 import jugglestruggle.timechangerstruggle.util.EasingType;
@@ -482,7 +482,8 @@ public class RandomizedTime extends MovingTimeBasis
 			return true;
 		}
 	}
-	
+
+	// Introduced in v0.0.1
 	class SeedSectionProperty extends FancySectionProperty
 	{
 		public SeedSectionProperty() {
@@ -494,7 +495,8 @@ public class RandomizedTime extends MovingTimeBasis
 			return !prop.property().equals("currentRngSeed");
 		}
 	}
-	
+
+	// Introduced in v0.0.1
 	protected class ResetSeedButton extends ButtonWidgetEx implements WidgetOnlyProperty.WidgetInterface
 	{
 		final RandomizedTime instance;

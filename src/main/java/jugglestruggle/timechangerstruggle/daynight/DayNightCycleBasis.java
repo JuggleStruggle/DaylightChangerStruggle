@@ -22,7 +22,6 @@ import net.minecraft.util.math.MathHelper;
 import com.google.common.collect.ImmutableSet;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 26-Jan-2022, Wednesday
  */
@@ -127,8 +126,7 @@ public interface DayNightCycleBasis
 	 * @param <V> the type used from the property itself, like
 	 *        {@link String} or {@link Integer}
 	 */
-	default void writePropertyValueToCycle(BaseProperty<?, ?> property, PropertyWriterSource writer) 
-	{ }
+	default void writePropertyValueToCycle(BaseProperty<?, ?> property, PropertyWriterSource writer) {}
 	
 	/**
 	 * Whenever a world change happens, save the cycle's preferences
@@ -149,9 +147,9 @@ public interface DayNightCycleBasis
 	 * helps in not having to do all of the elements on itself.
 	 * 
 	 * @param entry the entry to which is used to help make the 
-	 *         rows of the list
+	 *        rows of the list
 	 * @param elementsPerRow how many elements will there be for 
-	 *         each row
+	 *        each row
 	 * 
 	 * @return a doubled array of {@link Element} which represents
 	 * the following:

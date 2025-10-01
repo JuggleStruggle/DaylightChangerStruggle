@@ -7,6 +7,7 @@ import java.util.function.BiConsumer;
 
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.cursor.StandardCursors;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.screen.narration.NarrationPart;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -17,8 +18,8 @@ import net.minecraft.text.Text;
  * @author JuggleStruggle
  * @implNote Created on 13-Feb-2022, Sunday
  */
-public class ButtonWidgetEx extends ButtonWidget implements WidgetPositionedTooltip, 
-	SelfWidgetRendererInheritor<ButtonWidgetEx>
+public class ButtonWidgetEx extends ButtonWidget 
+implements WidgetPositionedTooltip, SelfWidgetRendererInheritor<ButtonWidgetEx>
 {
 	private int tooltipWidth;
 	private int tooltipHeight;
@@ -82,8 +83,12 @@ public class ButtonWidgetEx extends ButtonWidget implements WidgetPositionedTool
 	}
 	
 	@Override
-	public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) {
+	public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) 
+	{
 		this.renderer.renderButton(ctx, mouseX, mouseY, delta);
+		
+		if (this.isHovered())
+			ctx.setCursor(this.isInteractable() ? StandardCursors.POINTING_HAND : StandardCursors.NOT_ALLOWED);
 	}
 	
 	@Override

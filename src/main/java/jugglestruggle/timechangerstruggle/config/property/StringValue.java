@@ -66,12 +66,7 @@ public class StringValue extends BaseProperty<StringValue, String>
 	@Override
 	public void readFromJson(JsonElement elem) 
 	{
-		if (!elem.isJsonPrimitive())
-			return;
-		
-		JsonPrimitive prim = elem.getAsJsonPrimitive();
-		
-		if (prim.isString())
+		if (elem instanceof JsonPrimitive prim && prim.isString())
 		{
 			String s = prim.getAsString();
 			

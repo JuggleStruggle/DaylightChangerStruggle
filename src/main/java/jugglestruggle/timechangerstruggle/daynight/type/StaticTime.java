@@ -21,7 +21,7 @@ import java.util.Set;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.input.SystemKeycodes;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
@@ -61,7 +61,6 @@ public class StaticTime implements DayNightCycleBasis
 	public Class<?> getBuilderClass() {
 		return Builder.class;
 	}
-	
 
 	@Override
 	public Element[] createQuickOptionElements(TimeChangerScreen screen)
@@ -94,7 +93,7 @@ public class StaticTime implements DayNightCycleBasis
 	}
 	
 	
-	// Introduced in v0.0.1+1.21.5 port: Make both Static and Moving Time use the same quick-options 
+	// Introduced in v0.0.1: Make both Static and Moving Time use the same quick-options 
 	// as they're not anymore different to what they do with their core functionality.
 	public static Element[] createQuickOptionElementsShared(TimeChangerScreen screen, 
 		FancySectionProperty sectionProp, LongValue timeValue)
@@ -112,8 +111,10 @@ public class StaticTime implements DayNightCycleBasis
 		final String setPropsTooltip = PROPERTIES_KEY + "time.worldtime.";
 		final Iterator<PresetSetTimes> setTimesIterator = setTimes.iterator();
 		
+		MinecraftClient client = screen.getClient();
+		
 		MutableText lShiftKey = StaticTime.createQuickOptElemKey("shift");
-		MutableText lCtrlKey = StaticTime.createQuickOptElemKey(MinecraftClient.IS_SYSTEM_MAC ? "super" : "control");
+		MutableText lCtrlKey = StaticTime.createQuickOptElemKey(SystemKeycodes.IS_MAC_OS ? "super" : "control");
 		MutableText lAltKey = StaticTime.createQuickOptElemKey("alt");
 		
 		int i; 
@@ -160,9 +161,9 @@ public class StaticTime implements DayNightCycleBasis
 					
 					if (enableAdditionOptions)
 					{
-						final boolean shiftHeld = Screen.hasShiftDown();
-						final boolean controlHeld = Screen.hasControlDown();
-						final boolean altHeld = Screen.hasAltDown();
+						final boolean shiftHeld = client.isShiftPressed();
+						final boolean controlHeld = client.isCtrlPressed();
+						final boolean altHeld = client.isAltPressed();
 						
 						if (shiftHeld || controlHeld || altHeld) 
 						{

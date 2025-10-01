@@ -6,7 +6,8 @@ extendable method net/minecraft/client/gui/widget/CyclingButtonWidget <init> (II
 extendable method net/minecraft/client/gui/widget/CyclingButtonWidget refreshTooltip ()V
 
 # Entry List Widget
-extendable method net/minecraft/client/gui/widget/EntryListWidget getEntryAtPosition (DD)Lnet/minecraft/client/gui/widget/EntryListWidget$Entry;
+extendable method net/minecraft/client/gui/widget/EntryListWidget getYOfFirstEntry ()I
+extendable method net/minecraft/client/gui/widget/EntryListWidget recalculateAllChildrenPositions ()V
 
 # Shader and Rendering
 # > DrawContext: Allow the Scissor Stack to be publicly accessible

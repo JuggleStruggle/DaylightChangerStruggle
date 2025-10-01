@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.10-SNAPSHOT'
+	id 'fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 }
 
@@ -26,7 +26,6 @@ dependencies
 java {
 	withSourcesJar()
 }
-
 
 processResources {
 	inputs.property "version", project.version

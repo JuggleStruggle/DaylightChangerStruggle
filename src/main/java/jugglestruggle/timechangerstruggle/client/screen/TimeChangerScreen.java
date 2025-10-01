@@ -36,6 +36,7 @@ import org.joml.Matrix3x2f;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
@@ -46,6 +47,8 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.ElementListWidget;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
@@ -152,6 +155,7 @@ public class TimeChangerScreen extends Screen
 	 */
 	private DayNightCycleBuilder switchDaylightCycleMenu_propertiesListBuilder;
 	
+	
 	public TimeChangerScreen() {
 		super(Text.translatable("jugglestruggle.tcs.screen"));
 	}
@@ -162,10 +166,6 @@ public class TimeChangerScreen extends Screen
 		this.currentMenu = Menu.SWITCH_DAYLIGHT_CYCLE_MENU;
 		this.switchDaylightCycleMenu_propertiesListBuilder = builder;
 	}
-	
-	// public TextRenderer getTextRenderer() {
-	// 	return this.textRenderer;
-	// }
 	
 	@Override
 	protected void init() {
@@ -427,7 +427,6 @@ public class TimeChangerScreen extends Screen
 						}
 					}
 					
-					
 					if (elemList == null)
 					{
 						cyclePropertyList.setVisible(false);
@@ -454,11 +453,13 @@ public class TimeChangerScreen extends Screen
 				int listTop = 40;
 				int listHeight = this.height - (64 + ((hasTwoLists || canRenderTwoLists) ? 6 : 0));
 				
+				SwitchGetterBasisBuilderList<?> lobster;
+				
 				switch (elemList.length)
 				{
 					case 1:
 					{
-						SwitchGetterBasisBuilderList<?> lobster = elemList[0];
+						lobster = elemList[0];
 						
 						lobster.setX(10); lobster.setY(listTop);
 						lobster.setWidth(this.width - 20);
@@ -468,16 +469,15 @@ public class TimeChangerScreen extends Screen
 					}
 					case 2:
 					{
-						SwitchGetterBasisBuilderList<?> leftLobster = elemList[0];
+						// Left
+						lobster = elemList[0];
+						lobster.setX(9); lobster.setY(listTop);
+						lobster.setWidth(w - 11); lobster.setHeight(listHeight);
 						
-						leftLobster.setX(9); leftLobster.setY(listTop);
-						leftLobster.setWidth(w - 11); leftLobster.setHeight(listHeight);
-						
-						
-						SwitchGetterBasisBuilderList<?> rightLobster = elemList[1];
-						
-						rightLobster.setX(w + 1); rightLobster.setY(listTop);
-						rightLobster.setWidth(w - 11);  rightLobster.setHeight(listHeight);
+						// Right
+						lobster = elemList[1];
+						lobster.setX(w + 1); lobster.setY(listTop);
+						lobster.setWidth(w - 11); lobster.setHeight(listHeight);
 						
 						break;
 					}
@@ -485,9 +485,10 @@ public class TimeChangerScreen extends Screen
 				
 				for (int i = 0; i < elemList.length; ++i) 
 				{
-					final SwitchGetterBasisBuilderList<?> lobster = elemList[i];
+					lobster = elemList[i];
 					lobster.setVisible(true); lobster.active = true;
 					lobster.onLocSizeUpdate();
+					lobster.updateChildrenPosSize();
 					
 					if (cyclePropertyList != null && lobster instanceof SwitchDaylightCyclePropertyList)
 					{
@@ -701,7 +702,6 @@ public class TimeChangerScreen extends Screen
 					
 					if (elem instanceof SwitchGetterBasisBuilderList l && l.isVisible())
 					{
-						// (keys ? elem.isFocused() : elem.isMouseOver(mouseX, mouseY))
 						if (keys)
 						{
 							if (elem.isFocused()) {
@@ -713,18 +713,6 @@ public class TimeChangerScreen extends Screen
 						}
 					}
 				}
-				
-				/*
-				Optional<? extends Element> foundElement = this.children().stream().filter(elemToCheck -> {
-					if (elemToCheck instanceof SwitchGetterBasisBuilderList elemList)
-						return elemList.isVisible() && elemList.isMouseOver(mouseX, mouseY);
-					else
-						return false;
-				}).findFirst();
-				
-				if (foundElement.isPresent())
-					((SwitchGetterBasisBuilderList<?>)foundElement.get()).renderTooltips(ctx, mouseX, mouseY);
-				 */
 				
 				break;
 			}
@@ -797,9 +785,8 @@ public class TimeChangerScreen extends Screen
 		{
 			case MAIN_MENU:
 			{
-				if (TimeChangerStruggleClient.getTimeChanger() == null) {
+				if (TimeChangerStruggleClient.getTimeChanger() == null)
 					return;
-				}
 				
 				owningProperty.set(newValue);
 				TimeChangerStruggleClient.getTimeChanger().writePropertyValueToCycle(owningProperty, writer);
@@ -886,6 +873,12 @@ public class TimeChangerScreen extends Screen
 		this.menuDirty = true;
 	}
 	
+	// Introduced in v0.0.2+1.21.9 due to the game client not being accessible outside
+	// of its respective screens.
+	public MinecraftClient getClient() {
+		return this.client;
+	}
+	
 	
 	
 	
@@ -932,7 +925,7 @@ public class TimeChangerScreen extends Screen
 	{
 		this.mainMenu_onSwitchDaylightCycleType(true, () -> {
 			this.mainMenu_saveQuickOptionElements();
-			TimeChangerStruggleClient.quickSwitchCachedCycleType(Screen.hasShiftDown());
+			TimeChangerStruggleClient.quickSwitchCachedCycleType(this.client.isShiftPressed());
 		});
 	}
 	void mainMenu_onSwitchDaylightCycleType(boolean loadNewCycleConfig, Runnable consumer) 
@@ -1349,7 +1342,6 @@ public class TimeChangerScreen extends Screen
 		(PE parent, int mouseX, int mouseY, Predicate<Element> predicate)
 	{
 		Iterator<? extends Element> e = parent.children().iterator();
-		
 		final boolean keys = MinecraftClient.getInstance().getNavigationType().isKeyboard();
 		
 		while (e.hasNext()) 
@@ -1456,7 +1448,7 @@ public class TimeChangerScreen extends Screen
 		
 		if (obtainedElement == null)
 			return;
-			
+		
 		List<OrderedText> tooltipText = ((WidgetOrderedTooltip)obtainedElement).getOrderedTooltip();
 			
 		if (tooltipText == null)
@@ -1500,8 +1492,7 @@ public class TimeChangerScreen extends Screen
 	//
 	private class SwitchGetterBuilderList extends SwitchGetterBasisBuilderList<SwitchDaylightCycleBuilderListEntry>
 	{
-		public SwitchGetterBuilderList(TimeChangerScreen parent)
-		{
+		public SwitchGetterBuilderList(TimeChangerScreen parent) {
 			super(parent, 24);
 		}
 		public final void addSectionEntries()
@@ -1669,9 +1660,9 @@ public class TimeChangerScreen extends Screen
 		}
 		
 		@Override
-		public boolean mouseClicked(double mouseX, double mouseY, int button)
+		public boolean mouseClicked(Click click, boolean doubled)
 		{
-			final boolean clicked = super.mouseClicked(mouseX, mouseY, button);
+			final boolean clicked = super.mouseClicked(click, doubled);
 			
 			if (clicked)
 			{
@@ -1738,7 +1729,8 @@ public class TimeChangerScreen extends Screen
 				if (section.sectionShowButton.getValue())
 					section.sectionChildrenEntries.forEach(prop -> this.addEntry(prop));
 			});
-			
+
+			this.refreshScroll();
 			this.onLocSizeUpdate();
 		}
 	}
@@ -1814,9 +1806,13 @@ public class TimeChangerScreen extends Screen
 		}
 		
 		@Override
-		public void render(DrawContext ctx, int index, int y, int x, 
-			int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta)
+		public void render(DrawContext ctx, int mouseX, int mouseY, boolean hovered, float deltaTicks)
 		{
+			int x = this.getX();
+			int y = this.getY();
+			int entryWidth = this.getWidth();
+			int entryHeight = this.getHeight();
+			
 			this.options.setX(entryWidth - 35);
 			this.options.setY(y + 2);
 			this.createAndUse.setX(this.options.getX() + 22);
@@ -1837,7 +1833,7 @@ public class TimeChangerScreen extends Screen
 				colorStart = 0xA0000000; colorEnd = 0x44000000; colorTextName = -1; colorTextDesc = 0xFFAAAAAA;
 			}
 			
-			ctx.fillGradient(x, y, x + entryWidth, y + entryHeight + 4, colorStart, colorEnd);
+			ctx.fillGradient(x, y, x + entryWidth, y + entryHeight, colorStart, colorEnd);
 			
 			final TextRenderer textRenderer = this.parent.parent.textRenderer;
 			final int maxRenderTextWidth = entryWidth - 56;
@@ -1845,8 +1841,8 @@ public class TimeChangerScreen extends Screen
 			TimeChangerScreen.renderText(ctx, textRenderer, this.name, x + 4, y + 2, maxRenderTextWidth, false, colorTextName);
 			TimeChangerScreen.renderText(ctx, textRenderer, this.description, x + 4, y + textRenderer.fontHeight + 2, maxRenderTextWidth, false, colorTextDesc);
 			
-			this.options.render(ctx, mouseX, mouseY, tickDelta);
-			this.createAndUse.render(ctx, mouseX, mouseY, tickDelta);
+			this.options.render(ctx, mouseX, mouseY, deltaTicks);
+			this.createAndUse.render(ctx, mouseX, mouseY, deltaTicks);
 		}
 		
 		private void setSelectedIfTimeChangerMatches() {
@@ -1928,14 +1924,14 @@ public class TimeChangerScreen extends Screen
 		public final FancySectionProperty owningSection;
 		public final boolean isSection;
 		
-		// Section-Exclusive
+		// Section Exclusive
 		final CyclingButtonWidgetEx<Boolean> sectionShowButton;
 		final Set<DaylightCyclePropertyListEntry> sectionChildrenEntries;
 		
-		// Properties-Exclusive
+		// Properties Exclusive
 		final List<WidgetConfigInterface<?, ?>> properties;
 		
-		// Other things
+		// Other Things
 		boolean updateLocSizeForElements;
 		
 		// Section Entry
@@ -1959,6 +1955,7 @@ public class TimeChangerScreen extends Screen
 			this.sectionShowButton.setNarrationBuilder((cb, b) -> cb.appendNarrationTooltipLine(b, 1, 0));
 			this.sectionShowButton.setMessage(Text.of("\u2191"));
 		}
+		
 		// Property Entry
 		public DaylightCyclePropertyListEntry(SwitchDaylightCyclePropertyList parent, 
 			FancySectionProperty prop, WidgetConfigInterface<?, ?>[] rowElements)
@@ -2000,10 +1997,14 @@ public class TimeChangerScreen extends Screen
 		}
 
 		@Override
-		public void render(DrawContext ctx, int index, int y, int x, 
-			int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta)
+		public void render(DrawContext ctx, int mouseX, int mouseY, boolean hovered, float deltaTicks)
 		{
-			if (this.updateLocSizeForElements) 
+			int x = this.getX();
+			int y = this.getY();
+			int entryWidth = this.getWidth();
+			int entryHeight = this.getHeight();
+			
+			if (this.updateLocSizeForElements)
 			{
 				this.onLocSizeUpdateFromRender(x, y, entryWidth, entryHeight);
 				this.updateLocSizeForElements = false;
@@ -2026,7 +2027,7 @@ public class TimeChangerScreen extends Screen
 				colorStart = 0xFF000000; colorEnd = 0x55000F0F; colorTextName = -1; 
 			}
 			
-			ctx.fillGradient(x, y, x + entryWidth, y + entryHeight + 4, colorStart, colorEnd);
+			ctx.fillGradient(x, y, x + entryWidth, y + entryHeight, colorStart, colorEnd);
 			
 			int maxRenderTextWidth = entryWidth - 30;
 			
@@ -2039,15 +2040,15 @@ public class TimeChangerScreen extends Screen
 				(
 					ctx, textRenderer, this.owningSection.get(), 
 					x + (entryWidth / 2) - (textWidth / 2), 
-					y + (entryHeight / 2) - (textRenderer.fontHeight / 2), 
+					y + (entryHeight / 2) - (textRenderer.fontHeight / 2) - 2, 
 					maxRenderTextWidth, false, colorTextName
 				);
 				
-				this.sectionShowButton.render(ctx, mouseX, mouseY, tickDelta);
+				this.sectionShowButton.render(ctx, mouseX, mouseY, deltaTicks);
 			}
 			else
 			{
-				this.properties.forEach(elem -> elem.render(ctx, mouseX, mouseY, tickDelta));
+				this.properties.forEach(elem -> elem.render(ctx, mouseX, mouseY, deltaTicks));
 			}
 		}
 		
@@ -2055,9 +2056,8 @@ public class TimeChangerScreen extends Screen
 		// whenever one renders when they can instead update at the appropriate time
 		public void onLocSizeUpdate() {
 			this.updateLocSizeForElements = true;
-			
-			
 		}
+		
 		private void onLocSizeUpdateFromRender(int x, int y, int entryWidth, int entryHeight)
 		{
 			if (this.isSection)
@@ -2114,8 +2114,10 @@ public class TimeChangerScreen extends Screen
 
 		@Override
 		public int getRowWidth() {
-			return super.width - ((this.getMaxScrollY() > 0) ? 6 : 0);
+			return super.getWidth() - ((this.getMaxScrollY() > 0) ? 6 : 0);
 		}
+		
+		
 		
 		@Override
 		public int getRowLeft() {
@@ -2127,13 +2129,13 @@ public class TimeChangerScreen extends Screen
 		}
 		
 		@Override
-		public int getRowTop(int index) {
-			return this.getY() - (int)this.getScrollY() + (index * this.itemHeight);
+		protected int getScrollbarX() {
+			return super.getRight() - ((this.getMaxScrollY() > 0) ? 6 : 0);
 		}
 		
 		@Override
-		protected int getScrollbarX() {
-			return super.getRight() - ((this.getMaxScrollY() > 0) ? 6 : 0);
+		protected int getYOfFirstEntry() {
+			return this.getY();
 		}
 		
 		public boolean isVisible() {
@@ -2149,12 +2151,12 @@ public class TimeChangerScreen extends Screen
 		}
 		
 		@Override
-		public boolean mouseClicked(double mouseX, double mouseY, int button) {
-			return this.visible ? super.mouseClicked(mouseX, mouseY, button) : false;
+		public boolean mouseClicked(Click click, boolean doubled) {
+			return this.visible ? super.mouseClicked(click, doubled) : false;
 		}
 		@Override
-		public boolean mouseReleased(double mouseX, double mouseY, int button) {
-			return this.visible ? super.mouseReleased(mouseX, mouseY, button) : false;
+		public boolean mouseReleased(Click click) {
+			return this.visible ? super.mouseReleased(click) : false;
 		}
 		@Override
 		public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
@@ -2162,23 +2164,27 @@ public class TimeChangerScreen extends Screen
 		}
 		
 		@Override
-		public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-			return this.visible ? super.keyPressed(keyCode, scanCode, modifiers) : false;
+		public boolean keyPressed(KeyInput input) {
+			return this.visible ? super.keyPressed(input) : false;
 		}
 		@Override
-		public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-			return this.visible ? super.keyReleased(keyCode, scanCode, modifiers) : false;
+		public boolean keyReleased(KeyInput input) {
+			return this.visible ? super.keyReleased(input) : false;
+		}
+		@Override
+		public boolean charTyped(CharInput input) {
+			return this.visible ? super.charTyped(input) : false;
 		}
 		
 		@Override
 		protected void drawMenuListBackground(DrawContext ctx) 
 		{
-			ctx.fillGradient(this.getX(), this.getY(), this.getRight(), this.getBottom(), 0xAA334400, 0x55002233);
+			if (this.getMaxScrollY() <= 0)
+				ctx.fillGradient(this.getX(), this.getY(), this.getRight(), this.getBottom(), 0xAA334400, 0x55002233);
 
 			if (this.title != null)
 			{
 				final TextRenderer textRenderer = this.parent.getTextRenderer();
-				
 				int y = this.getY() - textRenderer.fontHeight - 6;
 				
 				ctx.fillGradient(this.getX(), y, this.getRight(), y + textRenderer.fontHeight + 4, 0xAA000000, 0x77000000);
@@ -2212,17 +2218,25 @@ public class TimeChangerScreen extends Screen
 			super.setScrollY(scrollY); this.onLocSizeUpdate();
 		}
 		
-		@Override
-		protected E getEntryAtPosition(double x, double y) {
-			return super.getEntryAtPosition(x, y + 4);
-		}
-		
 		public void onLocSizeUpdate() {}
+		
+		
+		// v0.0.2+1.21.9 change: update children list entries in regards to their
+		// position and size as they're not managed by the list entry's render anymore.
+		public void updateChildrenPosSize() {
+			this.recalculateAllChildrenPositions();
+		}
+
+		@Override
+		protected int getContentsHeightWithPadding() {
+			return super.getContentsHeightWithPadding() - 4;
+		}
 
 		public void tick() {
 			this.children().forEach(e -> e.tick());
 		}
 	}
+	
 	private abstract class SwitchGetterBasisBuilderEntry
 	<E extends SwitchGetterBasisBuilderEntry<E>> extends ElementListWidget.Entry<E>
 	{
@@ -2233,7 +2247,7 @@ public class TimeChangerScreen extends Screen
 			if (children == null || children.isEmpty())
 				return;
 			
-			children.forEach((elem) -> {
+			children.forEach(elem -> {
 				if (elem instanceof SelfWidgetRendererInheritor swr)
 					swr.getWidgetRenderer().tick();
 			});

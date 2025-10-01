@@ -8,7 +8,6 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 30-Jan-2022, Sunday
  */

@@ -15,7 +15,6 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 31-Jan-2022, Monday
  */
@@ -200,6 +199,6 @@ public abstract class BaseProperty<B extends BaseProperty<B, V>, V>
 	
 	public static interface ValueConsumer<B extends BaseProperty<B, V>, V> 
 	{
-		void consume(B owningProperty, V newValue, PropertyWriterSource writeraaa);
+		void consume(B owningProperty, V newValue, PropertyWriterSource writer);
 	}
 }
