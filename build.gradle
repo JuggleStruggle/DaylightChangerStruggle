@@ -1,4 +1,5 @@
-plugins {
+plugins 
+{
 	id 'fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 }
@@ -27,7 +28,8 @@ java {
 	withSourcesJar()
 }
 
-processResources {
+processResources 
+{
 	inputs.property "version", project.version
 
 	filesMatching("fabric.mod.json") {
@@ -43,7 +45,8 @@ loom {
 	accessWidenerPath = file("src/main/resources/timechangerstruggle.client.accesswidener");
 }
 
-jar {
+jar 
+{
 	inputs.property "archivesName", project.base.archivesName
 
 	from("LICENSE") {

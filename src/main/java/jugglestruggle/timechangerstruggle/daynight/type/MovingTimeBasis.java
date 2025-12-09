@@ -8,12 +8,9 @@ import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
 import jugglestruggle.timechangerstruggle.daynight.DayNightGetterType;
 import jugglestruggle.timechangerstruggle.util.EasingType;
 import jugglestruggle.timechangerstruggle.util.Easings;
-
-import java.util.Set;
-
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.Text;
-
+import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 
 /**

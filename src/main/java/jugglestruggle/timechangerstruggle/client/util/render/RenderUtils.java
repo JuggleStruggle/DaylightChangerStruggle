@@ -1,12 +1,11 @@
 package jugglestruggle.timechangerstruggle.client.util.render;
 
-import jugglestruggle.timechangerstruggle.mixin.client.render.DrawContextAccessor;
-
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2f;
+import org.joml.Matrix3x2fc;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
-
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.font.TextRenderer.GlyphDrawable;
 import net.minecraft.client.gl.RenderPipelines;
@@ -20,8 +19,6 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.texture.TextureSetup;
 import net.minecraft.text.OrderedText;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-
 /**
  * @author JuggleStruggle
  * @implNote Created on 11-Feb-2022, Friday
@@ -31,12 +28,10 @@ public final class RenderUtils
 	public static void fillPointedGradient(DrawContext ctx, int startX, int startY, int endX, int endY,
 		int z, int topLeftColor, int topRightColor, int bottomLeftColor, int bottomRightColor)
 	{
-		DrawContextAccessor dca = (DrawContextAccessor)ctx;
-		
-		dca.getRenderState().addSimpleElement(new ColoredBordersGradientGuiElementRenderState(
+		ctx.state.addSimpleElement(new ColoredBordersGradientGuiElementRenderState(
 			new Matrix3x2f(ctx.getMatrices()), startX, startY, endX, endY, z, 
 			topLeftColor, topRightColor, bottomLeftColor, bottomRightColor, 
-			dca.getScissorStack().peekLast())
+			ctx.scissorStack.peekLast())
 		);
 	}
 	public static void fillPoint(Matrix4f mat, BufferBuilder bb, int x, int y, int z, int color) 
@@ -63,7 +58,8 @@ public final class RenderUtils
 		public ColoredBordersGradientGuiElementRenderState(
 			Matrix3x2f pose, int x1, int y1, int x2, int y2, int z, 
 			int tlCol, int trCol, int blCol, int brCol, @Nullable ScreenRect scissorArea
-			) {
+		)
+		{
 			this(RenderPipelines.GUI, TextureSetup.empty(), pose, x1, y1, x2, y2, z, tlCol, trCol, blCol, brCol, 
 				scissorArea, ColoredQuadGuiElementRenderState.createBounds(x1, y1, x2, y2, pose, scissorArea));
 		}
@@ -93,26 +89,26 @@ public final class RenderUtils
 		public final float fX;
 		public final float fY;
 		
-		public TextGuiElementRenderStateDCS(TextRenderer textRenderer, OrderedText orderedText, Matrix3x2f mtx,
-			float x, float y, int color, int backgroundColor, boolean shadow, ScreenRect clipBounds)
+		public TextGuiElementRenderStateDCS(TextRenderer tr, OrderedText text, Matrix3x2fc mtx,
+			float x, float y, int color, int backgroundColor, boolean shadow, boolean includeEmpty, ScreenRect clipBounds)
 		{
-			super(textRenderer, orderedText, mtx, 0, 0, color, backgroundColor, shadow, clipBounds);
+			super(tr, text, mtx, 0, 0, color, backgroundColor, shadow, includeEmpty, clipBounds);
 			this.fX = x; this.fY = y;
 		}
-		
 
 		@Override
-		public GlyphDrawable prepare() 
+		public GlyphDrawable prepare()
 		{
 			if (this.preparation == null) 
 			{
-				this.preparation = this.textRenderer.prepare(this.orderedText, this.fX, this.fY, this.color, this.shadow, this.backgroundColor);
-				ScreenRect screenRect = this.preparation.getScreenRect();
+				this.preparation = this.textRenderer.prepare(this.orderedText, this.fX, this.fY, this.color, 
+					this.shadow, this.trackEmpty, this.backgroundColor);
+				ScreenRect rect = this.preparation.getScreenRect();
 			
-				if (screenRect != null) 
+				if (rect != null) 
 				{
-					screenRect = screenRect.transformEachVertex(this.matrix);
-					this.bounds = this.clipBounds == null ? screenRect : this.clipBounds.intersection(screenRect);
+					rect = rect.transformEachVertex(this.matrix);
+					this.bounds = this.clipBounds == null ? rect : this.clipBounds.intersection(rect);
 				}
 			}
 

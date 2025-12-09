@@ -17,16 +17,13 @@ import jugglestruggle.timechangerstruggle.util.Easings;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.text.Text;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
-
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
-
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -504,7 +501,7 @@ public class RandomizedTime extends MovingTimeBasis
 
 		public ResetSeedButton(RandomizedTime instance, TimeChangerScreen screen, WidgetOnlyProperty prop)
 		{
-			super(18, 18, Text.translatable(PROPERTIES_KEY + "seed.resettoinitial"), 
+			super(18, 18, net.minecraft.text.Text.translatable(PROPERTIES_KEY + "seed.resettoinitial"), 
 				screen.getTextRenderer(), instance::onResetSeedPropClicked);
 			
 			this.instance = instance; this.prop = prop;

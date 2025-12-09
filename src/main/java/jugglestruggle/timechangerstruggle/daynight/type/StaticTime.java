@@ -12,13 +12,6 @@ import jugglestruggle.timechangerstruggle.daynight.DayNightGetterType;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.input.SystemKeycodes;
@@ -26,7 +19,11 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;

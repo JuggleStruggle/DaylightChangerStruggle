@@ -9,12 +9,9 @@ import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import java.util.Set;
-
 import net.minecraft.client.gui.Element;
 import net.minecraft.text.Text;
-
+import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 
 /**

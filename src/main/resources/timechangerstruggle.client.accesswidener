@@ -1,20 +1,28 @@
 accessWidener	v1	named
 
-# Cycling Button Widget
-extendable class net/minecraft/client/gui/widget/CyclingButtonWidget$Values
-extendable method net/minecraft/client/gui/widget/CyclingButtonWidget <init> (IIIILnet/minecraft/text/Text;Lnet/minecraft/text/Text;ILjava/lang/Object;Lnet/minecraft/client/gui/widget/CyclingButtonWidget$Values;Ljava/util/function/Function;Ljava/util/function/Function;Lnet/minecraft/client/gui/widget/CyclingButtonWidget$UpdateCallback;Lnet/minecraft/client/option/SimpleOption$TooltipFactory;Z)V
+## Cycling Button Widget
+extendable method net/minecraft/client/gui/widget/CyclingButtonWidget <init> (IIIILnet/minecraft/text/Text;Lnet/minecraft/text/Text;ILjava/lang/Object;Ljava/util/function/Supplier;Lnet/minecraft/client/gui/widget/CyclingButtonWidget$Values;Ljava/util/function/Function;Ljava/util/function/Function;Lnet/minecraft/client/gui/widget/CyclingButtonWidget$UpdateCallback;Lnet/minecraft/client/option/SimpleOption$TooltipFactory;Lnet/minecraft/client/gui/widget/CyclingButtonWidget$LabelType;Lnet/minecraft/client/gui/widget/CyclingButtonWidget$IconGetter;)V
 extendable method net/minecraft/client/gui/widget/CyclingButtonWidget refreshTooltip ()V
+#extendable class net/minecraft/client/gui/components/CycleButton$ValueListSupplier
+#extendable method net/minecraft/client/gui/components/CycleButton <init> (IIIILnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/Component;ILjava/lang/Object;Ljava/util/function/Supplier;Lnet/minecraft/client/gui/components/CycleButton$ValueListSupplier;Ljava/util/function/Function;Ljava/util/function/Function;Lnet/minecraft/client/gui/components/CycleButton$OnValueChange;Lnet/minecraft/client/OptionInstance$TooltipSupplier;Lnet/minecraft/client/gui/components/CycleButton$DisplayState;Lnet/minecraft/client/gui/components/CycleButton$SpriteSupplier;)V
+#extendable method net/minecraft/client/gui/components/CycleButton updateTooltip ()V
 
-# Entry List Widget
+## Entry List Widget
 extendable method net/minecraft/client/gui/widget/EntryListWidget getYOfFirstEntry ()I
 extendable method net/minecraft/client/gui/widget/EntryListWidget recalculateAllChildrenPositions ()V
+#extendable method net/minecraft/client/gui/components/AbstractSelectionList getFirstEntryY ()I
+#extendable method net/minecraft/client/gui/components/AbstractSelectionList repositionEntries ()V
 
-# Shader and Rendering
-# > DrawContext: Allow the Scissor Stack to be publicly accessible
-extendable class net/minecraft/client/gui/DrawContext$ScissorStack
+## Shader and Rendering
 # > ColoredQuad: Make its static method publicly accessible in order to avoid needlessly copying
-accessible method net/minecraft/client/gui/render/state/ColoredQuadGuiElementRenderState createBounds (IIIILorg/joml/Matrix3x2f;Lnet/minecraft/client/gui/ScreenRect;)Lnet/minecraft/client/gui/ScreenRect;
-# > TextGuiElementRenderState: Avoid using ints for its position and use floats instead (in fact, the textRenderer.prepare() uses x and y uses floats!)
+accessible method net/minecraft/client/gui/render/state/ColoredQuadGuiElementRenderState createBounds (IIIILorg/joml/Matrix3x2fc;Lnet/minecraft/client/gui/ScreenRect;)Lnet/minecraft/client/gui/ScreenRect;
+#accessible method net/minecraft/client/gui/render/state/ColoredRectangleRenderState getBounds (IIIILorg/joml/Matrix3x2fc;Lnet/minecraft/client/gui/navigation/ScreenRectangle;)Lnet/minecraft/client/gui/navigation/ScreenRectangle;
+# > TextGuiElementRenderState: Avoid using ints for its position and use floats instead (in fact, the textRenderer.prepare() uses x and y as floats!)
 extendable class net/minecraft/client/gui/render/state/TextGuiElementRenderState
+accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState trackEmpty Z
 accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState preparation Lnet/minecraft/client/font/TextRenderer$GlyphDrawable;
 accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState bounds Lnet/minecraft/client/gui/ScreenRect;
+#extendable class net/minecraft/client/gui/render/state/GuiTextRenderState
+#accessible field net/minecraft/client/gui/render/state/GuiTextRenderState includeEmpty Z
+#accessible field net/minecraft/client/gui/render/state/GuiTextRenderState preparedText Lnet/minecraft/client/gui/Font$PreparedText;
+#accessible field net/minecraft/client/gui/render/state/GuiTextRenderState bounds Lnet/minecraft/client/gui/navigation/ScreenRectangle;

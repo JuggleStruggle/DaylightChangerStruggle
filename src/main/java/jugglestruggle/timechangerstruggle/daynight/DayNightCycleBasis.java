@@ -9,16 +9,13 @@ import jugglestruggle.timechangerstruggle.config.property.StringValue;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.MathHelper;
-
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 
 /**

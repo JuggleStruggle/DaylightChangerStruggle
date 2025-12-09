@@ -2,13 +2,11 @@ package jugglestruggle.timechangerstruggle.client.widget;
 
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
 import jugglestruggle.timechangerstruggle.util.SimpleCharacterVisitor;
-
-import java.util.List;
-
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.screen.narration.NarrationPart;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
+import java.util.List;
 
 /**
  * An ordered tooltip that is used for the {@link TimeChangerScreen}.

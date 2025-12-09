@@ -1,25 +1,21 @@
 package jugglestruggle.timechangerstruggle.client.widget;
 
 import jugglestruggle.timechangerstruggle.util.SimpleCharacterVisitor;
-
-import java.util.List;
-import java.util.function.BiConsumer;
-
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.cursor.StandardCursors;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.screen.narration.NarrationPart;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
+import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * @author JuggleStruggle
  * @implNote Created on 13-Feb-2022, Sunday
  */
-public class ButtonWidgetEx extends ButtonWidget 
-implements WidgetPositionedTooltip, SelfWidgetRendererInheritor<ButtonWidgetEx>
+public class ButtonWidgetEx extends ButtonWidget
+	implements WidgetPositionedTooltip, SelfWidgetRendererInheritor<ButtonWidgetEx>
 {
 	private int tooltipWidth;
 	private int tooltipHeight;
@@ -29,8 +25,8 @@ implements WidgetPositionedTooltip, SelfWidgetRendererInheritor<ButtonWidgetEx>
 	
 	private final SelfWidgetRender<ButtonWidgetEx> renderer;
 	
-	public ButtonWidgetEx(int width, int height, Text message, Text tooltipDescText, 
-		Text tooltipText, TextRenderer renderer, PressAction onPress)
+	public ButtonWidgetEx(int width, int height, net.minecraft.text.Text message, net.minecraft.text.Text tooltipDescText, 
+		net.minecraft.text.Text tooltipText, TextRenderer renderer, PressAction onPress)
 	{
 		super(0, 0, width, height, message, onPress, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
 		this.updateTooltip(tooltipDescText, tooltipText, renderer);
@@ -38,7 +34,7 @@ implements WidgetPositionedTooltip, SelfWidgetRendererInheritor<ButtonWidgetEx>
 		this.narrationBuilder = (bw, b) -> this.appendNarrationMessage(b, (byte)1, 0);
 	}
 	
-	public ButtonWidgetEx(int width, int height, Text message, 
+	public ButtonWidgetEx(int width, int height, net.minecraft.text.Text message, 
 		List<OrderedText> compiledTooltip, TextRenderer renderer, PressAction onPress)
 	{
 		super(0, 0, width, height, message, onPress, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
@@ -47,7 +43,7 @@ implements WidgetPositionedTooltip, SelfWidgetRendererInheritor<ButtonWidgetEx>
 		this.narrationBuilder = (bw, b) -> this.appendNarrationMessage(b, (byte)1, 0);
 	}
 
-	public ButtonWidgetEx(int width, int height, Text message, TextRenderer renderer, PressAction onPress) {
+	public ButtonWidgetEx(int width, int height, net.minecraft.text.Text message, TextRenderer renderer, PressAction onPress) {
 		this(width, height, message, null, renderer, onPress);
 	}
 	
@@ -83,12 +79,8 @@ implements WidgetPositionedTooltip, SelfWidgetRendererInheritor<ButtonWidgetEx>
 	}
 	
 	@Override
-	public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) 
-	{
+	public void drawIcon(DrawContext ctx, int mouseX, int mouseY, float delta) {
 		this.renderer.renderButton(ctx, mouseX, mouseY, delta);
-		
-		if (this.isHovered())
-			ctx.setCursor(this.isInteractable() ? StandardCursors.POINTING_HAND : StandardCursors.NOT_ALLOWED);
 	}
 	
 	@Override
@@ -108,7 +100,7 @@ implements WidgetPositionedTooltip, SelfWidgetRendererInheritor<ButtonWidgetEx>
 	
 	/**
 	 * Narrates the contents of this button widget via {@link #getNarrationMessage()}.
-	 * @see #appendNarration(NarrationMessageBuilder, byte, boolean, Text)
+	 * @see #appendNarration(NarrationMessageBuilder, byte, boolean, net.minecraft.text.Text)
 	 */
 	public void appendNarrationMessage(NarrationMessageBuilder builder, byte messageOrder, int skipTooltipLines) {
 		this.appendNarration(builder, messageOrder, skipTooltipLines, this.getNarrationMessage());
@@ -117,7 +109,7 @@ implements WidgetPositionedTooltip, SelfWidgetRendererInheritor<ButtonWidgetEx>
 	 * Narrates the contents of this button widget by using a {@link #compiledTooltipText}'s line.
 	 * 
 	 * @param targetTooltipLine targets the index from {@link #compiledTooltipText}
-	 * @see #appendNarration(NarrationMessageBuilder, byte, boolean, Text)
+	 * @see #appendNarration(NarrationMessageBuilder, byte, boolean, net.minecraft.text.Text)
 	 */
 	public void appendNarrationTooltipLine(NarrationMessageBuilder builder, byte messageOrder, int skipTooltipLines, int targetTooltipLine) 
 	{
@@ -133,7 +125,7 @@ implements WidgetPositionedTooltip, SelfWidgetRendererInheritor<ButtonWidgetEx>
 	 * @param titleText the text for the narrator to speak out as the title; if {@code messageOrder} is not 1 or 2, 
 	 *        this must be non-null
 	 */
-	public void appendNarration(NarrationMessageBuilder builder, byte messageOrder, int skipTooltipLines, Text titleText)
+	public void appendNarration(NarrationMessageBuilder builder, byte messageOrder, int skipTooltipLines, net.minecraft.text.Text titleText)
 	{
 		if (messageOrder == 1)
 			builder.put(NarrationPart.TITLE, titleText);
@@ -141,7 +133,7 @@ implements WidgetPositionedTooltip, SelfWidgetRendererInheritor<ButtonWidgetEx>
 		if (this.active)
 		{
 			builder.put(messageOrder == 2 ? NarrationPart.TITLE : NarrationPart.USAGE, 
-				Text.translatable("narration.button.usage." + (this.isFocused() ? "focused" : "hovered")));
+				net.minecraft.text.Text.translatable("narration.button.usage." + (this.isFocused() ? "focused" : "hovered")));
 				WidgetOrderedTooltip.narrateTooltip(builder, this.compiledTooltipText, skipTooltipLines);
 		}
 		

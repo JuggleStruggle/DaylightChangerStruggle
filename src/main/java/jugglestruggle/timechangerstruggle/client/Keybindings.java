@@ -3,7 +3,6 @@ package jugglestruggle.timechangerstruggle.client;
 import jugglestruggle.timechangerstruggle.TimeChangerStruggle;
 
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Identifier;
@@ -26,8 +25,8 @@ public class Keybindings
 		if (Keybindings.timeChangerMenuKey != null)
 			return;
 		
-		Keybindings.dcsCategory = KeyBinding.Category.create(Identifier.of
-			(TimeChangerStruggle.MOD_ID, "timechanger"));
+		Keybindings.dcsCategory = KeyBinding.Category.create
+			(Identifier.of(TimeChangerStruggle.MOD_ID, "timechanger"));
 		
 		Keybindings.timeChangerMenuKey = Keybindings.register("timechangermenu");
 		Keybindings.toggleWorldTimeKey = Keybindings.register("toggleworldtime");

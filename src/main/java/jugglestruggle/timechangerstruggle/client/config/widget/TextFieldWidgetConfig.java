@@ -7,14 +7,12 @@ import jugglestruggle.timechangerstruggle.config.property.BaseProperty.ValueCons
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import java.util.List;
-import java.util.function.Consumer;
-
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.Text;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author JuggleStruggle

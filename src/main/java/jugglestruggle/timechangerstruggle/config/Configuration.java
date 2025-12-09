@@ -321,9 +321,8 @@ public class Configuration
 		
 		JsonElement propertyElement = sections.getAsJsonObject().get(propertyName);
 		
-		if (propertyElement != null && propertyElement.isJsonObject()) {
-			return new SimpleImmutableEntry<>(propertyElement.getAsJsonObject(), true);
-		} 
+		if (propertyElement instanceof JsonObject obj)
+			return new SimpleImmutableEntry<>(obj, true);
 		
 		JsonObject createdSection = new JsonObject();
 		sections.getAsJsonObject().add(propertyName, createdSection);
@@ -342,10 +341,8 @@ public class Configuration
 			if (expectingPrimitive)
 				Configuration.addExpectedPrimitive(section, propertyName, defaultValue);
 		}
-		else if (expectingPrimitive && propertyElement.isJsonPrimitive())
+		else if (expectingPrimitive && propertyElement instanceof JsonPrimitive primitive)
 		{
-			JsonPrimitive primitive = propertyElement.getAsJsonPrimitive();
-		
 			boolean removeAndAdd = false;
 			
 			if (primitive.isBoolean())

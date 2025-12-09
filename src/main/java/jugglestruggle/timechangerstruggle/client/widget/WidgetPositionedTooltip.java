@@ -4,14 +4,10 @@ import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import java.util.List;
-
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-
-import net.minecraft.client.font.TextRenderer;
-
+import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 /**

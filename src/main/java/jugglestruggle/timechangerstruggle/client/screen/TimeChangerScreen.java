@@ -13,27 +13,10 @@ import jugglestruggle.timechangerstruggle.config.property.BaseProperty;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
-import jugglestruggle.timechangerstruggle.mixin.client.render.DrawContextAccessor;
 import jugglestruggle.timechangerstruggle.util.DaylightUtils;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.BooleanSupplier;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import org.joml.Matrix3x2f;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Click;
@@ -54,7 +37,20 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BooleanSupplier;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
+import org.joml.Matrix3x2f;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
@@ -374,8 +370,8 @@ public class TimeChangerScreen extends Screen
 					// For now just add the elements in its X position and width
 					int xAddition = xR;
 					
-					// 1.21.5 port change: TextFieldWidget's size was properly fixed;
-					// no need to do anything special for those widgets.
+					// 1.21+ and newer versions: TextFieldWidget's size was properly 
+					// fixed; no need to do anything special for those widgets.
 					
 					for (int i = 0; i < quickOptionElementsSize; ++i)
 					{
@@ -658,67 +654,48 @@ public class TimeChangerScreen extends Screen
 	@Override
 	public void render(DrawContext ctx, int mouseX, int mouseY, float delta)
 	{
-		switch (this.currentMenu)
+		if (this.currentMenu == Menu.MAIN_MENU && this.client.world != null)
 		{
-			case MAIN_MENU:
-			{
-				if (this.client.world != null)
-				{
-					String parsedTime = DaylightUtils.getParsedTime(this.client.world, TimeChangerStruggleClient.dateOverTicks);
-					
-					int textWidth = this.textRenderer.getWidth(parsedTime);
-					
-					int x = this.width / 2;
-					int y = this.height - 86;
-					
-					ctx.fillGradient(x - 152, y, x + 152, y + this.textRenderer.fontHeight + 4, 0xAA000000, 0x77000000);
-					ctx.drawText(this.textRenderer, parsedTime, x - (textWidth / 2), y + 3, -1, false);
-				}
-				
-				break;
-			}
+			String parsedTime = DaylightUtils.getParsedTime(this.client.world, TimeChangerStruggleClient.dateOverTicks);
 			
-			default:
-				break;
+			int textWidth = this.textRenderer.getWidth(parsedTime);
+			
+			int x = this.width / 2;
+			int y = this.height - 86;
+			
+			ctx.fillGradient(x - 152, y, x + 152, y + this.textRenderer.fontHeight + 4, 0xAA000000, 0x77000000);
+			ctx.drawText(this.textRenderer, parsedTime, x - (textWidth / 2), y + 3, -1, false);
 		}
-		
+			
 		// Renders the elements
 		super.render(ctx, mouseX, mouseY, delta);
 		
 		// Renders anything in front of the elements, this also includes the tooltips
 		TimeChangerScreen.renderTooltips(ctx, this, this, mouseX, mouseY, 0, 0);
 		
-		switch (this.currentMenu)
+		if (this.currentMenu == Menu.SWITCH_DAYLIGHT_CYCLE_MENU)
 		{
-			case SWITCH_DAYLIGHT_CYCLE_MENU:
+			Iterator<? extends Element> e = this.children().iterator();
+			
+			final boolean keys = MinecraftClient.getInstance().getNavigationType().isKeyboard();
+			
+			while (e.hasNext()) 
 			{
-				Iterator<? extends Element> e = this.children().iterator();
+				Element elem = e.next();
 				
-				final boolean keys = MinecraftClient.getInstance().getNavigationType().isKeyboard();
-				
-				while (e.hasNext()) 
+				if (elem instanceof SwitchGetterBasisBuilderList l && l.isVisible())
 				{
-					Element elem = e.next();
-					
-					if (elem instanceof SwitchGetterBasisBuilderList l && l.isVisible())
+					if (keys)
 					{
-						if (keys)
-						{
-							if (elem.isFocused()) {
-								l.renderTooltipsFromKey(ctx, mouseX, mouseY); break;
-							}
-						}
-						else if (elem.isMouseOver(mouseX, mouseY)) {
-							l.renderTooltipsFromMouse(ctx, mouseX, mouseY); break;
+						if (elem.isFocused()) {
+							l.renderTooltipsFromKey(ctx, mouseX, mouseY); break;
 						}
 					}
+					else if (elem.isMouseOver(mouseX, mouseY)) {
+						l.renderTooltipsFromMouse(ctx, mouseX, mouseY); break;
+					}
 				}
-				
-				break;
 			}
-			
-			default:
-				break;
 		}
 	}
 	@Override // 1.21.5 port change: avoid rendering the background unless the player's not in a world
@@ -1392,11 +1369,9 @@ public class TimeChangerScreen extends Screen
 	}
 	public static void renderTextD(DrawContext ctx, TextRenderer renderer, OrderedText message, float x, float y, int color, boolean shadow)
 	{
-		DrawContextAccessor dca = (DrawContextAccessor)ctx;
-		
-		dca.getRenderState().addText(new TextGuiElementRenderStateDCS(
+		ctx.state.addText(new TextGuiElementRenderStateDCS(
 			renderer, message, new Matrix3x2f(ctx.getMatrices()), 
-			x, y, color, 0, shadow, dca.getScissorStack().peekLast()
+			x, y, color, 0, shadow, false, ctx.scissorStack.peekLast()
 		));
 	}
 	
@@ -1407,7 +1382,7 @@ public class TimeChangerScreen extends Screen
 	 * @return the same text passed from the parameter, just grayed out
 	 * @since 0.0.2
 	 */
-	public static <T extends MutableText> T setAsGrayText(T textToGrayOut)
+	public static MutableText setAsGrayText(MutableText textToGrayOut)
 	{
 		textToGrayOut.styled(s -> s.withColor(Formatting.GRAY));
 		return textToGrayOut;
@@ -1495,6 +1470,7 @@ public class TimeChangerScreen extends Screen
 		public SwitchGetterBuilderList(TimeChangerScreen parent) {
 			super(parent, 24);
 		}
+		
 		public final void addSectionEntries()
 		{
 			TimeChangerStruggleClient.getCachedCycleTypeBuilders().stream().forEach((builder) -> {
@@ -1948,7 +1924,7 @@ public class TimeChangerScreen extends Screen
 			CyclingButtonWidgetEx.WidgetBuilder<Boolean> builder = 
 				CyclingButtonWidgetEx.booleanCycle(true, null, null);
 			
-			builder.initially(true); builder.omitKeyText();
+			builder.omitKeyText();
 			builder.tooltip(this::onShowHidePropertiesButtonApplyTooltip);
 			
 			this.sectionShowButton = builder.build(20, 20, Text.empty(), this::onShowHidePropertiesButtonUpdate);
@@ -2117,6 +2093,10 @@ public class TimeChangerScreen extends Screen
 			return super.getWidth() - ((this.getMaxScrollY() > 0) ? 6 : 0);
 		}
 		
+		@Override
+		protected int getScrollbarX() {
+			return super.getRight() - ((this.getMaxScrollY() > 0) ? 6 : 0);
+		}
 		
 		
 		@Override
@@ -2126,11 +2106,6 @@ public class TimeChangerScreen extends Screen
 		@Override
 		public int getRowRight() {
 			return super.getRowRight();
-		}
-		
-		@Override
-		protected int getScrollbarX() {
-			return super.getRight() - ((this.getMaxScrollY() > 0) ? 6 : 0);
 		}
 		
 		@Override
@@ -2181,19 +2156,20 @@ public class TimeChangerScreen extends Screen
 		{
 			if (this.getMaxScrollY() <= 0)
 				ctx.fillGradient(this.getX(), this.getY(), this.getRight(), this.getBottom(), 0xAA334400, 0x55002233);
-
-			if (this.title != null)
-			{
-				final TextRenderer textRenderer = this.parent.getTextRenderer();
-				int y = this.getY() - textRenderer.fontHeight - 6;
-				
-				ctx.fillGradient(this.getX(), y, this.getRight(), y + textRenderer.fontHeight + 4, 0xAA000000, 0x77000000);
-				TimeChangerScreen.renderText(ctx, textRenderer, this.title, this.getX(), y + 1, this.width, true, -1);
-			}
 		}
 
 		@Override
-		protected void drawHeaderAndFooterSeparators(DrawContext ctx) {}
+		protected void drawHeaderAndFooterSeparators(DrawContext ctx) 
+		{
+			if (this.title == null)
+				return;
+			
+			final TextRenderer textRenderer = this.parent.getTextRenderer();
+			int y = this.getY() - textRenderer.fontHeight - 6;
+			
+			ctx.fillGradient(this.getX(), y, this.getRight(), y + textRenderer.fontHeight + 4, 0xAA000000, 0x77000000);
+			TimeChangerScreen.renderText(ctx, textRenderer, this.title, this.getX(), y + 1, this.width, true, -1);
+		}
 		
 		public void renderTooltipsFromMouse(DrawContext ctx, int mouseX, int mouseY)
 		{
@@ -2243,14 +2219,15 @@ public class TimeChangerScreen extends Screen
 		public void tick()
 		{
 			List<? extends Element> children = this.children();
-			
+
 			if (children == null || children.isEmpty())
 				return;
 			
-			children.forEach(elem -> {
-				if (elem instanceof SelfWidgetRendererInheritor swr)
+			for (Element e : children)
+			{
+				if (e instanceof SelfWidgetRendererInheritor swr)
 					swr.getWidgetRenderer().tick();
-			});
+			}
 		}
 	}
 	

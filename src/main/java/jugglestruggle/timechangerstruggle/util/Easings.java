@@ -1,7 +1,6 @@
 package jugglestruggle.timechangerstruggle.util;
 
 import java.util.Locale;
-
 import net.minecraft.text.Text;
 
 /**

@@ -5,16 +5,14 @@ import jugglestruggle.timechangerstruggle.config.property.BaseNumber;
 import jugglestruggle.timechangerstruggle.config.property.BaseProperty.ValueConsumer;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
 import jugglestruggle.timechangerstruggle.util.SimpleCharacterVisitor;
-
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * @author JuggleStruggle
@@ -74,7 +72,8 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 	
 	
 	
-
+	
+	
 	@Override
 	public BaseNumber<N> getProperty() {
 		return this.property;
@@ -218,6 +217,8 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 		MutableText mt = SimpleCharacterVisitor.asMutableText(0, -1, this.compiledTooltipText);
 		return Text.translatable("gui.narrate.editBox", mt, super.getText());
 	}
+	
+	
 	
 	
 	

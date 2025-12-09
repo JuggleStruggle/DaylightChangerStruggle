@@ -13,8 +13,8 @@
 	"license": "LGPL-3.0-only",
 
 	"depends": {
-		"fabricloader": ">=0.16.14",
-		"minecraft": ">=1.21.9",
+		"fabricloader": ">=0.18.1",
+		"minecraft": ">=1.21.11",
 		"java": ">=21",
 		"fabric-api": "*"
 	},
@@ -37,7 +37,8 @@
 		"modmenu": {
 			"links": {
 				"modmenu.github_releases": "https://github.com/JuggleStruggle/DaylightChangerStruggle/releases",
-				"modmenu.modrinth": "https://modrinth.com/daylightchangerstruggle"
+				"modmenu.modrinth": "https://modrinth.com/mod/daylightchangerstruggle",
+				"modmenu.curseforge": "https://legacy.curseforge.com/minecraft/mc-mods/daylightchangerstruggle"
 			}
 		}
 	}

@@ -9,12 +9,9 @@ import jugglestruggle.timechangerstruggle.client.widget.WidgetPositionedTooltip;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-
-import java.util.Locale;
-
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
-
+import java.util.Locale;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.mojang.brigadier.arguments.ArgumentType;

@@ -5,7 +5,6 @@ import jugglestruggle.timechangerstruggle.client.util.color.RainbowRGB;
 import jugglestruggle.timechangerstruggle.client.util.render.RenderUtils;
 import jugglestruggle.timechangerstruggle.util.EasingType;
 import jugglestruggle.timechangerstruggle.util.Easings;
-
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -75,8 +74,9 @@ public class SelfWidgetRender<W extends ClickableWidget>
 			textColor = this.selectedTextRGB.getInterpolatedColor(delta);
 			
 			// v0.0.2+1.21.6 port change: Since Mojang is making changes to rendering side of things (as of June 2025), 
-			// the Rainbow Shader that was formerly used was completely removed. It will still be used in the future, 
-			// but not during minor ports to make porting quicker for newer versions of the game.
+			// the Rainbow Shader which is still used in older versions up to 1.21.5, was completely removed for 1.21.6
+			// onwards. It will still be used in the future, but not during minor ports to make porting quicker for newer 
+			// versions of the game.
 			RenderUtils.fillPointedGradient
 			(
 				ctx, this.widget.getX(), this.widget.getY(), 

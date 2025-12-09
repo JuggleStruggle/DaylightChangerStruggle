@@ -12,14 +12,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BooleanSupplier;
-import java.util.function.UnaryOperator;
-
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.TimeArgumentType;
 import net.minecraft.screen.ScreenTexts;
@@ -29,7 +21,12 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
-
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.UnaryOperator;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.Command;

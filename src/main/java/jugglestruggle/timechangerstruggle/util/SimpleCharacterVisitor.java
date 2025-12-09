@@ -1,7 +1,6 @@
 package jugglestruggle.timechangerstruggle.util;
 
 import java.util.List;
-
 import net.minecraft.text.CharacterVisitor;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;

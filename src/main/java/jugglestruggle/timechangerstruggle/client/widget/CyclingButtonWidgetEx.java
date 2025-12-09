@@ -6,13 +6,7 @@ import jugglestruggle.timechangerstruggle.util.SimpleCharacterVisitor;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.cursor.StandardCursors;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.screen.narration.NarrationPart;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
@@ -21,7 +15,10 @@ import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -38,12 +35,12 @@ implements SelfWidgetRendererInheritor<CyclingButtonWidgetEx<T>>, WidgetOrderedT
 	private BiConsumer<CyclingButtonWidgetEx<T>, NarrationMessageBuilder> narrationBuilder;
 	
 	protected CyclingButtonWidgetEx(int width, int height, Text message, Text optionText, 
-		int index, T value, Values<T> values, Function<T, Text> valueToText,
-		Function<CyclingButtonWidget<T>, MutableText> narrationMessageFactory, 
-		UpdateCallback<T> callback, TooltipFactoryEx<T> tooltipFactory, boolean optionTextOmitted)
+		int index, T value, Supplier<T> valueSupplier, Values<T> values, 
+		Function<T, Text> valueToText, Function<CyclingButtonWidget<T>, MutableText> narrationFactory, 
+		UpdateCallback<T> callback, TooltipFactoryEx<T> tooltipFactory, CyclingButtonWidget.LabelType displayState)
 	{
-		super(0, 0, width, height, message, optionText, index, value, values, valueToText, 
-			narrationMessageFactory, callback, null, optionTextOmitted);
+		super(0, 0, width, height, message, optionText, index, value, valueSupplier, values, valueToText, 
+			narrationFactory, callback, null, displayState, null);
 		
 		this.renderer = new SelfWidgetRender<>(this, null);
 		this.tooltipFactoryEx = tooltipFactory;
@@ -66,21 +63,14 @@ implements SelfWidgetRendererInheritor<CyclingButtonWidgetEx<T>>, WidgetOrderedT
 	public List<OrderedText> getOrderedTooltip() {
 		return this.cachedTooltipText;
 	}
-
-	
-	
 	
 	@Override
 	public SelfWidgetRender<CyclingButtonWidgetEx<T>> getWidgetRenderer() {
 		return this.renderer;
 	}
 	@Override
-	public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) 
-	{
+	public void drawIcon(DrawContext ctx, int mouseX, int mouseY, float delta) {
 		this.renderer.renderButton(ctx, mouseX, mouseY, delta);
-		
-		if (this.isHovered())
-			ctx.setCursor(this.isInteractable() ? StandardCursors.POINTING_HAND : StandardCursors.NOT_ALLOWED);
 	}
 
 	@Override
@@ -159,10 +149,8 @@ implements SelfWidgetRendererInheritor<CyclingButtonWidgetEx<T>>, WidgetOrderedT
 		else
 			valueToText = state -> state ? trueText : falseText;
 		
-		WidgetBuilder<Boolean> wcbb = new WidgetBuilder<>(valueToText);
-		
+		WidgetBuilder<Boolean> wcbb = new WidgetBuilder<>(valueToText, initial);
 		wcbb.values(ImmutableList.of(true, false));
-		wcbb.initially(initial);
 		
 		return wcbb;
 	}
@@ -175,28 +163,10 @@ implements SelfWidgetRendererInheritor<CyclingButtonWidgetEx<T>>, WidgetOrderedT
 	{
 		protected TooltipFactoryEx<V> tooltipFactoryEx = v -> null;
 		
-		public WidgetBuilderAbstract(Function<V, Text> valueToText) {
-			super(valueToText);
+		public WidgetBuilderAbstract(Function<V, Text> valueToText, V initialValue) {
+			super(valueToText, () -> initialValue);
 		}
 		
-		@Override 
-		@SuppressWarnings("unchecked")
-		public Builder<V> initially(V value)
-		{
-			final CyclingButtonWidgetBuilderAccessor<V> accessor = 
-				(CyclingButtonWidgetBuilderAccessor<V>)this;
-			
-			accessor.setValue(value);
-			
-			int valueIndex = accessor.getValues().getDefaults().indexOf(value);
-			
-			// means that it doesn't exist
-			if (valueIndex != -1)
-				accessor.setInitialIndex(valueIndex);
-			
-			return this;
-		}
-
 		/**
 		 * Use {@link #tooltip(TooltipFactoryEx)} instead as this will 
 		 * not apply the vanilla variant.
@@ -228,28 +198,9 @@ implements SelfWidgetRendererInheritor<CyclingButtonWidgetEx<T>>, WidgetOrderedT
 
 	public static class WidgetBuilder<V> extends WidgetBuilderAbstract<V>
 	{
-		public WidgetBuilder(Function<V, Text> valueToText) {
-			super(valueToText); 
+		public WidgetBuilder(Function<V, Text> valueToText, V initialValue) {
+			super(valueToText, initialValue); 
 		}
-		
-		@Override
-		@SuppressWarnings("unchecked")
-		public Builder<V> initially(V value)
-		{
-			final CyclingButtonWidgetBuilderAccessor<V> accessor = 
-				(CyclingButtonWidgetBuilderAccessor<V>)this;
-			
-			accessor.setValue(value);
-			
-			int valueIndex = accessor.getValues().getDefaults().indexOf(value);
-			
-			// means that it doesn't exist if -1
-			if (valueIndex != -1)
-				accessor.setInitialIndex(valueIndex);
-				
-			return this;
-		}
-		
 		public CyclingButtonWidgetEx<V> build(int width, int height, Text optionText) {
 			return this.build(width, height, optionText, (b, v) -> {});
 		}
@@ -260,17 +211,15 @@ implements SelfWidgetRendererInheritor<CyclingButtonWidgetEx<T>>, WidgetOrderedT
 			
 			List<V> defaults = accessor.getValues().getDefaults();
 			
-			V startingValue = accessor.getValue();
-			startingValue = startingValue == null ? defaults.get(accessor.getInitialIndex()) : startingValue;
-			
+			V startingValue = accessor.getValueSupplier().get();
 			Text messageText = accessor.getValueToText().apply(startingValue);
 			
-			if (!accessor.omitOptionText())
+			if (accessor.getDisplayState() != LabelType.VALUE)
 				messageText = ScreenTexts.composeGenericOptionText(optionText, messageText);
 			
 			return new CyclingButtonWidgetEx<>(width, height, messageText, optionText, 
-				accessor.getInitialIndex(), startingValue, accessor.getValues(), accessor.getValueToText(), 
-				accessor.getNarrationMessageFactory(), callback, this.tooltipFactoryEx, accessor.omitOptionText());
+				defaults.indexOf(startingValue), startingValue, accessor.getValueSupplier(), accessor.getValues(), accessor.getValueToText(), 
+				accessor.getNarrationMessageFactory(), callback, this.tooltipFactoryEx, accessor.getDisplayState());
 		}
 	}
 	

@@ -1,14 +1,12 @@
 package jugglestruggle.timechangerstruggle.mixin.client;
 
 import jugglestruggle.timechangerstruggle.client.TimeChangerStruggleClient;
-
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
 
 
 /**
@@ -22,7 +20,7 @@ public class MinecraftClientMixin
 	// the world parameter not be null. This variant requires that to be in order to
 	// save certain cycles to disk.
 	@Inject(method = "setWorld", at = @At("TAIL"))
-	private void onAfterClientWorldChange(ClientWorld world, CallbackInfo ci) {
+	private void daylightChangerStruggle_onAfterClientWorldChange(ClientWorld world, boolean stopSoundManager, CallbackInfo ci) {
 		TimeChangerStruggleClient.onWorldChanged((MinecraftClient)(Object)this, world);
 	}
 }

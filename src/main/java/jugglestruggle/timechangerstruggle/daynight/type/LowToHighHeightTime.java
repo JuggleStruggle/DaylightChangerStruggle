@@ -7,14 +7,11 @@ import jugglestruggle.timechangerstruggle.config.property.LongValue;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
 import jugglestruggle.timechangerstruggle.daynight.DayNightGetterType;
-
-import java.util.Set;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
-
+import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 
 /**

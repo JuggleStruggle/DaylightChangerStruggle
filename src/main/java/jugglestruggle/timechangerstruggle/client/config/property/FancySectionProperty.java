@@ -7,9 +7,7 @@ import jugglestruggle.timechangerstruggle.config.property.BaseProperty;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-
 import net.minecraft.text.Text;
-
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;

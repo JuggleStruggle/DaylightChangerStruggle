@@ -2,7 +2,6 @@ package jugglestruggle.timechangerstruggle.daynight;
 
 import jugglestruggle.timechangerstruggle.client.Commands;
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
-
 import net.minecraft.text.Text;
 
 /**
