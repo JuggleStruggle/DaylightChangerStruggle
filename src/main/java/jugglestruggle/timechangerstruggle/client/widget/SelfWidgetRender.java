@@ -30,17 +30,12 @@ public class SelfWidgetRender<W extends ClickableWidget>
 	private float previousRainbowOffset;
 	
 	public boolean swapTextColoringWithRainbow;
-//	private AbstractRGB[] hoveredColor;
 	
 	public SelfWidgetRender(W widget, TextRenderer textRenderer)
 	{
 		this.widget = widget;
 		this.textRenderer = textRenderer;
 
-		/*
-		 this.hoveredColor = ChromaRGB.createColors
-		 	(0xFFFFFFFF, 0xFFFFFF00, 0xFF00FFFF, 0xFF00FFFF, 0xFFFF00FF);
-		 */
 		this.textColoring = RainbowRGB.createColors(0xFFFFFFFF)[0];
 		
 		this.stripeScale = 2.0f;
@@ -50,17 +45,6 @@ public class SelfWidgetRender<W extends ClickableWidget>
 		// Non-functional; if you have an idea as to how we can render text
 		// using the rainbow shader then we can make this useful :D
 		this.swapTextColoringWithRainbow = false;
-		
-		/*
-		 ((ChromaRGB)this.hoveredColor[1]).setTicks(0);
-		 ((ChromaRGB)this.hoveredColor[2]).setTicks(14);
-		 ((ChromaRGB)this.hoveredColor[3]).setTicks(18);
-		 ((ChromaRGB)this.hoveredColor[4]).setTicks(28);
-		 
-		 for (int i = 1; i < 5; ++i) {
-		     ((ChromaRGB)this.hoveredColor[i]).setTicksForNextUpdate(42);
-		 }
-		 */
 	}
 	
 	public void setTextRendering(TextRenderer renderer) {
@@ -91,12 +75,6 @@ public class SelfWidgetRender<W extends ClickableWidget>
 				this.previousRainbowOffset = this.rainbowOffset;
 				this.rainbowOffset += this.rainbowSpeed;
 			}
-			
-			/*
-			for (AbstractRGB r : this.hoveredColor) {
-				r.tick();
-			}
-			 */
 		}
 	}
 	
@@ -107,20 +85,10 @@ public class SelfWidgetRender<W extends ClickableWidget>
 		
 		if (this.widget.active && this.widget.isHovered())
 		{
-			/*
-			textColor = this.hoveredColor[0].getInterpolatedColor(delta);
-			
-			RenderUtils.fillPointedGradient(matrices, this.widget.x, this.widget.y, 
-				this.widget.x + this.widget.getWidth(), this.widget.y + this.widget.getHeight(), this.widget.getZOffset(), 
-				this.hoveredColor[1].getInterpolatedColor(delta), this.hoveredColor[2].getInterpolatedColor(delta),
-				this.hoveredColor[3].getInterpolatedColor(delta), this.hoveredColor[4].getInterpolatedColor(delta));
-			 */
-			
 			if (this.swapTextColoringWithRainbow)
 			{
 				stcwr = true;
 				
-//				textColor = this.textColoring.getInterpolatedColor(delta);
 				textColor = 0xFF000000;
 				
 				DrawableHelper.fill(matrices, this.widget.x, this.widget.y, 
@@ -131,7 +99,6 @@ public class SelfWidgetRender<W extends ClickableWidget>
 			else
 			{
 				textColor = this.textColoring.getInterpolatedColor(delta);
-				
 				this.fillMyRainbow(matrices, delta, false);
 			}
 		}
@@ -141,7 +108,8 @@ public class SelfWidgetRender<W extends ClickableWidget>
 			int enabledColor = this.widget.active ? 0xCC888888 : 0xCC333333;
 			
 			DrawableHelper.fill(matrices, this.widget.x, this.widget.y, 
-				this.widget.x + this.widget.getWidth(), this.widget.y + this.widget.getHeight(), enabledColor);
+				this.widget.x + this.widget.getWidth(), 
+				this.widget.y + this.widget.getHeight(), enabledColor);
 		}
 		
 		OrderedText message = this.widget.getMessage().asOrderedText();

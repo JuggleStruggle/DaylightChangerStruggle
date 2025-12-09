@@ -13,8 +13,4 @@ public interface InterchangeableFunction<L, R>
 {
 	L applyLeft(R value);
 	R applyRight(L value);
-	
-//	default Function<R, L> getLeftFunction() {
-//		return this::getLeftFunction;
-//	}
 }

@@ -5,6 +5,7 @@ import jugglestruggle.timechangerstruggle.client.config.widget.CyclingWidgetConf
 import jugglestruggle.timechangerstruggle.client.config.widget.WidgetConfigInterface;
 import jugglestruggle.timechangerstruggle.client.config.widget.CyclingWidgetConfig.WidgetConfigBuilderEnum;
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
+import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
 import jugglestruggle.timechangerstruggle.util.InterchangeableFunction;
 
 import net.fabricmc.api.EnvType;
@@ -36,7 +37,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 31-Jan-2022, Monday
  */
@@ -51,7 +51,7 @@ public class EnumValue<EV extends Enum<EV>> extends BaseProperty<EnumValue<EV>, 
 	
 	private final CyclingButtonWidget.UpdateCallback<EV> callback = (button, value) -> { 
 		if (super.consumer != null)
-			super.consumer.consume(this, value);
+			super.consumer.consume(this, value, PropertyWriterSource.USER);
 	};
 	
 	@SuppressWarnings("unchecked")
@@ -63,11 +63,10 @@ public class EnumValue<EV extends Enum<EV>> extends BaseProperty<EnumValue<EV>, 
 		
 		this.enumValues = values;
 		
-		if (defaultValue instanceof InterchangeableFunction) {
+		if (defaultValue instanceof InterchangeableFunction)
 			this.readableFunc = (InterchangeableFunction<EV, String>)defaultValue;
-		} else {
+		else
 			this.readableFunc = null;
-		}
 	}
 
 	@Override
@@ -104,7 +103,8 @@ public class EnumValue<EV extends Enum<EV>> extends BaseProperty<EnumValue<EV>, 
 	 * <p> If not, then the Deprecated tag will be removed!
 	 * 
 	 * @param func the function used to translate the enumerator to string 
-	 *              and vice versa
+	 *        and vice versa
+	 * 
 	 * @return the same class but with an updated field
 	 */
 	@Deprecated
@@ -115,7 +115,8 @@ public class EnumValue<EV extends Enum<EV>> extends BaseProperty<EnumValue<EV>, 
 	 * Used to perform checks as to whether the enumerator provided is valid.
 	 * 
 	 * @param predicate the predicate which is going to be used to check
-	 * for enumerator validation.
+	 *        for enumerator validation
+	 * 
 	 * @return the same class but with an updated field
 	 */
 	public EnumValue<EV> setEnumValidation(Predicate<EV> predicate) {
@@ -143,11 +144,6 @@ public class EnumValue<EV extends Enum<EV>> extends BaseProperty<EnumValue<EV>, 
 		
 		if (optionText == null)
 			optionText = new LiteralText(this.property());
-		
-//		if (this.propertyText == null)
-//			optionText = new LiteralText(this.property());
-//		else
-//			optionText = this.propertyText;
 		
 		return builder.build(20, 20, optionText, this.callback);
 	}

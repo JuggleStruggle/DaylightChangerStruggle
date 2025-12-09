@@ -138,10 +138,27 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 	 * world time is ON.
 	 */
 	public static boolean commandsDisableWorldTimeOnCycleUsage = true;
+	/**
+	 * Whether to allow certain cycles, such as Moving or Randomized Time,
+	 * to write to disk whenever there's a world change (or leaving).
+	 * 
+	 * <p> Currently, there is no GUI option to change this but can be
+	 * changed in commands.
+	 * 
+	 * @see #worldExistedPreviously
+	 * @implNote Introduced in v0.0.1
+	 */
+	public static boolean allowWorldChangeCyclesToWriteToDisk = true;
 	
 	public static Configuration config;
 
 	private static Commands commands;
+
+	/**
+	 * Used to keep track of world changes in order to avoid doing too much work.
+	 * @implNote Introduced in v0.0.1
+	 */
+	private static boolean worldExistedPreviously = false;
 	
 	static
 	{
@@ -152,7 +169,7 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 		TimeChangerStruggleClient.registerCycleBuilder(new StaticTime.Builder());
 		TimeChangerStruggleClient.registerCycleBuilder(new MovingTime.Builder());
 		TimeChangerStruggleClient.registerCycleBuilder(new RandomizedTime.Builder());
-		// TimeChangerStruggleClient.registerCycleBuilder(new ShrugTime.Builder()); (will not be used in initial release since it does nothing)
+		// TimeChangerStruggleClient.registerCycleBuilder(new ShrugTime.Builder()); (will not be used at this time)
 		TimeChangerStruggleClient.registerCycleBuilder(new LowToHighHeightTime.Builder());
 	}
 	
@@ -304,7 +321,6 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 	
 	
 	@Override
-	@SuppressWarnings("resource")
 	public void onInitializeClient()
 	{
 		// Register keybindings to client
@@ -340,8 +356,7 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 	
 	private void onClientStart(MinecraftClient client)
 	{
-		// Create my favorite shader that PvP / Cheat Clients use:
-		// Chroma/Rainbow Shader :D
+		// Create a Rainbow Shader
 		if (RenderUtils.rainbowAllTheWay == null)
 		{
 			try {
@@ -350,39 +365,20 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 				e.printStackTrace();
 			} 
 		}
-		
 	}
 	
 	private void onClientTick(MinecraftClient client)
 	{
-		// TODO: Is there a better way to call key events on press and releases without the need of ticking?
-		
 		if (client.currentScreen == null && client.world != null)
 		{
-			if (Keybindings.timeChangerMenuKey.isPressed()) {
+			if (Keybindings.timeChangerMenuKey.isPressed())
 				client.setScreen(new TimeChangerScreen());
-			}
 			
 			final boolean previousWorldTime = TimeChangerStruggleClient.worldTime;
 			while (Keybindings.toggleWorldTimeKey.wasPressed()) {
 				TimeChangerStruggleClient.worldTime = !previousWorldTime;
 			}
 		}
-		
-		/*
-		boolean isTCS = (client.currentScreen instanceof TimeChangerScreen);
-		if (RenderUtils.rainbowAllTheWay != null && isTCS)
-		{
-			// final net.minecraft.client.util.Window win = client.getWindow();
-			 RenderUtils.rainbowAllTheWay.aspectRatio.set((float)win.getWidth() / (float)win.getHeight());
-			 RenderUtils.rainbowAllTheWay.stripeScale.set(50.0f / 2.0f * 1.0f);
-			
-			// Stroke Width: No use yet so far...
-			 RenderUtils.rainbowAllTheWay.strokeWidth.set(18.0f);
-			// Global Rainbow Shift Offset
-			 RenderUtils.rainbowAllTheWay.timeOffset.set(2500.0f);
-		}
-		 */
 	}
 	private void onWorldTick(ClientWorld world)
 	{
@@ -390,5 +386,20 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 			return;
 		
 		TimeChangerStruggleClient.timeChanger.tick();
+	}
+
+	// Introduced in v0.0.1
+	public static void onWorldChanged(MinecraftClient client, ClientWorld world)
+	{
+		if (!TimeChangerStruggleClient.useWorldTime() && TimeChangerStruggleClient.worldExistedPreviously && 
+			TimeChangerStruggleClient.timeChanger.saveOnWorldChange()) 
+		{
+			TimeChangerStruggleClient.config.createOrModifyDaylightCycleConfig(TimeChangerStruggleClient.timeChanger, true);
+			
+			if (TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk)
+				TimeChangerStruggleClient.config.writeIfModified();
+		}
+		
+		TimeChangerStruggleClient.worldExistedPreviously = world != null;
 	}
 }

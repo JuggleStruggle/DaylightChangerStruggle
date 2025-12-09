@@ -11,18 +11,15 @@ import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.util.OrderableTooltip;
 
 import com.google.common.collect.ImmutableList;
 
 /**
- * 
- *
  * @author JuggleStruggle
  * @implNote Created on 06-Feb-2022, Sunday
  */
 @Environment(EnvType.CLIENT)
-public interface PositionedTooltip extends OrderableTooltip
+public interface WidgetPositionedTooltip extends WidgetOrderedTooltip
 {
 	int getTooltipWidth();
 	int getTooltipHeight();
@@ -30,6 +27,7 @@ public interface PositionedTooltip extends OrderableTooltip
 	void setTooltipWidth(int width);
 	void setTooltipHeight(int height);
 	
+	@Override
 	void setOrderedTooltip(List<OrderedText> textToSet);
 	
 	default void updateTooltip(Text tooltipDescText, Text tooltipText, TextRenderer renderer)
@@ -59,7 +57,7 @@ public interface PositionedTooltip extends OrderableTooltip
 			);
 		}
 		
-		final int[] offsetPos = TimeChangerScreen.getTooltipForWidgetWidthHeight(compiledTooltipText, renderer);
+		final int[] offsetPos = TimeChangerScreen.getTooltipsSize(compiledTooltipText, renderer);
 		this.setTooltipWidth(offsetPos[0]); this.setTooltipHeight(offsetPos[1]); 
 		
 		this.setOrderedTooltip(compiledTooltipText);

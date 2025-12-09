@@ -5,32 +5,41 @@
 	"environment": "client",
 	
 	"name": "DaylightChangerStruggle",
-	"description": "Sometimes when you want not to bother with the world time so you resort to your own and call it a success.",
+	"description": "Allows you to change the client's world time in a variety of ways!",
+	"icon": "assets/timechangerstruggle/icon.png",
 	"authors": ["JuggleStruggle"],
+	"contributors": [],
+
+	"license": "LGPL-3.0-only",
 	
-	"contact": {
-	  "homepage": "https://github.com/JuggleStruggle/DaylightChangerStruggle",
-	  "sources": "https://github.com/JuggleStruggle/DaylightChangerStruggle",
-	  "issues": "https://github.com/JuggleStruggle/DaylightChangerStruggle/issues"
+	"depends": {
+		"fabricloader": ">=0.12.12",
+		"minecraft": "1.18.x",
+		"java": "17",
+		"fabric": "*"
 	},
 	
-	"license": "MIT",
-	"icon": "assets/timechangerstruggle/icon.png",
-	
-	"entrypoints": 
-	{
-	  "main": ["jugglestruggle.timechangerstruggle.TimeChangerStruggle"],
-	  "client": ["jugglestruggle.timechangerstruggle.client.TimeChangerStruggleClient"],
-	  "modmenu": ["jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen"]
+	"entrypoints": {
+		"main": ["jugglestruggle.timechangerstruggle.TimeChangerStruggle"],
+		"client": ["jugglestruggle.timechangerstruggle.client.TimeChangerStruggleClient"]
 	},
 	
 	"mixins": ["timechangerstruggle.client.mixins.json"],
 	"accessWidener": "timechangerstruggle.client.accesswidener",
 	
-	"depends": {
-	  "fabricloader": ">=0.12.12",
-	  "fabric": "*",
-	  "minecraft": "1.18.x",
-	  "java": ">=17"
+	"contact": {
+		"homepage": "https://github.com/JuggleStruggle/DaylightChangerStruggle",
+		"sources": "https://github.com/JuggleStruggle/DaylightChangerStruggle",
+		"issues": "https://github.com/JuggleStruggle/DaylightChangerStruggle/issues"
+	},
+
+	"custom": {
+		"modmenu": {
+			"links": {
+				"modmenu.github_releases": "https://github.com/JuggleStruggle/DaylightChangerStruggle/releases",
+				"modmenu.modrinth": "https://modrinth.com/mod/daylightchangerstruggle",
+				"modmenu.curseforge": "https://legacy.curseforge.com/minecraft/mc-mods/daylightchangerstruggle"
+			}
+		}
 	}
 }

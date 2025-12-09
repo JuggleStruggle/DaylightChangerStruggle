@@ -11,7 +11,7 @@ import java.util.Locale;
 import net.minecraft.world.World;
 
 /**
- * https://minecraft.gamepedia.com/wiki/Daylight_cycle
+ * https://minecraft.wiki/w/Daylight_cycle
  * 
  * @author JuggleStruggle
  * @implNote Created on 27-Jan-2022, Thursday
@@ -73,14 +73,12 @@ public final class DaylightUtils
 		
 		// Align to local time rather than GMT since the game doesn't care if we us
 		// players live in a different timezone.
-//		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.ENGLISH);
 		Calendar cal = Calendar.getInstance(Locale.ENGLISH);
 		
 		cal.setLenient(true);
 		
-		if (addDay) {
+		if (addDay)
 			days += 1L;
-		}
 		
 		cal.set(0, Calendar.JANUARY, (int)days, hours, minutes, seconds);
 		

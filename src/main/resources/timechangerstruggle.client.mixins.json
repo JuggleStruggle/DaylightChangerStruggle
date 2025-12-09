@@ -5,8 +5,10 @@
     "compatibilityLevel": "JAVA_17",
     "client": 
     [
+		"MinecraftClientMixin",
         "render.GameRendererMixin",
         "world.ClientWorldMixin",
+        "widget.CyclingButtonWidgetAccessor",
         "widget.CyclingButtonWidgetBuilderAccessor"
     ],
     "injectors": {

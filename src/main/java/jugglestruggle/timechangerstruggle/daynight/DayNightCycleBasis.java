@@ -130,8 +130,21 @@ public interface DayNightCycleBasis
 	 * @param <V> the type used from the property itself, like
 	 *             {@link String} or {@link Integer}
 	 */
-//	default <B extends BaseProperty<B, V>, V> void writePropertyValueToCycle(B property) { }
-	default void writePropertyValueToCycle(BaseProperty<?, ?> property) { }
+	default void writePropertyValueToCycle(BaseProperty<?, ?> property, PropertyWriterSource writer) { }
+
+	/**
+	 * Whenever a world change happens, save the cycle's preferences
+	 * to disk so that certain values that constantly update aren't lost
+	 * on the next session. However, this only triggers if the world 
+	 * previously was not empty as to avoid saving when not needed.
+	 * 
+	 * @return a boolean value; by default it's set to {@code false}
+	 * on most cycles
+	 * @implNote Introduced in v0.0.1
+	 */
+	default boolean saveOnWorldChange() {
+		return false;
+	}
 	
 	/**
 	 * Rearranges {@link #createProperties()}'s given elements to 
@@ -271,5 +284,19 @@ public interface DayNightCycleBasis
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Used to know which source requested for a write. It is there to ensure that certain 
+	 * properties behave the way they should when it comes to user writing the property or 
+	 * if it was loaded from disk, which shouldn't write much else on certain cycles.
+	 *
+	 * @author JuggleStruggle
+	 * @implNote Implemented in v0.0.1
+	 */
+	public enum PropertyWriterSource
+	{
+		FROM_JSON,
+		USER
 	}
 }

@@ -4,8 +4,6 @@ import jugglestruggle.timechangerstruggle.util.EasingType;
 import jugglestruggle.timechangerstruggle.util.Easings;
 
 /**
- * 
- *
  * @author JuggleStruggle
  * @implNote Created on 11-Feb-2022, Friday
  */
@@ -19,9 +17,11 @@ public class RainbowRGB extends AbstractRGB
 		else 
 		{
 			RainbowRGB[] chromaColors = new RainbowRGB[startingColors.length];
+			
 			for (int i = 0; i < startingColors.length; ++i) {
 				chromaColors[i] = new RainbowRGB(startingColors[i]);
 			}
+			
 			return chromaColors;
 		}
 	}
@@ -44,26 +44,29 @@ public class RainbowRGB extends AbstractRGB
 	 * <li> 5 = Falling Green
 	 * </ul>
 	 */
-	private byte targetColor = 0;
+	private byte targetColor;
 	public boolean reverseTargetColor;
 	
 	private int previousChromaColor;
 	private int currentChromaColor;
+
+	public RainbowRGB(int startingColor) {
+		this(startingColor, Easings.QUAD, EasingType.BETWEEN, 20, (byte)0);
+	}
 	
-	public RainbowRGB(int startingColor)
+	public RainbowRGB(int startingColor, Easings interpolation, 
+		EasingType easingType, int ticksForNextUpdate, byte targetColor)
 	{
 		this.previousChromaColor = this.currentChromaColor =
 		this.previousColor = this.color = startingColor;
 		
-		this.interpolation = Easings.QUAD;
-		this.easingType = EasingType.BETWEEN;
-		
-		// If this field is set to ticksForNextUpdate, it is assumed 
-		// that it updates the colors then resets it back to 0
-		// this.ticks = 20;
-		// After the chroma colors are updated, ticks is set to 0.
-		// Helps with interpolation combined with easings
-		this.ticksForNextUpdate = 20;
+		this.interpolation = interpolation;
+		this.easingType = easingType;
+
+		// After the chroma colors are updated, the ticks field is set to 0.
+		// Helps with interpolation combined with easings.
+		this.ticksForNextUpdate = ticksForNextUpdate;
+		this.setTargetColor(targetColor);
 		
 		this.tickSelf(true);
 	}
@@ -263,6 +266,18 @@ public class RainbowRGB extends AbstractRGB
 			
 			++this.ticks;
 		}
+	}
+
+
+	// Introduced in v0.0.2+1.21.6
+	public void setTargetColor(byte targetColor) 
+	{
+		if (targetColor < 0)
+			this.targetColor = 0;
+		else if (targetColor > 5)
+			this.targetColor = 5;
+		else
+			this.targetColor = targetColor;
 	}
 }
 

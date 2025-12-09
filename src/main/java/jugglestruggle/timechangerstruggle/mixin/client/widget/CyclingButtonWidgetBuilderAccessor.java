@@ -14,8 +14,7 @@ import net.minecraft.client.gui.widget.CyclingButtonWidget.Values;
 /**
  *
  * @author JuggleStruggle
- * @implNote
- * Created on 03-Feb-2022, Thursday
+ * @implNote Created on 03-Feb-2022, Thursday
  */
 @Mixin(CyclingButtonWidget.Builder.class)
 public interface CyclingButtonWidgetBuilderAccessor<T>
@@ -26,7 +25,7 @@ public interface CyclingButtonWidgetBuilderAccessor<T>
 	void setValue(T value);
 	
 	@Accessor("values")
-	Values<T> values();
+	Values<T> getValues();
 	
 	@Accessor("initialIndex")
 	int getInitialIndex();

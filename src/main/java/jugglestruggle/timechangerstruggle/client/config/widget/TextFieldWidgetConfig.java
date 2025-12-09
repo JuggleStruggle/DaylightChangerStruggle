@@ -1,7 +1,8 @@
 package jugglestruggle.timechangerstruggle.client.config.widget;
 
-import jugglestruggle.timechangerstruggle.client.widget.PositionedTooltip;
+import jugglestruggle.timechangerstruggle.client.widget.WidgetPositionedTooltip;
 import jugglestruggle.timechangerstruggle.config.property.StringValue;
+import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
 import jugglestruggle.timechangerstruggle.config.property.BaseProperty.ValueConsumer;
 
 import net.fabricmc.api.EnvType;
@@ -17,13 +18,12 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 30-Jan-2022, Sunday
  */
 @Environment(EnvType.CLIENT)
 public class TextFieldWidgetConfig extends TextFieldWidget 
-implements WidgetConfigInterface<StringValue, String>, PositionedTooltip
+implements WidgetConfigInterface<StringValue, String>, WidgetPositionedTooltip
 {
 	String initialText;
 	final StringValue property;
@@ -105,15 +105,13 @@ implements WidgetConfigInterface<StringValue, String>, PositionedTooltip
 	{
 		ValueConsumer<StringValue, String> consumer = this.property.getConsumer();
 		
-		if (consumer != null) {
-			consumer.consume(this.property, newText);
-		}
+		if (consumer != null)
+			consumer.consume(this.property, newText, PropertyWriterSource.USER);
 		
 		this.property.set(newText);
 		
-		if (this.textChangedListener != null) {
+		if (this.textChangedListener != null)
 			this.textChangedListener.accept(newText);
-		}
 	}
 	
 	

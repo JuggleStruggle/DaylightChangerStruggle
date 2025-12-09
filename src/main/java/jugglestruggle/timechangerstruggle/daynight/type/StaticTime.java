@@ -13,21 +13,23 @@ import jugglestruggle.timechangerstruggle.daynight.DayNightGetterType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.commons.lang3.ArrayUtils;
-
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
@@ -38,12 +40,14 @@ import com.google.common.collect.Lists;
  * is off and the time is set through the time command.
  *
  * @author JuggleStruggle
- * @implNote
- * Created on 26-Jan-2022, Wednesday
+ * @implNote Created on 26-Jan-2022, Wednesday
  */
 @Environment(EnvType.CLIENT)
 public class StaticTime implements DayNightCycleBasis
 {
+	final static String PROPERTIES_KEY = "jugglestruggle.tcs.dnt.statictime.properties.";
+	
+	
 	public long timeSet = 0;
 
 	@Override
@@ -59,9 +63,145 @@ public class StaticTime implements DayNightCycleBasis
 	public Class<?> getBuilderClass() {
 		return Builder.class;
 	}
-	
+
 	@Override
 	public Element[] createQuickOptionElements(TimeChangerScreen screen)
+	{
+		final Iterator<BaseProperty<?, ?>> propsCreated = this.createProperties().iterator();
+
+		return StaticTime.createQuickOptionElementsShared(screen, 
+			(FancySectionProperty)propsCreated.next(), (LongValue)propsCreated.next()
+		);
+	}
+	
+	
+	@Override
+	public Set<BaseProperty<?, ?>> createProperties()
+	{
+		ImmutableSet.Builder<BaseProperty<?, ?>> prop = ImmutableSet.builderWithExpectedSize(2);
+		
+		prop.add(new FancySectionProperty("time", new TranslatableText(PROPERTIES_KEY+"time")));
+		prop.add(new LongValue("worldtime", this.timeSet, null, null));
+
+		return prop.build();
+	}
+
+	@Override
+	public void writePropertyValueToCycle(BaseProperty<?, ?> property, PropertyWriterSource writer)
+	{
+		final String belongingKey = property.property();
+		
+		if (belongingKey.equals("worldtime") && property instanceof LongValue lv)
+			this.timeSet = lv.get();
+	}
+	
+
+	// Introduced in v0.0.1: Make both Static and Moving Time use the same quick-options 
+	// as they're not anymore different to what they do with their core functionality.
+	public static Element[] createQuickOptionElementsShared(TimeChangerScreen screen, 
+		FancySectionProperty sectionProp, LongValue timeValue)
+	{
+		final NumericFieldWidgetConfig<Long> timeWidget = (NumericFieldWidgetConfig<Long>)
+			timeValue.createConfigElement(screen, sectionProp);
+		
+		final List<PresetSetTimes> setTimes = 
+			Lists.newArrayList(PresetSetTimes.values()).stream()
+			.filter(presetTime -> presetTime.shouldShowInQuickOptions()).toList();
+		
+		final int setTimesSize = setTimes.size();
+		final Element[] itemsToAdd = new Element[1 + setTimesSize];
+		
+		final String setPropsTooltip = PROPERTIES_KEY + "time.worldtime.";
+		final Iterator<PresetSetTimes> setTimesIterator = setTimes.iterator();
+		
+		MutableText lShiftKey = StaticTime.createQuickOptElemKey("shift");
+		MutableText lCtrlKey = StaticTime.createQuickOptElemKey(MinecraftClient.IS_SYSTEM_MAC ? "super" : "control");
+		MutableText lAltKey = StaticTime.createQuickOptElemKey("alt");
+		
+		int i; 
+		
+		List<OrderedText> howToUseTooltipsPreset = new ArrayList<>(4);
+		
+		for (i = 1; i <= 4; ++i) 
+		{
+			howToUseTooltipsPreset.addAll(
+				screen.getTextRenderer().wrapLines(TimeChangerScreen.translateTextAsGrayColor(
+				setPropsTooltip + "tooltip." + i, lShiftKey, lCtrlKey, lAltKey), 200)
+			);
+		}
+		
+		i = 0;
+		ButtonWidgetEx bw;
+		
+		while (setTimesIterator.hasNext())
+		{
+			final PresetSetTimes entry = setTimesIterator.next();
+			final Text displayText = entry.getQuickOptionsText();
+			final String cycleName = entry.name().toLowerCase(Locale.ROOT);
+			
+			// not used if enableAdditionOptions is SUNRISE due to its value being 0
+			final boolean enableAdditionOptions = entry != PresetSetTimes.SUNRISE;
+			
+			ImmutableList.Builder<OrderedText> tooltipsB = 
+				ImmutableList.builderWithExpectedSize(enableAdditionOptions ? 5 : 1);
+			
+			// Name of the tooltip text that belongs on the first line
+			tooltipsB.add(new TranslatableText(setPropsTooltip + cycleName).asOrderedText());
+			
+			// How to use tooltip lines 
+			if (enableAdditionOptions)
+				tooltipsB.addAll(howToUseTooltipsPreset);
+			
+			bw = new ButtonWidgetEx
+			(
+				20, 20, displayText, tooltipsB.build(),
+				screen.getTextRenderer(), b -> 
+				{
+					Long addTime = entry.getTime();
+					Long baseTime = 0L;
+					
+					if (enableAdditionOptions)
+					{
+						final boolean shiftHeld = Screen.hasShiftDown();
+						final boolean controlHeld = Screen.hasControlDown();
+						final boolean altHeld = Screen.hasAltDown();
+						
+						if (shiftHeld || controlHeld || altHeld) 
+						{
+							baseTime = timeWidget.getProperty().get();
+							
+							// Shift just adds so no reason to do anything
+							// Control sets the value negative
+							if (controlHeld)
+								addTime = -addTime;
+							// Alt divides the value to half
+							if (altHeld)
+								addTime /= 2L;
+						}
+					}
+					
+					final Long finalValue = baseTime + addTime;
+					timeWidget.setText(finalValue.toString());
+				}
+			);
+			
+			bw.setNarrationBuilder((bwx, b) -> bwx.appendNarrationTooltipLine(b, (byte)1, 1, 0));
+			
+			// add i + 1 before setting it as the index (e.g. we want to 
+			// add the button widget to index 1 instead of 0 even if i is 0)
+			itemsToAdd[++i] = bw;
+		}
+		
+		itemsToAdd[0] = timeWidget;
+		
+		timeWidget.setWidth(148 - (20 * setTimesSize));
+		timeWidget.setHeight(18);
+		
+		return itemsToAdd;
+	}
+
+	/*
+	public Element[] createQuickOptionElements2(TimeChangerScreen screen)
 	{
 		final Iterator<BaseProperty<?, ?>> propsCreated = this.createProperties().iterator();
 
@@ -128,28 +268,15 @@ public class StaticTime implements DayNightCycleBasis
 		
 		return ArrayUtils.insert(1, itemsToAdd, dayCycles);
 	}
+	*/
 	
-	@Override
-	public Set<BaseProperty<?, ?>> createProperties()
+	// v0.0.2
+	public static MutableText createQuickOptElemKey(String key)
 	{
-		ImmutableSet.Builder<BaseProperty<?, ?>> prop = ImmutableSet.builderWithExpectedSize(2);
+		MutableText keyText = new TranslatableText("jugglestruggle.tcs.keytype." + key);	
+		keyText.styled(s -> s.withColor(0xBFFFBF).withBold(true));
 		
-		final String sectLang = "jugglestruggle.tcs.dnt.statictime.properties.";
-
-		prop.add(new FancySectionProperty("time", new TranslatableText(sectLang+"time")));
-		prop.add(new LongValue("worldtime", this.timeSet, null, null));
-
-		return prop.build();
-	}
-	
-	@Override
-	public void writePropertyValueToCycle(BaseProperty<?, ?> property)
-	{
-		final String belongingKey = property.property();
-		
-		if (property instanceof LongValue && belongingKey.equals("worldtime")) {
-			this.timeSet = ((LongValue)property).get();
-		}
+		return keyText;
 	}
 	
 	public static enum PresetSetTimes

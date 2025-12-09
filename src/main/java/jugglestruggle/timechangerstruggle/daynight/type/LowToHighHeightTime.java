@@ -10,12 +10,11 @@ import jugglestruggle.timechangerstruggle.daynight.DayNightGetterType;
 
 import java.util.Set;
 
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -64,12 +63,6 @@ public class LowToHighHeightTime implements DayNightCycleBasis
 			
 			this.cachedTime = (long)((double)this.minHeightTime + (double)(this.maxHeightTime - this.minHeightTime) * res);
 		}
-		
-//		if (Keybindings.toggleWorldTimeKey.isPressed())
-//		{
-//			jugglestruggle.timechangerstruggle.TimeChangerStruggle.LOGGER
-//			.info("cached time: {} | prev: {}", this.cachedTime, this.cachedTimePrev);
-//		}
 	}
 	
 	@Override
@@ -104,32 +97,24 @@ public class LowToHighHeightTime implements DayNightCycleBasis
 	}
 	
 	@Override
-	public void writePropertyValueToCycle(BaseProperty<?, ?> property)
+	public void writePropertyValueToCycle(BaseProperty<?, ?> property, PropertyWriterSource writer)
 	{
 		final String belongingKey = property.property();
 		
-		if (property instanceof LongValue)
+		if (property instanceof LongValue prop)
 		{
-			LongValue prop = (LongValue)property;
-			
 			switch (belongingKey)
 			{
-				case "minHeightTime": 
-					this.minHeightTime = prop.get(); break;
-				case "maxHeightTime": 
-					this.maxHeightTime = prop.get(); break;
+				case "minHeightTime" -> this.minHeightTime = prop.get();
+				case "maxHeightTime" -> this.maxHeightTime = prop.get(); 
 			}
 		}
-		else if (property instanceof DoubleValue)
+		else if (property instanceof DoubleValue prop)
 		{
-			DoubleValue prop = (DoubleValue)property;
-			
 			switch (belongingKey)
 			{
-				case "minHeight": 
-					this.minHeight = prop.get(); break;
-				case "maxHeight": 
-					this.maxHeight = prop.get(); break;
+				case "minHeight" -> this.minHeight = prop.get();
+				case "maxHeight" -> this.maxHeight = prop.get();
 			}
 		}
 	}

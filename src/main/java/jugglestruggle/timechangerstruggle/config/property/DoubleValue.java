@@ -48,26 +48,4 @@ public class DoubleValue extends BaseNumber<Double>
 	public int onCommandOptionWithValueExecute(CommandContext<FabricClientCommandSource> ctx) {
 		this.set(DoubleArgumentType.getDouble(ctx, "value")); return 3;
 	}
-	
-	/*
-	@Override
-	public boolean readFromValue(String value) 
-	{
-		try 
-		{
-			this.value = Double.parseDouble(value);
-			return true;
-		} 
-		catch (NumberFormatException nfe) {
-			nfe.printStackTrace();
-		}
-		
-		return false;
-	}
-
-	@Override
-	public String getValueAsString() {
-		return this.value.toString();
-	}
-	 */
 }

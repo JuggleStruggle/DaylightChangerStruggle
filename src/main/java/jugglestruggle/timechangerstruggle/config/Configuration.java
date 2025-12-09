@@ -5,6 +5,7 @@ import jugglestruggle.timechangerstruggle.client.config.property.FancySectionPro
 import jugglestruggle.timechangerstruggle.config.property.BaseProperty;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
+import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,7 +29,6 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.stream.JsonWriter;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 31-Jan-2022, Monday
  */
@@ -43,9 +43,7 @@ public class Configuration
 		this.configFile = configFile;
 		
 		GsonBuilder builder = new GsonBuilder();
-		
-		builder.setPrettyPrinting()
-		       .setLenient();
+		builder.setPrettyPrinting().setLenient();
 		
 		this.configDataBaseGson = builder.create();
 	}
@@ -60,22 +58,8 @@ public class Configuration
 		}
 		else
 		{
-			try 
-			{
+			try {
 				populateConfig = !(this.configFile.exists() && this.configFile.canRead());
-				
-				/*
-				if (this.configFile.exists())
-				{
-					if (!this.configFile.canRead())
-						populateConfig = true;
-				}
-				else
-				{
-					this.configFile.createNewFile();
-					populateConfig = true;
-				}
-				 */
 			}
 			catch (Exception ex) 
 			{
@@ -113,6 +97,7 @@ public class Configuration
 					TimeChangerStruggleClient.applyOnPropertyListValueUpdate = this.configData.get("applyOnPropertyListValueUpdate").getAsBoolean();
 					TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant = this.configData.get("commandFeedbackOnLessImportant").getAsBoolean();
 					TimeChangerStruggleClient.commandsDisableWorldTimeOnCycleUsage = this.configData.get("disableWorldTimeOnCycleUsage").getAsBoolean();
+					TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk = this.configData.get("allowWorldChangeCyclesToWriteToDisk").getAsBoolean();
 					
 					JsonElement elem = this.configData.get("activeDaylightChanger");
 					
@@ -127,8 +112,7 @@ public class Configuration
 						}
 					}
 				}
-				else
-				{
+				else {
 					shouldPopulate = true;
 				}
 			} 
@@ -138,9 +122,8 @@ public class Configuration
 				IOUtils.closeQuietly(reader);
 			}
 			
-			if (shouldPopulate) {
+			if (shouldPopulate)
 				this.checkAndPopulateConfigData();
-			}
 		}
 	}
 	
@@ -153,6 +136,7 @@ public class Configuration
 		this.configData.addProperty("applyOnPropertyListValueUpdate", TimeChangerStruggleClient.applyOnPropertyListValueUpdate);
 		this.configData.addProperty("commandFeedbackOnLessImportant", TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant);
 		this.configData.addProperty("disableWorldTimeOnCycleUsage", TimeChangerStruggleClient.commandsDisableWorldTimeOnCycleUsage);
+		this.configData.addProperty("allowWorldChangeCyclesToWriteToDisk", TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk);
 		
 		this.configData.addProperty("activeDaylightChanger", (TimeChangerStruggleClient.getTimeChangerKey() == null) ? "" : TimeChangerStruggleClient.getTimeChangerKey());
 		
@@ -164,9 +148,8 @@ public class Configuration
 		
 		try
 		{
-			if (this.configFile.exists()) {
+			if (this.configFile.exists())
 				this.configFile.delete();
-			}
 			
 			this.configFile.createNewFile();
 			
@@ -175,8 +158,7 @@ public class Configuration
 			
 			this.configDataBaseGson.toJson(this.configData, jsonWriter);
 		} 
-		catch (IOException e)
-		{
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 		
@@ -185,8 +167,6 @@ public class Configuration
 			IOUtils.closeQuietly(writer);
 			IOUtils.closeQuietly(jsonWriter);
 		}
-		
-//		if (this.configFile.)
 	}
 	
 
@@ -206,6 +186,7 @@ public class Configuration
 			TimeChangerStruggleClient.disableNightVisionEffect != true ||
 			TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant != true ||
 			TimeChangerStruggleClient.commandsDisableWorldTimeOnCycleUsage != true ||
+			TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk != true ||
 			TimeChangerStruggleClient.getTimeChangerKey() != null)
 		{
 			this.write();
@@ -229,6 +210,7 @@ public class Configuration
 		Configuration.checkOrCreateProperty(this.configData, "applyOnPropertyListValueUpdate", TimeChangerStruggleClient.applyOnPropertyListValueUpdate);
 		Configuration.checkOrCreateProperty(this.configData, "commandFeedbackOnLessImportant", TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant);
 		Configuration.checkOrCreateProperty(this.configData, "disableWorldTimeOnCycleUsage", TimeChangerStruggleClient.commandsDisableWorldTimeOnCycleUsage);
+		Configuration.checkOrCreateProperty(this.configData, "allowWorldChangeCyclesToWriteToDisk", TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk);
 
 		Configuration.checkOrCreateProperty(this.configData, "activeDaylightChanger", 
 			(TimeChangerStruggleClient.getTimeChangerKey() == null) ? "" : TimeChangerStruggleClient.getTimeChangerKey());
@@ -252,9 +234,8 @@ public class Configuration
 		Optional<DayNightCycleBuilder> builder = TimeChangerStruggleClient.
 			getCachedCycleBuilderByClass(cycle.getBuilderClass());
 		
-		if (!builder.isPresent()) {
+		if (!builder.isPresent())
 			return;
-		}
 		
 		final DayNightCycleBuilder cycleBuilder = builder.get();
 		final String cycleKeyName = cycleBuilder.getKeyName();
@@ -264,11 +245,10 @@ public class Configuration
 		if (props == null || props.isEmpty()) 
 		{
 			JsonElement cyclesSection = this.configData.get("cyclesSection");
-			
+
 			// Remove the config entry should it exist
-			if (cyclesSection != null && cyclesSection.isJsonObject() &&
-				cyclesSection.getAsJsonObject().has(cycleKeyName))
-				cyclesSection.getAsJsonObject().remove(cycleKeyName);
+			if (cyclesSection instanceof JsonObject obj && obj.has(cycleKeyName))
+				obj.remove(cycleKeyName);
 			
 			return;
 		}
@@ -297,7 +277,7 @@ public class Configuration
 			if (!overrideConfigValues && sectionCreated && hasPropEntry) 
 			{
 				prop.readFromJson(section.get(propKey)); 
-				cycle.writePropertyValueToCycle((B)prop);
+				cycle.writePropertyValueToCycle((B)prop, PropertyWriterSource.FROM_JSON);
 			}
 			// If not, just write it as a JSON entry and add it into the section
 			else
@@ -306,9 +286,8 @@ public class Configuration
 				
 				if (propElem == null)
 				{
-					if (overrideConfigValues && hasPropEntry) {
+					if (overrideConfigValues && hasPropEntry)
 						section.remove(propKey);
-					}
 				}
 				else {
 					section.add(propKey, propElem);
@@ -340,13 +319,9 @@ public class Configuration
 		}
 		
 		JsonElement propertyElement = sections.getAsJsonObject().get(propertyName);
-		
-		if (propertyElement != null && propertyElement.isJsonObject()) {
-			return new SimpleImmutableEntry<>(propertyElement.getAsJsonObject(), true);
-		} 
-//		else if (propertyElement != null) {
-//			this.configData.remove(propertyName);
-//		}
+
+		if (propertyElement instanceof JsonObject obj)
+			return new SimpleImmutableEntry<>(obj, true);
 		
 		JsonObject createdSection = new JsonObject();
 		sections.getAsJsonObject().add(propertyName, createdSection);
@@ -362,34 +337,24 @@ public class Configuration
 		
 		if (propertyElement == null)
 		{
-			if (expectingPrimitive) {
-				Configuration.addExpectedPrimitive(section, propertyName, defaultValue);
-			}
-		}
-		else
-		{
 			if (expectingPrimitive)
+				Configuration.addExpectedPrimitive(section, propertyName, defaultValue);
+		}
+		else if (expectingPrimitive && propertyElement instanceof JsonPrimitive primitive)
+		{
+			boolean removeAndAdd = false;
+			
+			if (primitive.isBoolean())
+				removeAndAdd = (defaultValue instanceof Number || defaultValue instanceof String);
+			else if (primitive.isNumber())
+				removeAndAdd = (defaultValue instanceof String || defaultValue instanceof Boolean);
+			else if (primitive.isString())
+				removeAndAdd = (defaultValue instanceof Boolean || defaultValue instanceof Number);
+							
+			if (removeAndAdd)
 			{
-				if (propertyElement.isJsonPrimitive())
-				{
-					JsonPrimitive primitive = propertyElement.getAsJsonPrimitive();
-					
-					boolean removeAndAdd = false;
-					
-					if (primitive.isBoolean()) {
-						removeAndAdd = (defaultValue instanceof Number || defaultValue instanceof String);
-					} else if (primitive.isNumber()) {
-						removeAndAdd = (defaultValue instanceof String || defaultValue instanceof Boolean);
-					} else if (primitive.isString()) {
-						removeAndAdd = (defaultValue instanceof Boolean || defaultValue instanceof Number);
-					}
-					
-					if (removeAndAdd)
-					{
-						section.remove(propertyName);
-						Configuration.addExpectedPrimitive(section, propertyName, defaultValue);
-					}
-				}
+				section.remove(propertyName);
+				Configuration.addExpectedPrimitive(section, propertyName, defaultValue);
 			}
 		}
 	}

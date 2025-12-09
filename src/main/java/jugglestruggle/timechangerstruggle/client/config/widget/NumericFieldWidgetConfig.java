@@ -1,26 +1,28 @@
 package jugglestruggle.timechangerstruggle.client.config.widget;
 
-import jugglestruggle.timechangerstruggle.client.widget.PositionedTooltip;
+import jugglestruggle.timechangerstruggle.client.widget.WidgetPositionedTooltip;
 import jugglestruggle.timechangerstruggle.config.property.BaseNumber;
 import jugglestruggle.timechangerstruggle.config.property.BaseProperty.ValueConsumer;
+import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
+import jugglestruggle.timechangerstruggle.util.SimpleCharacterVisitor;
 
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.OrderedText;
-
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.TranslatableText;
 
 /**
- *
  * @author JuggleStruggle
  * @implNote Created on 30-Jan-2022, Sunday
  */
 public class NumericFieldWidgetConfig<N extends Number> extends TextFieldWidget 
-implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
+implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 {
 	protected final BaseNumber<N> property;
 	protected N initialNumber;
@@ -66,22 +68,15 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
 	@Override
 	public void setTextPredicate(Predicate<String> textPredicate)
 	{
-		Predicate<String> theNextPredicate = (text) -> 
-		{
-			if (!text.isBlank()) {
-				return NumericFieldWidgetConfig.canParseString(this.property.getDefaultValue(), text);
-			}
-			
-			return true;
-		};
-		
-		super.setTextPredicate(theNextPredicate);
+		super.setTextPredicate(text -> text.isBlank() ? true : 
+			NumericFieldWidgetConfig.canParseString(this.property.getDefaultValue(), text));
 	}
 	
 	
 	
 	
-
+	
+	
 	@Override
 	public BaseNumber<N> getProperty() {
 		return this.property;
@@ -174,9 +169,8 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
 			{
 				ValueConsumer<BaseNumber<N>, N> consumer = this.property.getConsumer();
 				
-				if (consumer != null) {
-					consumer.consume(this.property, parsedNumber);
-				}
+				if (consumer != null)
+					consumer.consume(this.property, parsedNumber, PropertyWriterSource.USER);
 				
 				this.property.set(parsedNumber);
 			}
@@ -185,9 +179,13 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
 		this.isNewTextValid = valid;
 		this.setEditableColor(valid ? DEFAULT_EDITABLE_COLOR : 0xE06060);
 		
-		if (this.textChangedListener != null) {
+		if (this.textChangedListener != null)
 			this.textChangedListener.accept(newText);
-		}
+	}
+	
+	// v0.0.3+1.18 exclusive: Allow setting the height for this widget
+	public void setHeight(int height) {
+		this.height = height;
 	}
 	
 	
@@ -220,6 +218,13 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
 	public void setOrderedTooltip(List<OrderedText> textToSet) {
 		this.compiledTooltipText = textToSet;
 	}
+
+	@Override
+	protected MutableText getNarrationMessage()
+	{
+		MutableText mt = SimpleCharacterVisitor.asMutableText(0, -1, this.compiledTooltipText);
+		return new TranslatableText("gui.narrate.editBox", mt, super.getText());
+	}
 	
 	
 	
@@ -238,17 +243,16 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, PositionedTooltip
 		
 		try
 		{
-			if (n instanceof Integer) {
+			if (n instanceof Integer)
 				return (N)(Integer)Integer.parseInt(val);
-			} else if (n instanceof Long) {
+			else if (n instanceof Long)
 				return (N)(Long)Long.parseLong(val);
-			} else if (n instanceof Double) {
+			else if (n instanceof Double)
 				return (N)(Double)Double.parseDouble(val);
-			} else if (n instanceof Float) {
+			else if (n instanceof Float)
 				return (N)(Float)Float.parseFloat(val);
-			} else if (n instanceof Byte) {
+			else if (n instanceof Byte)
 				return (N)(Byte)Byte.parseByte(val);
-			}
 		}
 		catch (NumberFormatException nfe) {}
 		

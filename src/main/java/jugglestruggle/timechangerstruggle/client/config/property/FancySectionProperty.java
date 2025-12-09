@@ -39,7 +39,7 @@ public class FancySectionProperty extends BaseProperty<FancySectionProperty, Tex
 
 	@Override
 	public WidgetConfigInterface<FancySectionProperty, Text> createConfigElement
-	(TimeChangerScreen screen, FancySectionProperty owningSection)
+		(TimeChangerScreen screen, FancySectionProperty owningSection) 
 	{
 		return null;
 	}
@@ -60,5 +60,23 @@ public class FancySectionProperty extends BaseProperty<FancySectionProperty, Tex
 	@Override
 	public int onCommandOptionWithValueExecute(CommandContext<FabricClientCommandSource> ctx) {
 		return 0;
+	}
+
+	/**
+	 * Gets whether this property shall be created under this section. 
+	 * 
+	 * <p> This is useful if certain properties need to be hidden from the user if 
+	 * the property is meant to be "remembered" such as Moving Time or Randomized 
+	 * Time. However, please do not forget that they can still be edited in the
+	 * configuration file and ensure to verify/parse things (or not) where applicable.
+	 * 
+	 * @param sectionPropIndex the index representing the child props of this section
+	 * @param prop the "child" property that's part of this section
+	 * @return a boolean value; by default this returns {@code true} to allow all of them
+	 * 
+	 * @implNote Implemented in v0.0.1
+	 */
+	public boolean shouldCreatePropertyConfigElem(int sectionPropIndex, BaseProperty<?, ?> prop) {
+		return true;
 	}
 }

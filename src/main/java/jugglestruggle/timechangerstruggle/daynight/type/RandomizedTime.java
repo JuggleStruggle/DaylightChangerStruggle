@@ -1,7 +1,10 @@
 package jugglestruggle.timechangerstruggle.daynight.type;
 
 import jugglestruggle.timechangerstruggle.client.config.property.FancySectionProperty;
+import jugglestruggle.timechangerstruggle.client.config.property.WidgetOnlyProperty;
 import jugglestruggle.timechangerstruggle.client.config.widget.WidgetConfigInterface;
+import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
+import jugglestruggle.timechangerstruggle.client.widget.ButtonWidgetEx;
 import jugglestruggle.timechangerstruggle.config.property.BaseProperty;
 import jugglestruggle.timechangerstruggle.config.property.BooleanValue;
 import jugglestruggle.timechangerstruggle.config.property.EnumValue;
@@ -16,11 +19,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.Map.Entry;
 
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
@@ -32,12 +36,13 @@ import com.google.common.collect.ImmutableSet;
  * seed can be put, but whatever.
  * 
  * @author JuggleStruggle
- * @implNote
- * Created on 26-Jan-2022, Wednesday
+ * @implNote Created on 26-Jan-2022, Wednesday
  */
 @Environment(EnvType.CLIENT)
 public class RandomizedTime extends MovingTimeBasis
 {
+	final static String PROPERTIES_KEY = "jugglestruggle.tcs.dnt.randomizer.properties.";
+	
 	/** 
 	 * The initial seed whenever this class is created, loaded or 
 	 * property-loaded provided that the property-load was done without 
@@ -253,81 +258,87 @@ public class RandomizedTime extends MovingTimeBasis
 		return typeToUse;
 	}
 	
-	
 	@Override
 	public Class<?> getBuilderClass() {
 		return Builder.class;
+	}
+
+	@Override // Introduced in v0.0.1
+	public boolean saveOnWorldChange() {
+		return true;
 	}
 	
 	@Override
 	public Set<BaseProperty<?, ?>> createProperties()
 	{
-		ImmutableSet.Builder<BaseProperty<?, ?>> prop = ImmutableSet.builderWithExpectedSize(12);
+		ImmutableSet.Builder<BaseProperty<?, ?>> props = ImmutableSet.builderWithExpectedSize(12);
 		
-		final String sectLang = "jugglestruggle.tcs.dnt.randomizer.properties.";
+		props.add(new SeedSectionProperty());
+		props.add(new StringValue("startingSeed", (this.startingSeed == null) ? "" : this.startingSeed).setEmptyTextAllowance(true));
+		props.add(new WidgetOnlyProperty("resetSeedToInitial", this::onResetSeedToInitialCreateButton));
+		// props.add(new LongValue("currentRngSeed", this.rng.setSeed(maximumRandomTime), null, null));
 		
-		prop.add(new FancySectionProperty("seed", new TranslatableText(sectLang+"seed")));
-		prop.add(new StringValue("startingSeed", (this.startingSeed == null) ? "" : this.startingSeed).setEmptyTextAllowance(true));
+		props.add(new FancySectionProperty("daylightrandomtime", new TranslatableText(PROPERTIES_KEY+"daylightrandomtime")));
+		props.add(new LongValue("minimumRandomTime", this.minimumRandomTime, 0L, Long.MAX_VALUE));
+		props.add(new LongValue("maximumRandomTime", this.maximumRandomTime, 0L, Long.MAX_VALUE));
 		
-		prop.add(new FancySectionProperty("daylightrandomtime", new TranslatableText(sectLang+"daylightrandomtime")));
-		prop.add(new LongValue("minimumRandomTime", this.minimumRandomTime, 0L, Long.MAX_VALUE));
-		prop.add(new LongValue("maximumRandomTime", this.maximumRandomTime, 0L, Long.MAX_VALUE));
+		props.add(new FancySectionProperty("ticksuntilnextrng", new TranslatableText(PROPERTIES_KEY+"ticksuntilnextrng")));
+		props.add(new BooleanValue("randomizeTicksUntilNextRNG", this.randomizeTicksUntilNextRNG));
+		props.add(new LongValue("ticksUntilNextRNG", this.ticksUntilNextRNGBasis, 1L, Long.MAX_VALUE));
+		props.add(new LongValue("ticksUntilNextRNGMin", this.ticksUntilNextRNGMin, 1L, Long.MAX_VALUE));
+		props.add(new LongValue("ticksUntilNextRNGMax", this.ticksUntilNextRNGMax, 1L, Long.MAX_VALUE));
 		
-		prop.add(new FancySectionProperty("ticksuntilnextrng", new TranslatableText(sectLang+"ticksuntilnextrng")));
-		prop.add(new BooleanValue("randomizeTicksUntilNextRNG", this.randomizeTicksUntilNextRNG));
-		prop.add(new LongValue("ticksUntilNextRNG", this.ticksUntilNextRNGBasis, 1L, Long.MAX_VALUE));
-		prop.add(new LongValue("ticksUntilNextRNGMin", this.ticksUntilNextRNGMin, 1L, Long.MAX_VALUE));
-		prop.add(new LongValue("ticksUntilNextRNGMax", this.ticksUntilNextRNGMax, 1L, Long.MAX_VALUE));
-		
-		prop.add(new FancySectionProperty("easings", new TranslatableText(sectLang+"easings")));
-		prop.add(new BooleanValue("randomizeEasingBetweenTicks", this.randomizeEasingBetweenTicks));
-		prop.add(new EnumValue<>("easingBetweenTicks", this.easingBetweenTicksBasis, Easings.LINEAR, Easings.values())
+		props.add(new FancySectionProperty("easings", new TranslatableText(PROPERTIES_KEY+"easings")));
+		props.add(new BooleanValue("randomizeEasingBetweenTicks", this.randomizeEasingBetweenTicks));
+		props.add(new EnumValue<>("easingBetweenTicks", this.easingBetweenTicksBasis, Easings.LINEAR, Easings.values())
 			.setVTT(easing -> easing.getFormattedText()));
-		prop.add(new BooleanValue("randomizeEasingTypeBetweenTicks", this.randomizeEasingTypeBetweenTicks));
-		prop.add(new EnumValue<>("easingTypeBetweenTicks", this.easingTypeBetweenTicksBasis, EasingType.BETWEEN, EasingType.values())
+		props.add(new BooleanValue("randomizeEasingTypeBetweenTicks", this.randomizeEasingTypeBetweenTicks));
+		props.add(new EnumValue<>("easingTypeBetweenTicks", this.easingTypeBetweenTicksBasis, EasingType.BETWEEN, EasingType.values())
 			.setVTT(easing -> easing.getFormattedText()));
+
+		props.addAll(this.createSnapshotProperties(false));
 		
-		return prop.build();
+		return props.build();
 	}
-	
+
 	@Override
-//	public <B extends BaseProperty<B, V>, V> void writePropertyValueToCycle(B property)
-	public void writePropertyValueToCycle(BaseProperty<?, ?> property)
+	public void writePropertyValueToCycle(BaseProperty<?, ?> property, PropertyWriterSource writer)
 	{
 		final String belongingKey = property.property();
 		
-		if (property instanceof StringValue)
+		if (property instanceof StringValue prop)
 		{
 			if (belongingKey.equals("startingSeed"))
 			{
-				this.startingSeed = ((StringValue)property).get();
+				this.startingSeed = prop.get();
 				
 				if (!this.hasTickUpdateOccured)
 					this.createRNG(this.startingSeed, true);
+				
+				return;
 			}
 		}
-		else if (property instanceof LongValue)
+		else if (property instanceof LongValue prop)
 		{
-			LongValue prop = (LongValue)property;
-			
 			switch (belongingKey)
 			{
-				case "minimumRandomTime": 
-					this.minimumRandomTime = prop.get(); break;
-				case "maximumRandomTime": 
-					this.maximumRandomTime = prop.get(); break;
+				case "minimumRandomTime" -> {
+					this.minimumRandomTime = prop.get(); return;
+				}
+				case "maximumRandomTime" -> {
+					this.maximumRandomTime = prop.get(); return;
+				}
 					
-				case "ticksUntilNextRNG": 
+				case "ticksUntilNextRNG" ->
 				{
 					this.ticksUntilNextRNGBasis = prop.get();
 					
 					if (!this.randomizeTicksUntilNextRNG)
 						this.ticksUntilNextCall = this.ticksUntilNextRNGBasis;
-						
-					break;
+					
+					return;
 				}
-				case "ticksUntilNextRNGMin": 
-				case "ticksUntilNextRNGMax": 
+				case "ticksUntilNextRNGMin", "ticksUntilNextRNGMax" ->
 				{
 					if (belongingKey.equals("ticksUntilNextRNGMax"))
 						this.ticksUntilNextRNGMax = prop.get();
@@ -339,17 +350,15 @@ public class RandomizedTime extends MovingTimeBasis
 					else
 						this.easingBetweenTicks = this.easingBetweenTicksBasis;
 					
-					break;
+					return;
 				}
 			}
 		}
-		else if (property instanceof BooleanValue)
+		else if (property instanceof BooleanValue prop)
 		{
-			BooleanValue prop = (BooleanValue)property;
-			
 			switch (belongingKey)
 			{
-				case "randomizeTicksUntilNextRNG": 
+				case "randomizeTicksUntilNextRNG" ->
 				{
 					this.randomizeTicksUntilNextRNG = prop.get(); 
 					
@@ -358,9 +367,9 @@ public class RandomizedTime extends MovingTimeBasis
 					else
 						this.ticksUntilNextCall = this.ticksUntilNextRNGBasis;
 					
-					break;
+					return;
 				}
-				case "randomizeEasingBetweenTicks": 
+				case "randomizeEasingBetweenTicks" ->
 				{
 					this.randomizeEasingBetweenTicks = prop.get(); 
 					
@@ -369,9 +378,9 @@ public class RandomizedTime extends MovingTimeBasis
 					else
 						this.easingBetweenTicks = this.easingBetweenTicksBasis;
 					
-					break;
+					return;
 				}
-				case "randomizeEasingTypeBetweenTicks": 
+				case "randomizeEasingTypeBetweenTicks" ->
 				{
 					this.randomizeEasingTypeBetweenTicks = prop.get(); 
 					
@@ -380,26 +389,24 @@ public class RandomizedTime extends MovingTimeBasis
 					else
 						this.easingType = this.easingTypeBetweenTicksBasis;
 					
-					break;
+					return;
 				}
 			}
 		}
-		else if (property instanceof EnumValue<?>)
+		else if (property instanceof EnumValue<?> prop)
 		{
-			EnumValue<?> prop = (EnumValue<?>)property;
-			
 			if (prop.getDefaultValue() instanceof Easings)
 			{
 				switch (belongingKey)
 				{
-					case "easingBetweenTicks": 
+					case "easingBetweenTicks" ->
 					{
 						this.easingBetweenTicksBasis = (Easings)prop.get(); 
 						
 						if (!this.randomizeEasingBetweenTicks)
 							this.easingBetweenTicks = this.easingBetweenTicksBasis;
 						
-						break;
+						return;
 					}
 				}
 			}
@@ -407,18 +414,20 @@ public class RandomizedTime extends MovingTimeBasis
 			{
 				switch (belongingKey)
 				{
-					case "easingTypeBetweenTicks": 
+					case "easingTypeBetweenTicks" ->
 					{
 						this.easingTypeBetweenTicksBasis = (EasingType)prop.get(); 
 						
 						if (!this.randomizeEasingTypeBetweenTicks)
 							this.easingType = this.easingTypeBetweenTicksBasis;
 						
-						break;
+						return;
 					}
 				}
 			}
 		}
+		
+		this.writePropertyValueToCycleForBasis(property, writer);
 	}
 	
 	@Override
@@ -440,6 +449,16 @@ public class RandomizedTime extends MovingTimeBasis
 				new WidgetConfigInterface<?, ?>[]{ elements.get(2), elements.get(3) }
 			};
 		};
+	}
+
+	protected ResetSeedButton onResetSeedToInitialCreateButton
+		(TimeChangerScreen screen, FancySectionProperty section, WidgetOnlyProperty prop)
+	{
+		return new ResetSeedButton(this, screen, prop);
+	}
+	
+	protected void onResetSeedPropClicked(ButtonWidget b) {
+		this.createRNG(this.startingSeed, true);
 	}
 	
 	public static class Builder implements DayNightCycleBuilder
@@ -465,6 +484,62 @@ public class RandomizedTime extends MovingTimeBasis
 		
 		@Override
 		public boolean hasOptionsToEdit() {
+			return true;
+		}
+	}
+
+	// Introduced in v0.0.1
+	class SeedSectionProperty extends FancySectionProperty
+	{
+		public SeedSectionProperty() {
+			super("seed", new TranslatableText(PROPERTIES_KEY+"seed"));
+		}
+		
+		@Override
+		public boolean shouldCreatePropertyConfigElem(int sectionPropIndex, BaseProperty<?, ?> prop) {
+			return !prop.property().equals("currentRngSeed");
+		}
+	}
+	
+	// Introduced in v0.0.1
+	protected class ResetSeedButton extends ButtonWidgetEx implements WidgetOnlyProperty.WidgetInterface
+	{
+		final RandomizedTime instance;
+		final WidgetOnlyProperty prop;
+
+		public ResetSeedButton(RandomizedTime instance, TimeChangerScreen screen, WidgetOnlyProperty prop)
+		{
+			super(18, 18, new TranslatableText(PROPERTIES_KEY + "seed.resettoinitial"), 
+				screen.getTextRenderer(), instance::onResetSeedPropClicked);
+			
+			this.instance = instance; this.prop = prop;
+		}
+
+		@Override
+		public boolean isValid() {
+			return false;
+		}
+
+		@Override
+		public WidgetOnlyProperty getProperty() {
+			return this.prop;
+		}
+		@Override
+		public Object getInitialValue() {
+			return this.prop.getDefaultValue();
+		}
+
+		@Override
+		public void setInitialValue(Object value) {}
+
+		@Override
+		public void forceSetWidgetValueToDefault(boolean justInitial) {}
+
+		@Override
+		public void setPropertyValueToDefault(boolean justInitial) {}
+
+		@Override
+		public boolean isDefaultValue() {
 			return true;
 		}
 	}

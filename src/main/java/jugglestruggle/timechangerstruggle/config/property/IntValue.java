@@ -48,26 +48,4 @@ public class IntValue extends BaseNumber<Integer>
 	public int onCommandOptionWithValueExecute(CommandContext<FabricClientCommandSource> ctx) {
 		this.set(IntegerArgumentType.getInteger(ctx, "value")); return 3;
 	}
-	
-	/*
-	@Override
-	public boolean readFromValue(String value)
-	{
-		try 
-		{
-			this.value = Integer.parseInt(value);
-			return true;
-		} 
-		catch (NumberFormatException nfe) {
-			nfe.printStackTrace();
-		}
-		
-		return false;
-	}
-
-	@Override
-	public String getValueAsString() {
-		return this.value.toString();
-	}
-	 */
 }
