@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.IOUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -43,9 +43,7 @@ public class Configuration
 		this.configFile = configFile;
 		
 		GsonBuilder builder = new GsonBuilder();
-		
-		builder.setPrettyPrinting()
-		       .setLenient();
+		builder.setPrettyPrinting().setLenient();
 		
 		this.configDataBaseGson = builder.create();
 	}
@@ -160,8 +158,7 @@ public class Configuration
 			
 			this.configDataBaseGson.toJson(this.configData, jsonWriter);
 		} 
-		catch (IOException e)
-		{
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 		
@@ -170,8 +167,6 @@ public class Configuration
 			IOUtils.closeQuietly(writer);
 			IOUtils.closeQuietly(jsonWriter);
 		}
-		
-//		if (this.configFile.)
 	}
 	
 
@@ -324,10 +319,9 @@ public class Configuration
 		}
 		
 		JsonElement propertyElement = sections.getAsJsonObject().get(propertyName);
-		
-		if (propertyElement != null && propertyElement.isJsonObject()) {
-			return new SimpleImmutableEntry<>(propertyElement.getAsJsonObject(), true);
-		} 
+
+		if (propertyElement instanceof JsonObject obj)
+			return new SimpleImmutableEntry<>(obj, true);
 		
 		JsonObject createdSection = new JsonObject();
 		sections.getAsJsonObject().add(propertyName, createdSection);
@@ -346,10 +340,8 @@ public class Configuration
 			if (expectingPrimitive)
 				Configuration.addExpectedPrimitive(section, propertyName, defaultValue);
 		}
-		else if (expectingPrimitive && propertyElement.isJsonPrimitive())
+		else if (expectingPrimitive && propertyElement instanceof JsonPrimitive primitive)
 		{
-			JsonPrimitive primitive = propertyElement.getAsJsonPrimitive();
-		
 			boolean removeAndAdd = false;
 			
 			if (primitive.isBoolean())

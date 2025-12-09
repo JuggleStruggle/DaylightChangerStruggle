@@ -100,7 +100,7 @@ public abstract class MovingTimeBasis implements DayNightCycleBasis
 		}
 	}
 	/**
-	 * Updates the call whenever {@link #ticksPassed} supercedes or 
+	 * Updates the call whenever {@link #ticksPassed} supersedes or 
 	 * matches {@link #ticksUntilNextCall}.
 	 */
 	public void updateCall()

@@ -3,6 +3,7 @@ package jugglestruggle.timechangerstruggle.client.widget;
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
 import jugglestruggle.timechangerstruggle.client.util.color.AbstractRGB;
 import jugglestruggle.timechangerstruggle.client.util.color.RainbowRGB;
+import jugglestruggle.timechangerstruggle.client.util.render.RainbowShader;
 import jugglestruggle.timechangerstruggle.client.util.render.RenderUtils;
 
 import net.minecraft.client.font.TextRenderer;
@@ -123,7 +124,7 @@ public class SelfWidgetRender<W extends ClickableWidget>
 	
 	private void fillMyRainbow(DrawContext ctx, float delta, boolean adv)
 	{
-		RenderUtils.rainbowShader.stripeScale.set(50.0f / 2.0f * this.stripeScale);
+		RainbowShader.RAINBOW_SHADER.stripeScale.set(50.0f / 2.0f * this.stripeScale);
 		
 		RenderUtils.fillRainbow
 		(

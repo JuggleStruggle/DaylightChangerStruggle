@@ -142,7 +142,7 @@ implements WidgetConfigInterface<B, T>, SelfWidgetRendererInheritor<CyclingWidge
 		return this.renderer;
 	}
 	@Override
-	public void renderButton(DrawContext ctx, int mouseX, int mouseY, float delta) {
+	public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) {
 		this.renderer.renderButton(ctx, mouseX, mouseY, delta);
 	}
 	
@@ -200,8 +200,7 @@ implements WidgetConfigInterface<B, T>, SelfWidgetRendererInheritor<CyclingWidge
 	{
 		protected SetPropertyValueCallback() { }
 		
-		@Override
-		@SuppressWarnings({ "unchecked" })
+		@Override @SuppressWarnings("unchecked")
 		public void onValueChange(CyclingButtonWidget<T> button, T value) {
 			((CyclingWidgetConfig<B, T>)button).onValueChanged(value);
 		}
@@ -222,7 +221,7 @@ implements WidgetConfigInterface<B, T>, SelfWidgetRendererInheritor<CyclingWidge
 		{
 			@SuppressWarnings("unchecked")
 			final CyclingButtonWidgetBuilderAccessor<V> accessor = 
-			(CyclingButtonWidgetBuilderAccessor<V>)this;
+				(CyclingButtonWidgetBuilderAccessor<V>)this;
 			
 			List<V> defaults = accessor.getValues().getDefaults();
 			

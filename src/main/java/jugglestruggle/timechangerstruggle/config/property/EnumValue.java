@@ -61,11 +61,10 @@ public class EnumValue<EV extends Enum<EV>> extends BaseProperty<EnumValue<EV>, 
 		
 		this.enumValues = values;
 		
-		if (defaultValue instanceof InterchangeableFunction) {
+		if (defaultValue instanceof InterchangeableFunction)
 			this.readableFunc = (InterchangeableFunction<EV, String>)defaultValue;
-		} else {
+		else
 			this.readableFunc = null;
-		}
 	}
 
 	@Override
@@ -102,7 +101,8 @@ public class EnumValue<EV extends Enum<EV>> extends BaseProperty<EnumValue<EV>, 
 	 * <p> If not, then the Deprecated tag will be removed!
 	 * 
 	 * @param func the function used to translate the enumerator to string 
-	 *              and vice versa
+	 *        and vice versa
+	 * 
 	 * @return the same class but with an updated field
 	 */
 	@Deprecated
@@ -113,7 +113,8 @@ public class EnumValue<EV extends Enum<EV>> extends BaseProperty<EnumValue<EV>, 
 	 * Used to perform checks as to whether the enumerator provided is valid.
 	 * 
 	 * @param predicate the predicate which is going to be used to check
-	 * for enumerator validation.
+	 *        for enumerator validation
+	 * 
 	 * @return the same class but with an updated field
 	 */
 	public EnumValue<EV> setEnumValidation(Predicate<EV> predicate) {

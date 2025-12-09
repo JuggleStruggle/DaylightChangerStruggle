@@ -74,7 +74,7 @@ implements SelfWidgetRendererInheritor<CyclingButtonWidgetEx<T>>, WidgetOrderedT
 		return this.renderer;
 	}
 	@Override
-	public void renderButton(DrawContext ctx, int mouseX, int mouseY, float delta) {
+	public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) {
 		this.renderer.renderButton(ctx, mouseX, mouseY, delta);
 	}
 

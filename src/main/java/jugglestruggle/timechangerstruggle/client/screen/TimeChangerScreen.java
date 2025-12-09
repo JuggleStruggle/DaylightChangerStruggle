@@ -45,7 +45,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.ElementListWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
@@ -155,7 +154,7 @@ public class TimeChangerScreen extends Screen
 	private DayNightCycleBuilder switchDaylightCycleMenu_propertiesListBuilder;
 	
 	public TimeChangerScreen() {
-		super(Text.empty());
+		super(Text.translatable("jugglestruggle.tcs.screen"));
 	}
 	public TimeChangerScreen(DayNightCycleBuilder builder) 
 	{
@@ -375,7 +374,9 @@ public class TimeChangerScreen extends Screen
 				{
 					// For now just add the elements in its X position and width
 					int xAddition = xR;
-					boolean wasPreviousTextFieldWidget = false;
+
+					// 1.21+ and newer versions: TextFieldWidget's size was properly 
+					// fixed; no need to do anything special for those widgets.
 					
 					for (int i = 0; i < quickOptionElementsSize; ++i)
 					{
@@ -385,25 +386,8 @@ public class TimeChangerScreen extends Screen
 						if (quickElement instanceof ClickableWidget) 
 						{
 							pw = (ClickableWidget)quickElement;
-							
-							if (pw instanceof TextFieldWidget) 
-							{
-								xAddition += 1;
-								pw.setX(xAddition); pw.setY(y + 1);
-								
-								wasPreviousTextFieldWidget = true;
-							}
-							else
-							{
-								if (wasPreviousTextFieldWidget) {
-									xAddition += 1;
-								}
-								
-								pw.setX(xAddition); pw.setY(y);
-								
-								wasPreviousTextFieldWidget = false;
-							}
-							
+							pw.setX(xAddition); pw.setY(y);
+
 							xAddition += pw.getWidth();
 						}
 					}
@@ -472,7 +456,7 @@ public class TimeChangerScreen extends Screen
 					{
 						lobster = elemList[0];
 						
-						lobster.setLeftPos(10);  lobster.setTopPos(listTop);
+						lobster.setX(10);  lobster.setY(listTop);
 						lobster.setWidth(this.width - 20); 
 						lobster.setHeight(listHeight);
 						
@@ -482,12 +466,12 @@ public class TimeChangerScreen extends Screen
 					{
 						// Left
 						lobster = elemList[0];
-						lobster.setLeftPos(9);    lobster.setTopPos(listTop);
+						lobster.setX(9);    lobster.setY(listTop);
 						lobster.setWidth(w - 11); lobster.setHeight(listHeight);
 						
 						// Right
 						lobster = elemList[1];
-						lobster.setLeftPos(w + 1); lobster.setTopPos(listTop);
+						lobster.setX(w + 1); lobster.setY(listTop);
 						lobster.setWidth(w - 11);  lobster.setHeight(listHeight);
 						
 						break;
@@ -519,7 +503,7 @@ public class TimeChangerScreen extends Screen
 						
 						ClickableWidget bwe = (ClickableWidget)widgetRenderer;
 						
-						bwe.setX(lobster.getLeft());
+						bwe.setX(lobster.getX());
 						bwe.setY(lobster.getBottom() + 2);
 						
 						bwe.setMessage(Text.of(TimeChangerStruggleClient.applyOnPropertyListValueUpdate ? "\u25C9" : "\u25EF"));
@@ -541,7 +525,7 @@ public class TimeChangerScreen extends Screen
 							.setNarrationBuilder((cb, b) -> cb.appendNarrationTooltipLine(b, (byte)1, 1, 0));
 						
 						bwe.active = !TimeChangerStruggleClient.applyOnPropertyListValueUpdate;
-						bwe.setX(lobster.getLeft() + 22); bwe.setY(lobster.getBottom() + 2);
+						bwe.setX(lobster.getX() + 22); bwe.setY(lobster.getBottom() + 2);
 						
 						disposableElements.add((T)bwe);
 						
@@ -634,9 +618,8 @@ public class TimeChangerScreen extends Screen
 			case CONFIGURATION_MENU:
 			case SWITCH_DAYLIGHT_CYCLE_MENU:
 			{
-				if (this.currentMenu == Menu.SWITCH_DAYLIGHT_CYCLE_MENU) {
+				if (this.currentMenu == Menu.SWITCH_DAYLIGHT_CYCLE_MENU)
 					this.switchDaylightCycleMenu_savePropertiesToConfig();
-				}
 				
 				if (this.menuElements.containsKey(Menu.MAIN_MENU)) {
 					this.updateMenuType(Menu.MAIN_MENU); return;
@@ -666,70 +649,56 @@ public class TimeChangerScreen extends Screen
 	@Override
 	public void render(DrawContext ctx, int mouseX, int mouseY, float delta)
 	{
-		switch (this.currentMenu)
-		{
-			case MAIN_MENU:
-			{
-				if (this.client.world != null)
-				{
-					String parsedTime = DaylightUtils.getParsedTime(this.client.world, TimeChangerStruggleClient.dateOverTicks);
-					
-					int textWidth = this.textRenderer.getWidth(parsedTime);
-					
-					int x = this.width / 2;
-					int y = this.height - 86;
-					
-					ctx.fillGradient(x - 152, y, x + 152, y + this.textRenderer.fontHeight + 4, 0xAA000000, 0x77000000);
-					ctx.drawText(this.textRenderer, parsedTime, x - (textWidth / 2), y + 3, -1, false);
-				}
-				
-				break;
-			}
-			
-			default:
-				break;
-		}
-		
 		// Renders the elements
 		super.render(ctx, mouseX, mouseY, delta);
+
+		if (this.currentMenu == Menu.MAIN_MENU && this.client.world != null)
+		{
+			String parsedTime = DaylightUtils.getParsedTime(this.client.world, TimeChangerStruggleClient.dateOverTicks);
+			
+			int textWidth = this.textRenderer.getWidth(parsedTime);
+			
+			int x = this.width / 2;
+			int y = this.height - 86;
+			
+			ctx.fillGradient(x - 152, y, x + 152, y + this.textRenderer.fontHeight + 4, 0xAA000000, 0x77000000);
+			ctx.drawText(this.textRenderer, parsedTime, x - (textWidth / 2), y + 3, -1, false);
+		}
 		
 		// Renders anything in front of the elements, this also includes the tooltips
 		TimeChangerScreen.renderTooltips(ctx, this, this, mouseX, mouseY, 0, 0);
 		
-		switch (this.currentMenu)
+		if (this.currentMenu == Menu.SWITCH_DAYLIGHT_CYCLE_MENU)
 		{
-			case SWITCH_DAYLIGHT_CYCLE_MENU:
+			Iterator<? extends Element> e = this.children().iterator();
+			final boolean keys = MinecraftClient.getInstance().getNavigationType().isKeyboard();
+			
+			while (e.hasNext()) 
 			{
-
-				Iterator<? extends Element> e = this.children().iterator();
+				Element elem = e.next();
 				
-				final boolean keys = MinecraftClient.getInstance().getNavigationType().isKeyboard();
-				
-				while (e.hasNext()) 
+				if (elem instanceof SwitchGetterBasisBuilderList l && l.isVisible())
 				{
-					Element elem = e.next();
-					
-					if (elem instanceof SwitchGetterBasisBuilderList l && l.isVisible())
+					if (keys)
 					{
-						if (keys)
-						{
-							if (elem.isFocused()) {
-								l.renderTooltipsFromKey(ctx, mouseX, mouseY); break;
-							}
-						}
-						else if (elem.isMouseOver(mouseX, mouseY)) {
-							l.renderTooltipsFromMouse(ctx, mouseX, mouseY); break;
+						if (elem.isFocused()) {
+							l.renderTooltipsFromKey(ctx, mouseX, mouseY); break;
 						}
 					}
+					else if (elem.isMouseOver(mouseX, mouseY)) {
+						l.renderTooltipsFromMouse(ctx, mouseX, mouseY); break;
+					}
 				}
-				
-				break;
 			}
-			
-			default:
-				break;
 		}
 	}
+	@Override // from 1.21.5 port: avoid rendering the background unless the player's not in a world
+	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta)
+	{
+		if (this.client.world == null)
+			super.renderBackground(context, mouseX, mouseY, delta);
+	}
+	
 	@Override
 	public void tick()
 	{
@@ -969,7 +938,7 @@ public class TimeChangerScreen extends Screen
 			
 			bwe.updateTooltip
 			(
-				firstLineText, Text.translatable("jugglestruggle.tcs.screen.switchcyclemenu.desc"),
+				firstLineText, TimeChangerScreen.translateTextAsGrayColor("jugglestruggle.tcs.screen.switchcyclemenu.desc"),
 				this.getTextRenderer()
 			);
 			
@@ -978,7 +947,7 @@ public class TimeChangerScreen extends Screen
 			
 			bwe.updateTooltip
 			(
-				firstLineText, Text.translatable("jugglestruggle.tcs.screen.switchcyclemenu.quick.desc"),
+				firstLineText, TimeChangerScreen.translateTextAsGrayColor("jugglestruggle.tcs.screen.switchcyclemenu.quick.desc"),
 				this.getTextRenderer()
 			);
 			
@@ -991,9 +960,8 @@ public class TimeChangerScreen extends Screen
 	}
 	void mainMenu_createQuickOptionElements(List<Element> elements)
 	{
-		if (TimeChangerStruggleClient.getTimeChanger() == null) {
+		if (TimeChangerStruggleClient.getTimeChanger() == null)
 			return;
-		}
 		
 		Element[] quickOptionElements = TimeChangerStruggleClient.getTimeChanger().createQuickOptionElements(this);
 		
@@ -1009,10 +977,10 @@ public class TimeChangerScreen extends Screen
 			if (elem == null) 
 				continue;
 
-			if (elem instanceof SelfWidgetRendererInheritor swr)
-				swr.getWidgetRenderer().setTextRendering(this.getTextRenderer());;
-			if (elem instanceof WidgetConfigInterface wci)
-				wci.getProperty().consumerOnlyIfNotExists(this);
+			if (elem instanceof SelfWidgetRendererInheritor e)
+				e.getWidgetRenderer().setTextRendering(this.getTextRenderer());;
+			if (elem instanceof WidgetConfigInterface e)
+				e.getProperty().consumerOnlyIfNotExists(this);
 			
 			elements.add(elem);
 		}
@@ -1158,9 +1126,9 @@ public class TimeChangerScreen extends Screen
 	}
 	private void switchDaylightCycleMenu_propertyList_saveProperties(ButtonWidget b)
 	{
-		this.switchDaylightCycleMenu_propertyList_forEachProperty((modifyingCycleType, propElem) -> {
-			modifyingCycleType.writePropertyValueToCycle(propElem.getProperty(), PropertyWriterSource.USER);
-		});
+		this.switchDaylightCycleMenu_propertyList_forEachProperty((modifyingCycleType, propElem) ->
+			modifyingCycleType.writePropertyValueToCycle(propElem.getProperty(), PropertyWriterSource.USER)
+		);
 	}
 	private void switchDaylightCycleMenu_propertyList_resetProperties(ButtonWidget b)
 	{
@@ -1249,6 +1217,7 @@ public class TimeChangerScreen extends Screen
 				this.switchDaylightCycleMenu_onlyPropertiesList = cycleMenuListWidget.getValue();
 				update = true;
 			}
+			
 			if (update) {
 				this.clearChildren(); this.initSelf();
 			}
@@ -1513,6 +1482,7 @@ public class TimeChangerScreen extends Screen
 		public SwitchGetterBuilderList(TimeChangerScreen parent) {
 			super(parent, 24);
 		}
+		
 		public final void addSectionEntries()
 		{
 			TimeChangerStruggleClient.getCachedCycleTypeBuilders().stream().forEach((builder) -> {
@@ -1779,8 +1749,7 @@ public class TimeChangerScreen extends Screen
 			this.name = this.builder.getTranslatableName();
 			this.description = this.builder.getTranslatableDescription();
 			
-			this.options = new ButtonWidgetEx(
-				20, 20, Text.of("\u26A1"), 
+			this.options = new ButtonWidgetEx(20, 20, Text.of("\u26A1"), 
 				Text.translatable("jugglestruggle.tcs.screen.switchcyclemenu.cycleentry.useasoption", this.name),
 				null, parent.parent.textRenderer, this::onCreateOptionClick)
 				.setNarrationBuilder((bwx, b) -> bwx.appendNarrationTooltipLine(b, (byte)1, 1, 0));
@@ -1886,9 +1855,8 @@ public class TimeChangerScreen extends Screen
 		{
 			// Firstly, check if this builder is already in use before attempting to
 			// make changes to certain elements
-			if (this.isDaylightCycleTypeEqual()) {
+			if (this.isDaylightCycleTypeEqual())
 				return;
-			}
 			
 			final SwitchDaylightCycleBuilderListEntry myInstance = this;
 			
@@ -2115,89 +2083,52 @@ public class TimeChangerScreen extends Screen
 	private abstract class SwitchGetterBasisBuilderList<E extends SwitchGetterBasisBuilderEntry<E>> extends ElementListWidget<E>
 	{
 		protected final TimeChangerScreen parent;
-		protected boolean visible;
 		protected Text title;
 		
 		public SwitchGetterBasisBuilderList(TimeChangerScreen parent, int itemSize)
 		{
-			super(parent.client, 0, 0, 0, 0, itemSize);
-			
+			super(parent.client, 0, 0, 0, itemSize);
 			this.parent = parent;
-			this.visible = true;
 			
-			this.setRenderBackground(false);
 			this.setRenderHeader(false, 0);
-			this.setRenderHorizontalShadows(false);
-			
 			this.centerListVertically = false;
 		}
 
-		public int getLeft() {
-			return super.left;
-		}
-		public int getRight() {
-			return super.right;
-		}
-		public int getBottom() {
-			return super.bottom;
-		}
-		
-		public int getHeight() {
-			return super.height;
-		}
-
-		public void setTopPos(int y)
-		{
-			super.top = y;
-			super.bottom = y + super.height;
-		}
-		
-		public void setWidth(int w)
-		{
-			super.width = w;
-			this.setLeftPos(this.left);
-		}
-		public void setHeight(int h)
-		{
-			super.height = h;
-			this.setTopPos(super.top);
-		}
-		
 		@Override
 		public int getRowWidth() {
 			return super.width - ((this.getMaxScroll() > 0) ? 6 : 0);
 		}
 		@Override
-		protected int getScrollbarPositionX() {
-			return super.right - ((this.getMaxScroll() > 0) ? 6 : 0);
+		protected int getScrollbarX() {
+			return super.getRight() - ((this.getMaxScroll() > 0) ? 6 : 0);
 		}
 		
 		@Override
 		public int getRowLeft() {
-			return super.left;
+			return super.getX();
 		}
 		@Override
 		public int getRowRight() {
-			return this.getScrollbarPositionX();
+			return this.getScrollbarX();
 		}
 		
 		@Override
 		protected int getRowTop(int index) {
-			return this.top - (int)this.getScrollAmount() + index * this.itemHeight;
+			return this.getY() - (int)this.getScrollAmount() + index * this.itemHeight;
 		}
 
 		@Override
 		public int getMaxScroll() {
-			return Math.max(0, this.getMaxPosition() - (this.bottom - this.top));
+			return Math.max(0, this.getMaxPosition() - this.getHeight());
 		}
 
 		@Override @Nullable
 		protected E getEntryAtPosition(double x, double y) 
 		{
-			int m = MathHelper.floor(y - this.top) + (int)this.getScrollAmount();
+			int m = MathHelper.floor(y - this.getY()) + (int)this.getScrollAmount();
 			int yIndex = m / this.itemHeight;
 			
-			return (x >= this.left && x < this.getScrollbarPositionX() && 
+			return (x >= this.getX() && x < this.getScrollbarX() && 
 				yIndex >= 0 && m >= 0 && yIndex < this.getEntryCount()) ? this.children().get(yIndex) : null;
 		}
 		
@@ -2223,8 +2154,8 @@ public class TimeChangerScreen extends Screen
 			return this.visible ? super.mouseReleased(mouseX, mouseY, button) : false;
 		}
 		@Override
-		public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-			return this.visible ? super.mouseScrolled(mouseX, mouseY, amount) : false;
+		public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+			return this.visible ? super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount) : false;
 		}
 		
 		@Override
@@ -2241,11 +2172,10 @@ public class TimeChangerScreen extends Screen
 		}
 		
 		@Override
-		protected void renderBackground(DrawContext ctx)
+		protected void drawMenuListBackground(DrawContext ctx)
 		{
 			if (this.getMaxScroll() <= 0)
-				ctx.fillGradient(this.left, this.top, this.right, this.bottom, 0xAA334400, 0x55002233);
-			
+				ctx.fillGradient(this.getX(), this.getY(), this.getRight(), this.getBottom(), 0xAA334400, 0x55002233);
 		}
 		
 		@Override
@@ -2254,30 +2184,36 @@ public class TimeChangerScreen extends Screen
 			if (this.title != null)
 			{
 				final TextRenderer textRenderer = this.parent.getTextRenderer();
-				int y = this.top - textRenderer.fontHeight - 6;
+				int y = this.getY() - textRenderer.fontHeight - 6;
 				
-				ctx.fillGradient(this.left, y, this.right, y + textRenderer.fontHeight + 4, 0xAA000000, 0x77000000);
-				TimeChangerScreen.renderText(ctx, textRenderer, this.title, this.left, y + 3, this.width, true, -1);
+				ctx.fillGradient(this.getX(), y, this.getRight(), y + textRenderer.fontHeight + 4, 0xAA000000, 0x77000000);
+				TimeChangerScreen.renderText(ctx, textRenderer, this.title, this.getX(), y + 3, this.width, true, -1);
 			}
+		}
+
+		@Override
+		protected void drawHeaderAndFooterSeparators(DrawContext ctx) {
+			// Do nothing
 		}
 		
 		@Override
-		public void render(DrawContext ctx, int mouseX, int mouseY, float delta)
+		public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta)
 		{
 			if (!this.visible)
 				return;
 				
-			this.renderBackground(ctx);
+			this.drawMenuListBackground(ctx);
 			
-			this.hoveredEntry = this.isMouseOver(mouseX, mouseY) ? this.getEntryAtPosition(mouseX, mouseY) : null;
+//			this.hoveredEntry = this.isMouseOver(mouseX, mouseY) ? this.getEntryAtPosition(mouseX, mouseY) : null;
+			this.hoveredEntry = this.hovered ? this.getEntryAtPosition(mouseX, mouseY) : null;
 			
 			final double scale = this.client.getWindow().getScaleFactor();
 			// Has to conform to using OpenGL's way since it always starts bottom-left
-			final int selfTop = this.parent.height - (this.top + this.height); 
+			final int selfTop = this.parent.height - (this.getY() + this.height); 
 			
 			RenderSystem.enableScissor
 			(
-				(int)((double)this.left   * scale), 
+				(int)((double)this.getX() * scale), 
 				(int)((double)selfTop     * scale),
 				(int)((double)this.width  * scale), 
 				(int)((double)this.height * scale)
@@ -2290,19 +2226,22 @@ public class TimeChangerScreen extends Screen
 			
 			if (scrollAmount > 0) 
 			{
-				int x1 = this.getScrollbarPositionX();
+				int x1 = this.getScrollbarX();
 				int x2 = x1 + 6;
 
-				int y2 = (int)((float)((this.bottom - this.top) * (this.bottom - this.top)) / this.getMaxPosition());
-				y2 = MathHelper.clamp(y2, 32, this.bottom - this.top - 8);
+				int y2 = (int)((float)(this.height * this.height) / this.getMaxPosition());
+				y2 = MathHelper.clamp(y2, 32, this.height - 8);
 				
-				int y1 = (int)this.getScrollAmount() * (this.bottom - this.top - y2) / scrollAmount + this.top;
-				if (y1 < this.top)
-					y1 = this.top;
+				int y1 = (int)this.getScrollAmount() * (this.height - y2) / scrollAmount + this.getY();
+				
+				if (y1 < this.getY())
+					y1 = this.getY();
 
-				ctx.fill(x1, this.top, x2, this.bottom, -16777216);
+				RenderSystem.enableBlend();
+				ctx.fill(x1, this.getY(), x2, this.getBottom(), -16777216);
 				ctx.fill(x1, y1, x2, y1 + y2, -8355712);
 				ctx.fill(x1, y1, x2 - 1, y1 + y2 - 1, -4144960);
+				RenderSystem.disableBlend();
 			}
 
 			RenderSystem.disableScissor();
@@ -2341,20 +2280,21 @@ public class TimeChangerScreen extends Screen
 		}
 	}
 	
-	private abstract class SwitchGetterBasisBuilderEntry
-	<E extends SwitchGetterBasisBuilderEntry<E>> extends ElementListWidget.Entry<E>
+	private abstract class SwitchGetterBasisBuilderEntry<E extends SwitchGetterBasisBuilderEntry<E>> 
+		extends ElementListWidget.Entry<E>
 	{
 		public void tick()
 		{
 			List<? extends Element> children = this.children();
-			
+
 			if (children == null || children.isEmpty())
 				return;
 			
-			children.forEach(elem -> {
-				if (elem instanceof SelfWidgetRendererInheritor swr)
+			for (Element e : children)
+			{
+				if (e instanceof SelfWidgetRendererInheritor swr)
 					swr.getWidgetRenderer().tick();
-			});
+			}
 		}
 	}
 	

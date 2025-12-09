@@ -8,3 +8,9 @@ extendable method net/minecraft/client/gui/widget/CyclingButtonWidget refreshToo
 # Entry List Widget
 extendable method net/minecraft/client/gui/widget/EntryListWidget getEntryAtPosition (DD)Lnet/minecraft/client/gui/widget/EntryListWidget$Entry;
 accessible field net/minecraft/client/gui/widget/EntryListWidget hoveredEntry Lnet/minecraft/client/gui/widget/EntryListWidget$Entry;
+
+# Shader and Rendering
+# > VertexFormat: Get past the pointless limitation of registering Vertex Format Element IDs to avoid mod conflict
+extendable method net/minecraft/client/render/VertexFormat <init> (Ljava/util/List;Ljava/util/List;Lit/unimi/dsi/fastutil/ints/IntList;I)V
+accessible field net/minecraft/client/render/VertexFormat offsetsByElementId [I
+extendable method net/minecraft/client/render/VertexFormat$Builder <init> ()V

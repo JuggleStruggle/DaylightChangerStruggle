@@ -47,7 +47,7 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 		this.setText(this.property.get().toString());
 		this.initialNumber = this.property.get();
 		
-		this.setCursorToStart();
+		this.setCursorToStart(false);
 	}
 
 	@Override
@@ -74,7 +74,8 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 	
 	
 	
-
+	
+	
 	@Override
 	public BaseNumber<N> getProperty() {
 		return this.property;
@@ -219,10 +220,6 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 		return Text.translatable("gui.narrate.editBox", mt, super.getText());
 	}
 	
-	public void setHeight(int height) {
-		this.height = height;
-	}
-	
 	
 	
 	
@@ -240,17 +237,16 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 		
 		try
 		{
-			if (n instanceof Integer) {
+			if (n instanceof Integer)
 				return (N)(Integer)Integer.parseInt(val);
-			} else if (n instanceof Long) {
+			else if (n instanceof Long)
 				return (N)(Long)Long.parseLong(val);
-			} else if (n instanceof Double) {
+			else if (n instanceof Double)
 				return (N)(Double)Double.parseDouble(val);
-			} else if (n instanceof Float) {
+			else if (n instanceof Float)
 				return (N)(Float)Float.parseFloat(val);
-			} else if (n instanceof Byte) {
+			else if (n instanceof Byte)
 				return (N)(Byte)Byte.parseByte(val);
-			}
 		}
 		catch (NumberFormatException nfe) {}
 		

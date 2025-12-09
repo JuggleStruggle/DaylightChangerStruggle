@@ -4,10 +4,9 @@ plugins
 	id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+sourceCompatibility = JavaVersion.VERSION_21
+targetCompatibility = JavaVersion.VERSION_21
 
-// archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
@@ -15,9 +14,8 @@ base {
 	archivesName = "${project.archives_base_name}-${project.version}+${project.minecraft_version}"
 }
 
-repositories {}
-
-dependencies {
+dependencies 
+{
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 
@@ -30,7 +28,8 @@ java {
 	withSourcesJar()
 }
 
-processResources {
+processResources 
+{
 	inputs.property "version", project.version
 
 	filesMatching("fabric.mod.json") {
@@ -39,19 +38,19 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 17
+	it.options.release = 21
 }
-
 
 loom {
 	accessWidenerPath = file("src/main/resources/timechangerstruggle.client.accesswidener");
 }
 
-jar {
+jar 
+{
 	inputs.property "archivesName", project.base.archivesName
 
 	from("LICENSE") {
-		rename { "${project.archivesBaseName}-${it}"}
+		rename {"${project.archives_base_name}-LICENSE"}
 	}
 }
 
@@ -64,3 +63,5 @@ publishing {
 
 	repositories {}
 }
+
+repositories {}

@@ -1,7 +1,7 @@
 {
 	"jugglestruggle.tcs": "TimeChangerStruggle",
-	
-	"jugglestruggle.tcs.": "",
+
+	"jugglestruggle.tcs.screen": "DaylightChangerStruggle",
 	"jugglestruggle.tcs.screen.toggleworldtime": "Tiempo del Mundo",
 	"jugglestruggle.tcs.screen.toggledate": "Fecha Sobre Ticks",
 	"jugglestruggle.tcs.screen.togglesmoothbutterdaylightcycle": "Cíclo Suaves",

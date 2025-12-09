@@ -137,6 +137,7 @@ public interface DayNightCycleBasis
 	 * 
 	 * @return a boolean value; by default it's set to {@code false}
 	 * on most cycles
+	 * @implNote Introduced in v0.0.1
 	 */
 	default boolean saveOnWorldChange() {
 		return false;

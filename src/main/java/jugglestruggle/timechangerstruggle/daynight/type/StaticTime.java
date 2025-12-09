@@ -191,8 +191,8 @@ public class StaticTime implements DayNightCycleBasis
 		
 		itemsToAdd[0] = timeWidget;
 		
-		timeWidget.setWidth(148 - (20 * setTimesSize));
-		timeWidget.setHeight(18);
+		timeWidget.setWidth(150 - (20 * setTimesSize));
+		timeWidget.setHeight(20);
 		
 		return itemsToAdd;
 	}

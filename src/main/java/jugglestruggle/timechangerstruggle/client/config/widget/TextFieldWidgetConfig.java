@@ -45,7 +45,7 @@ implements WidgetConfigInterface<StringValue, String>, WidgetPositionedTooltip
 		this.setText(this.initialText);
 		this.setChangedListener(null);
 		
-		this.setCursorToStart();
+		this.setCursorToStart(false);
 	}
 
 	@Override

@@ -1,13 +1,14 @@
 package jugglestruggle.timechangerstruggle.client.util.render;
 
+import jugglestruggle.timechangerstruggle.mixin.client.render.BufferBuilderAccessor;
+
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.lwjgl.system.MemoryUtil;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.render.RenderLayer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -17,27 +18,22 @@ import com.mojang.blaze3d.systems.RenderSystem;
  */
 public final class RenderUtils
 {
-	public static RainbowShader rainbowShader;
-	
 	public static void fillPointedGradient(DrawContext ctx, int startX, int startY, int endX, int endY,
 		int z, int topLeftColor, int topRightColor, int bottomLeftColor, int bottomRightColor)
 	{
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
-		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+//		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 		
-		final Tessellator tess = Tessellator.getInstance();
-		final BufferBuilder bb = tess.getBuffer();
+		final BufferBuilder bb = (BufferBuilder)ctx.getVertexConsumers().getBuffer(RenderLayer.getGui());
 		final Matrix4f mat = ctx.getMatrices().peek().getPositionMatrix();
-		
-		bb.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 		
 		RenderUtils.fillPoint(mat, bb, endX, startY, z, topRightColor);
 		RenderUtils.fillPoint(mat, bb, startX, startY, z, topLeftColor);
 		RenderUtils.fillPoint(mat, bb, startX, endY, z, bottomLeftColor);
 		RenderUtils.fillPoint(mat, bb, endX, endY, z, bottomRightColor);
 		
-		tess.draw();
+		ctx.draw();
 		
 		RenderSystem.disableBlend();
 	}
@@ -48,7 +44,7 @@ public final class RenderUtils
 		float g = (float)(color >> 8 & 0xFF) / 255.0f;
 		float b = (float)(color & 0xFF) / 255.0f;
 		
-		bb.vertex(mat, x, y, z).color(r, g, b, a).next();
+		bb.vertex(mat, x, y, z).color(r, g, b, a);
 	}
 	
 	public static void fillRainbow
@@ -61,15 +57,8 @@ public final class RenderUtils
 			RenderSystem.enableBlend(); RenderSystem.defaultBlendFunc();
 		}
 		
-		
-		
-		RenderSystem.setShader(() -> RenderUtils.rainbowShader);
-		
-		final Tessellator tess = Tessellator.getInstance();
-		final BufferBuilder bb = tess.getBuffer();
+		final BufferBuilder bb = (BufferBuilder)ctx.getVertexConsumers().getBuffer(RainbowShader.RAINBOW_RL);
 		final Matrix4f mat = ctx.getMatrices().peek().getPositionMatrix();
-		
-		bb.begin(VertexFormat.DrawMode.QUADS, RainbowShader.RAINBOW_SHADER_FORMAT);
 		
 		float width  = endX - startX;
 		float height = endY - startY;
@@ -103,8 +92,7 @@ public final class RenderUtils
 		RenderUtils.fillRainbowPoint(mat, bb, startX,   endY, z, offsetX, offsetY, offsetZ, progress + btmLeftProgress);
 		RenderUtils.fillRainbowPoint(mat, bb,   endX,   endY, z, offsetX, offsetY, offsetZ, progress + btmRghtProgress);
 		
-		tess.draw();
-		
+		ctx.draw();
 		
 		if (!adv)
 			RenderSystem.disableBlend();
@@ -114,10 +102,28 @@ public final class RenderUtils
 		float offsetX, float offsetY, float offsetZ, float progress) 
 	{
 		bb.vertex(mat, x, y, z);
-		bb.vertex(mat, offsetX, offsetY, offsetZ);
+		RenderUtils.rainbowVertexPos(bb, mat, offsetX, offsetY, offsetZ);
+		RenderUtils.rainbowFloatGeneric(bb, progress);
+	}
+
+	static void rainbowVertexPos(BufferBuilder bb, Matrix4f mat, float x, float y, float z)
+	{
+		long p = ((BufferBuilderAccessor)bb).getBeginElement(RainbowShader.VFE_OFFSET);
 		
-		bb.putFloat(0, progress); bb.nextElement();
+		if (p == -1L)
+			return;
 		
-		bb.next();
+		Vector3f v = mat.transformPosition(x, y, z, new Vector3f());
+		MemoryUtil.memPutFloat(p     , v.x());
+		MemoryUtil.memPutFloat(p + 4L, v.y());
+		MemoryUtil.memPutFloat(p + 8L, v.z());
+	}
+
+	static void rainbowFloatGeneric(BufferBuilder bb, float v)
+	{
+		long p = ((BufferBuilderAccessor)bb).getBeginElement(RainbowShader.VFE_FLOAT_GENERIC);
+		
+		if (p != -1L)
+			MemoryUtil.memPutFloat(p, v);
 	}
 }

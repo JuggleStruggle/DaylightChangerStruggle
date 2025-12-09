@@ -26,7 +26,6 @@ implements WidgetPositionedTooltip, SelfWidgetRendererInheritor<ButtonWidgetEx>
 	private List<OrderedText> compiledTooltipText;
 	private BiConsumer<ButtonWidgetEx, NarrationMessageBuilder> narrationBuilder;
 	
-	
 	private final SelfWidgetRender<ButtonWidgetEx> renderer;
 	
 	public ButtonWidgetEx(int width, int height, Text message, Text tooltipDescText, Text tooltipText, 
@@ -83,7 +82,7 @@ implements WidgetPositionedTooltip, SelfWidgetRendererInheritor<ButtonWidgetEx>
 	}
 	
 	@Override
-	public void renderButton(DrawContext ctx, int mouseX, int mouseY, float delta) {
+	public void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) {
 		this.renderer.renderButton(ctx, mouseX, mouseY, delta);
 	}
 

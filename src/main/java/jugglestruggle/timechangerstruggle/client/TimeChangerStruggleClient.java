@@ -3,7 +3,6 @@ package jugglestruggle.timechangerstruggle.client;
 import jugglestruggle.timechangerstruggle.TimeChangerStruggle;
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
 import jugglestruggle.timechangerstruggle.client.util.render.RainbowShader;
-import jugglestruggle.timechangerstruggle.client.util.render.RenderUtils;
 import jugglestruggle.timechangerstruggle.config.Configuration;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
@@ -353,17 +352,8 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 		TimeChangerStruggleClient.config.read();
 	}
 	
-	private void onClientStart(MinecraftClient client)
-	{
-		// Create a rainbow shader.
-		if (RenderUtils.rainbowShader == null)
-		{
-			try {
-				RenderUtils.rainbowShader = new RainbowShader();
-			} catch (Exception e) {
-				e.printStackTrace();
-			} 
-		}
+	private void onClientStart(MinecraftClient client) {
+		RainbowShader.start();
 	}
 	
 	private void onClientTick(MinecraftClient client)

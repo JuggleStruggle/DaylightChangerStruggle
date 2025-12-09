@@ -92,7 +92,6 @@ public class MovingTime extends MovingTimeBasis
 		props.add(this.getNextInterpolatedTimeProp());
 		props.add(this.getTicksPassedProp());
 		
-		
 		return props.build();
 	}
 	

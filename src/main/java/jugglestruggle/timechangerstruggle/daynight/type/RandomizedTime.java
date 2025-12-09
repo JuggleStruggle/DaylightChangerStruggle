@@ -252,7 +252,6 @@ public class RandomizedTime extends MovingTimeBasis
 		return typeToUse;
 	}
 	
-	
 	@Override
 	public Class<?> getBuilderClass() {
 		return Builder.class;
