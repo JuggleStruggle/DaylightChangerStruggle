@@ -15,15 +15,15 @@ import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
 import jugglestruggle.timechangerstruggle.util.EasingType;
 import jugglestruggle.timechangerstruggle.util.Easings;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
+
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.text.Text;
+
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -34,7 +34,6 @@ import com.google.common.collect.ImmutableSet;
  * @author JuggleStruggle
  * @implNote Created on 26-Jan-2022, Wednesday
  */
-@Environment(EnvType.CLIENT)
 public class RandomizedTime extends MovingTimeBasis
 {
 	final static String PROPERTIES_KEY = "jugglestruggle.tcs.dnt.randomizer.properties.";

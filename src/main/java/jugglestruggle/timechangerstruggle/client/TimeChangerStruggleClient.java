@@ -2,6 +2,8 @@ package jugglestruggle.timechangerstruggle.client;
 
 import jugglestruggle.timechangerstruggle.TimeChangerStruggle;
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
+import jugglestruggle.timechangerstruggle.client.timeline.ClientClocksDCS;
+import jugglestruggle.timechangerstruggle.client.timeline.DCSCameraProvider;
 import jugglestruggle.timechangerstruggle.config.Configuration;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
@@ -10,14 +12,12 @@ import jugglestruggle.timechangerstruggle.daynight.type.MovingTime;
 import jugglestruggle.timechangerstruggle.daynight.type.RandomizedTime;
 import jugglestruggle.timechangerstruggle.daynight.type.StaticTime;
 import jugglestruggle.timechangerstruggle.daynight.type.SystemTime;
+import jugglestruggle.timechangerstruggle.mixin.client.render.GameRendererAccessor;
 import jugglestruggle.timechangerstruggle.mixin.client.world.ClientWorldMixin;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
+
 import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
@@ -25,13 +25,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientWorld;
+
 /**
  * @author JuggleStruggle
  * @implNote Created on 26-Jan-2022, Wednesday
  * 
  * @see TimeChangerStruggle
  */
-@Environment(EnvType.CLIENT)
 public class TimeChangerStruggleClient implements ClientModInitializer
 {
 	/**
@@ -93,30 +95,6 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 	 */
 	public static boolean applyOnPropertyListValueUpdate = false;
 	/**
-	 * Used instead of an enumerator to avoid being locked to specific
-	 * day-night cycles if locks were to ever be defined by the mod.
-	 */
-	private static DayNightCycleBasis timeChanger = null;
-	/**
-	 * Used as a "key" for {@link #CYCLE_BUILDERS}.
-	 */
-	private static String timeChangerKey = null;
-	/**
-	 * Used as a "key" to get the first item on the map.
-	 * 
-	 * @see TimeChangerStruggleClient#timeChangerKey
-	 * @see TimeChangerStruggleClient#timeChangerKeyLast
-	 */
-	private static String timeChangerKeyFirst = null;
-	/**
-	 * Used as a "key" to get the last item on the map. Usually this
-	 * is the recently added item into the builder cache.
-	 * 
-	 * @see TimeChangerStruggleClient#timeChangerKey
-	 * @see TimeChangerStruggleClient#timeChangerKeyFirst
-	 */
-	private static String timeChangerKeyLast = null;
-	/**
 	 * Tell the user client-sided about the changes that was made in
 	 * the command. This only affects command actions that aren't too
 	 * important.
@@ -144,6 +122,31 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 	 */
 	public static boolean allowWorldChangeCyclesToWriteToDisk = true;
 	
+	/**
+	 * Used instead of an enumerator to avoid being locked to specific
+	 * day-night cycles if locks were to ever be defined by the mod.
+	 */
+	private static DayNightCycleBasis timeChanger = null;
+	/**
+	 * Used as a "key" for {@link #CYCLE_BUILDERS}.
+	 */
+	private static String timeChangerKey = null;
+	/**
+	 * Used as a "key" to get the first item on the map.
+	 * 
+	 * @see TimeChangerStruggleClient#timeChangerKey
+	 * @see TimeChangerStruggleClient#timeChangerKeyLast
+	 */
+	private static String timeChangerKeyFirst = null;
+	/**
+	 * Used as a "key" to get the last item on the map. Usually this
+	 * is the recently added item into the builder cache.
+	 * 
+	 * @see TimeChangerStruggleClient#timeChangerKey
+	 * @see TimeChangerStruggleClient#timeChangerKeyFirst
+	 */
+	private static String timeChangerKeyLast = null;
+	
 	public static Configuration config;
 	
 	private static Commands commands;
@@ -153,6 +156,21 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 	 * @implNote Introduced in v0.0.1
 	 */
 	private static boolean worldExistedPreviously = false;
+
+	/**
+	 * Used to control environmental attributes' clocks from the client world and
+	 * hosts extra variables for the sake of continuing with the core features
+	 * DCS offers. 
+	 * 
+	 * <p> Those cycle features would have been made made redundant due to the 
+	 * clock itself only offering the time and nothing else for cycle control. 
+	 * A solution was made to still invoke the clock but with different parameters 
+	 * to yield different results.
+	 * 
+	 * @implNote Introduced in v0.0.4
+	 */
+	public static ClientClocksDCS dcsClock = new ClientClocksDCS();
+	
 	
 	static
 	{
@@ -307,6 +325,50 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 		final Optional<DayNightCycleBuilder> builder = TimeChangerStruggleClient.getCurrentCycleBuilder();
 		return builder.isPresent() && builder.get().getKeyName().equals(cycleTypeToCheck);
 	}
+
+	// Introduced in v0.0.1
+	public static void onWorldChanged(MinecraftClient client, ClientWorld world)
+	{
+		if (!TimeChangerStruggleClient.useWorldTime() && TimeChangerStruggleClient.worldExistedPreviously && 
+			TimeChangerStruggleClient.timeChanger.saveOnWorldChange()) 
+		{
+			TimeChangerStruggleClient.config.createOrModifyDaylightCycleConfig(TimeChangerStruggleClient.timeChanger, true);
+			
+			if (TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk)
+				TimeChangerStruggleClient.config.writeIfModified();
+		}
+		
+		TimeChangerStruggleClient.worldExistedPreviously = world != null;
+	}
+
+	/**
+	 * Fixes the single-player bug when pausing the game and the block/sky 
+	 * visuals remain as it was before ticking to update to newly defined
+	 * values. This is done by simply ticking in the relevant places so
+	 * they're updated.
+	 * 
+	 * @param skipIfNotPaused skips further execution only if the game instance is not paused
+	 * @implNote Introduced in v0.0.4
+	 */
+	public static void updateWorldDaylightCycle(boolean skipIfNotPaused)
+	{
+		MinecraftClient client = MinecraftClient.getInstance();
+		
+		if (skipIfNotPaused && !client.isPaused())
+			return;
+		
+		ClientWorld world = client.world;
+		
+		if (world == null)
+			return;
+		
+		if (TimeChangerStruggleClient.useWorldTime())
+			world.getEnvironmentAttributes().tick();
+		else
+			((DCSCameraProvider)client.gameRenderer.getCamera()).getDcsAttributes().refresh();
+
+		((GameRendererAccessor)client.gameRenderer).getLightmapTextureManager().tick();
+	}
 	
 	
 	
@@ -365,20 +427,5 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 			return;
 		
 		TimeChangerStruggleClient.timeChanger.tick();
-	}
-	
-	// Introduced in v0.0.1
-	public static void onWorldChanged(MinecraftClient client, ClientWorld world)
-	{
-		if (!TimeChangerStruggleClient.useWorldTime() && TimeChangerStruggleClient.worldExistedPreviously && 
-			TimeChangerStruggleClient.timeChanger.saveOnWorldChange()) 
-		{
-			TimeChangerStruggleClient.config.createOrModifyDaylightCycleConfig(TimeChangerStruggleClient.timeChanger, true);
-			
-			if (TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk)
-				TimeChangerStruggleClient.config.writeIfModified();
-		}
-		
-		TimeChangerStruggleClient.worldExistedPreviously = world != null;
 	}
 }

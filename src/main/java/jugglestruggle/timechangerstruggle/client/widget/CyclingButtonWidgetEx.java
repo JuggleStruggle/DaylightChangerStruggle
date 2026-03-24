@@ -4,8 +4,11 @@ import jugglestruggle.timechangerstruggle.mixin.client.widget.CyclingButtonWidge
 import jugglestruggle.timechangerstruggle.mixin.client.widget.CyclingButtonWidgetBuilderAccessor;
 import jugglestruggle.timechangerstruggle.util.SimpleCharacterVisitor;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.screen.narration.NarrationPart;
@@ -15,17 +18,13 @@ import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+
 import com.google.common.collect.ImmutableList;
 
 /**
  * @author JuggleStruggle
  * @implNote Created on 13-Feb-2022, Sunday
  */
-@Environment(EnvType.CLIENT)
 public class CyclingButtonWidgetEx<T> extends CyclingButtonWidget<T> 
 implements SelfWidgetRendererInheritor<CyclingButtonWidgetEx<T>>, WidgetOrderedTooltip
 {

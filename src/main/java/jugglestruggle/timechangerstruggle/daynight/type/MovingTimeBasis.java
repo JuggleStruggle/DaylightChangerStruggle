@@ -1,5 +1,6 @@
 package jugglestruggle.timechangerstruggle.daynight.type;
 
+import jugglestruggle.timechangerstruggle.client.TimeChangerStruggleClient;
 import jugglestruggle.timechangerstruggle.client.config.property.FancySectionProperty;
 import jugglestruggle.timechangerstruggle.config.property.BaseProperty;
 import jugglestruggle.timechangerstruggle.config.property.EnumValue;
@@ -8,9 +9,12 @@ import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
 import jugglestruggle.timechangerstruggle.daynight.DayNightGetterType;
 import jugglestruggle.timechangerstruggle.util.EasingType;
 import jugglestruggle.timechangerstruggle.util.Easings;
+
+import java.util.Set;
+
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.Text;
-import java.util.Set;
+
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -191,6 +195,8 @@ public abstract class MovingTimeBasis implements DayNightCycleBasis
             		{
             			this.previousInterpolatedTime = this.nextInterpolatedTime =
             			this.previousCachedTime = this.cachedTime = v;
+
+            			TimeChangerStruggleClient.updateWorldDaylightCycle(true);
             		}
             		else {
             			this.cachedTime = v;

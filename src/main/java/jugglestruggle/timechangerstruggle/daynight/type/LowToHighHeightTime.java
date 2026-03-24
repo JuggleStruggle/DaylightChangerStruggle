@@ -1,5 +1,6 @@
 package jugglestruggle.timechangerstruggle.daynight.type;
 
+import jugglestruggle.timechangerstruggle.client.TimeChangerStruggleClient;
 import jugglestruggle.timechangerstruggle.client.config.property.FancySectionProperty;
 import jugglestruggle.timechangerstruggle.config.property.BaseProperty;
 import jugglestruggle.timechangerstruggle.config.property.DoubleValue;
@@ -7,11 +8,14 @@ import jugglestruggle.timechangerstruggle.config.property.LongValue;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
 import jugglestruggle.timechangerstruggle.daynight.DayNightGetterType;
+
+import java.util.Set;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
-import java.util.Set;
+
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -84,9 +88,9 @@ public class LowToHighHeightTime implements DayNightCycleBasis
 		final String sectLang = "jugglestruggle.tcs.dnt.lowtohighheighttime.properties.";
 		
 		props.add(new FancySectionProperty("minmaxheight", Text.translatable(sectLang+"minmaxheight")));
-		props.add(new DoubleValue("minHeight",     this.minHeight, Double.MIN_VALUE, Double.MAX_VALUE));
+		props.add(new DoubleValue("minHeight",     this.minHeight, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
 		props.add(new LongValue  ("minHeightTime", this.minHeightTime, Long.MIN_VALUE, Long.MAX_VALUE));
-		props.add(new DoubleValue("maxHeight",     this.maxHeight, Double.MIN_VALUE, Double.MAX_VALUE));
+		props.add(new DoubleValue("maxHeight",     this.maxHeight, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
 		props.add(new LongValue  ("maxHeightTime", this.maxHeightTime, Long.MIN_VALUE, Long.MAX_VALUE));
 		
 		return props.build();
@@ -113,6 +117,9 @@ public class LowToHighHeightTime implements DayNightCycleBasis
 				case "maxHeight" -> this.maxHeight = prop.get();
 			}
 		}
+		
+		if (writer == PropertyWriterSource.USER)
+			TimeChangerStruggleClient.updateWorldDaylightCycle(true);
 	}
 
 	public static class Builder implements DayNightCycleBuilder

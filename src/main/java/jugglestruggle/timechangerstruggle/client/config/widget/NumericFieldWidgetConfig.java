@@ -34,7 +34,7 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 	
 	public NumericFieldWidgetConfig(TextRenderer textRenderer, int width, int height, BaseNumber<N> property) 
 	{
-		super(textRenderer, 18, 18, width, height, Text.empty());
+		super(textRenderer, 0, 0, width, height, Text.empty());
 		
 		this.property = property;
 		this.isNewTextValid = true;
@@ -63,12 +63,21 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 	 * avoid problems.
 	 */
 	@Override
-	public void setTextPredicate(Predicate<String> textPredicate)
-	{
-		super.setTextPredicate(text -> text.isBlank() ? true : 
-			NumericFieldWidgetConfig.canParseString(this.property.getDefaultValue(), text));
+	public void setTextPredicate(Predicate<String> textPredicate) {
+		super.setTextPredicate(this::verifyTextPredicate);
 	}
-	
+
+	/**
+	 * Verifies if this text, based on a set of conditions, passes the requirements
+	 * for it to be displayed as a number in this property.
+	 * 
+	 * @implNote Introduced in v0.0.4
+	 */
+	protected boolean verifyTextPredicate(String text)
+	{
+		return text == null || text.isEmpty() || NumericFieldWidgetConfig.isDashOnly(text) || 
+			NumericFieldWidgetConfig.canParseString(this.property.getDefaultValue(), text);
+	}
 	
 	
 	
@@ -85,10 +94,7 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 		if (!this.isNewTextValid || this.property.get() == null)
 			return false;
 		
-		if (this.property.getMin() == null || this.property.getMax() == null)
-			return true;
-		
-		return this.property.isWithinRange();
+		return !this.hasMinAndMaxValues() || this.property.isWithinRange();
 	}
 	@Override
 	public N getInitialValue() {
@@ -137,19 +143,20 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 	}
 	private void onTextChanged(String newText)
 	{
-		boolean valid = !(newText.isEmpty() || newText.isBlank());
+		boolean valid = !(newText == null || newText.isEmpty() || newText.isBlank());
 		
 		if (valid)
 		{
-			N parsedNumber = NumericFieldWidgetConfig.parseString(this.property.getDefaultValue(), newText);
+			N parsedNumber = NumericFieldWidgetConfig.isDashOnly(newText) ? this.getZero() : 
+				NumericFieldWidgetConfig.parseString(this.property.getDefaultValue(), newText);
 			
 			if (parsedNumber == null) {
 				valid = false;
 			}
 			else
 			{
-				boolean tempNewTextValid = this.isNewTextValid;
-				N previousNumber = this.property.get();
+				final boolean prevNewTextValid = this.isNewTextValid;
+				final N previousNumber = this.property.get();
 				
 				// to avoid the numbers from not being valid despite them being it
 				this.isNewTextValid = true; 
@@ -159,7 +166,7 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 				
 				// just set it back after we are done :)
 				this.property.set(previousNumber);
-				this.isNewTextValid = tempNewTextValid;
+				this.isNewTextValid = prevNewTextValid;
 			}
 			
 			if (valid)
@@ -174,12 +181,21 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 		}
 		
 		this.isNewTextValid = valid;
-		this.setEditableColor(valid ? DEFAULT_EDITABLE_COLOR : 0xE06060);
+		this.setEditableColor(valid ? DEFAULT_EDITABLE_COLOR : 0xFFE06060);
 		
 		if (this.textChangedListener != null)
 			this.textChangedListener.accept(newText);
 	}
-	
+
+	/**
+	 * Extracted function for the sake of knowing if the {@link #property} has both a
+	 * minimum and a maximum applied.
+	 * 
+	 * @implNote Introduced in v0.0.4
+	 */
+	public boolean hasMinAndMaxValues() {
+		return this.property.getMin() != null && this.property.getMax() != null;
+	}
 	
 	
 	
@@ -222,6 +238,10 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 	
 	
 	
+
+	protected static final boolean isDashOnly(String val) {
+		return val.length() == 1 && val.equals("-");
+	}
 	
 	protected static final boolean canParseString(Number n, String val) {
 		return NumericFieldWidgetConfig.parseString(n, val) != null;

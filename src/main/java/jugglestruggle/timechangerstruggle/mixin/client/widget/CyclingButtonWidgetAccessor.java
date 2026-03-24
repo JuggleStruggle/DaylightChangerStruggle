@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 /**
  * @author JuggleStruggle
- * @implNote Implemented in v0.0.2
+ * @implNote Introduced in v0.0.2
  */
 @Mixin(CyclingButtonWidget.class)
 public interface CyclingButtonWidgetAccessor<T>

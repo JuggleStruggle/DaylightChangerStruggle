@@ -15,8 +15,21 @@ import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWr
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
 import jugglestruggle.timechangerstruggle.util.DaylightUtils;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BooleanSupplier;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+import org.joml.Matrix3x2f;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Click;
@@ -37,20 +50,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.BooleanSupplier;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
-import org.joml.Matrix3x2f;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
@@ -58,7 +58,6 @@ import com.google.common.collect.ImmutableSet;
  * @author JuggleStruggle
  * @implNote Created on 26-Jan-2022, Wednesday
  */
-@Environment(EnvType.CLIENT)
 public class TimeChangerScreen extends Screen
 {
 	private static final Predicate<Element> ORDERED_TOOLTIP_PREDICATE = 
@@ -150,14 +149,25 @@ public class TimeChangerScreen extends Screen
 	 * <p> ESC exits the screen instead of being sent back into the main menu.
 	 */
 	private DayNightCycleBuilder switchDaylightCycleMenu_propertiesListBuilder;
+
+	/**
+	 * The screen which may have been responsible for opening this screen.
+	 * @implNote Introduced in v0.0.4+26.1
+	 */
+	private Screen parentScreen;
 	
 	
 	public TimeChangerScreen() {
-		super(Text.translatable("jugglestruggle.tcs.screen"));
+		this(null);
 	}
-	public TimeChangerScreen(DayNightCycleBuilder builder) 
+	public TimeChangerScreen(Screen parentScreen) 
 	{
-		this();
+		super(Text.translatable("jugglestruggle.tcs.screen")); 
+		this.parentScreen = parentScreen;
+	}
+	public TimeChangerScreen(Screen parentScreen, DayNightCycleBuilder builder) 
+	{
+		this(parentScreen);
 		
 		this.currentMenu = Menu.SWITCH_DAYLIGHT_CYCLE_MENU;
 		this.switchDaylightCycleMenu_propertiesListBuilder = builder;
@@ -613,7 +623,7 @@ public class TimeChangerScreen extends Screen
 	// Note: The 1.21.5 port's vanilla code finally adds the ability to only update existing 
 	// widgets' positions instead of creating new ones. See #refreshWidgetPositions().
 	// In the meantime, this will not be implemented as it will take extra work due to how
-	// this screen is currently designed and implemented.
+	// this screen is currently designed.
 	
 	@Override
 	public void close()
@@ -636,8 +646,8 @@ public class TimeChangerScreen extends Screen
 			default:
 				break;
 		}
-		
-		super.close();
+
+		this.client.setScreen(this.parentScreen);
 	}
 	
 	@Override
@@ -804,10 +814,8 @@ public class TimeChangerScreen extends Screen
 							{
 								Element elem = elems.get(i);
 								
-								if (elem instanceof WidgetConfigInterface)
+								if (elem instanceof WidgetConfigInterface elemConfig)
 								{
-									WidgetConfigInterface<?, ?> elemConfig = (WidgetConfigInterface<?, ?>)elem;
-									
 									boolean propertyNameEquals = elemConfig.getProperty().property().equals(owningProperty.property());
 									
 									if (propertyNameEquals)
@@ -850,7 +858,7 @@ public class TimeChangerScreen extends Screen
 		this.menuDirty = true;
 	}
 	
-	// Introduced in v0.0.2+1.21.9 due to the game client not being accessible outside
+	// Introduced in v0.0.3+1.21.9 due to the game client not being accessible outside
 	// of its respective screens.
 	public MinecraftClient getClient() {
 		return this.client;
@@ -864,14 +872,20 @@ public class TimeChangerScreen extends Screen
 	//
 	// Main Menu Methods
 	//
-	private void toggleWorldTime(CyclingButtonWidget<Boolean> b, boolean newValue) {
+	private void toggleWorldTime(CyclingButtonWidget<Boolean> b, boolean newValue) 
+	{
 		TimeChangerStruggleClient.worldTime = newValue; this.menuDirty = true;
+		TimeChangerStruggleClient.updateWorldDaylightCycle(true);
 	}
 	private void toggleDateVsTicks(CyclingButtonWidget<Boolean> b, boolean newValue) {
 		TimeChangerStruggleClient.dateOverTicks = newValue; this.menuDirty = true;
 	}
-	private void toggleSmoothButterDaylightCycle(CyclingButtonWidget<Boolean> b, boolean newValue) {
+	private void toggleSmoothButterDaylightCycle(CyclingButtonWidget<Boolean> b, boolean newValue) 
+	{
 		TimeChangerStruggleClient.smoothButterCycle = newValue; this.menuDirty = true;
+
+		if (!TimeChangerStruggleClient.worldTime)
+			TimeChangerStruggleClient.updateWorldDaylightCycle(true);
 	}
 	private Text mainMenu_getButtonWidgetText_switchGetterMenu() 
 	{
@@ -903,6 +917,7 @@ public class TimeChangerScreen extends Screen
 		this.mainMenu_onSwitchDaylightCycleType(true, () -> {
 			this.mainMenu_saveQuickOptionElements();
 			TimeChangerStruggleClient.quickSwitchCachedCycleType(this.client.isShiftPressed());
+			TimeChangerStruggleClient.updateWorldDaylightCycle(true);
 		});
 	}
 	void mainMenu_onSwitchDaylightCycleType(boolean loadNewCycleConfig, Runnable consumer) 
@@ -1282,14 +1297,6 @@ public class TimeChangerScreen extends Screen
 	 */
 	public static List<OrderedText> createOrderedTooltips(TextRenderer textRenderer, byte useCase, Text onText, Text offText)
 	{
-		Text text = switch (useCase)
-		{
-			case 0 -> onText;
-			case 1, 2 -> offText;
-			
-			default -> null;
-		};
-		
 		ImmutableList.Builder<OrderedText> wrappedTextBuilder;
 		
 		if (useCase == 3)
@@ -1297,21 +1304,31 @@ public class TimeChangerScreen extends Screen
 			wrappedTextBuilder = ImmutableList.builderWithExpectedSize(1);
 			wrappedTextBuilder.add(onText.asOrderedText());
 		}
-		else if (text == null)
-			return ImmutableList.of();
 		else
 		{
-			List<OrderedText> wrappedText = textRenderer.wrapLines(text, 200);
-			wrappedTextBuilder = ImmutableList.builderWithExpectedSize(wrappedText.size() + 1);
+			Text text = switch (useCase)
+			{
+				case 0 -> onText;
+				case 1, 2 -> offText;
+				
+				default -> null;
+			};
 			
-			if (useCase == 2)
-				wrappedTextBuilder.add(onText.asOrderedText());
+			if (text == null)
+				return ImmutableList.of();
 			else
-				wrappedTextBuilder.add(Text.translatable("jugglestruggle.tcs.screen.desc").asOrderedText());
-			
-			wrappedTextBuilder.addAll(wrappedText);
+			{
+				List<OrderedText> wrappedText = textRenderer.wrapLines(text, 200);
+				wrappedTextBuilder = ImmutableList.builderWithExpectedSize(wrappedText.size() + 1);
+				
+				if (useCase == 2)
+					wrappedTextBuilder.add(onText.asOrderedText());
+				else
+					wrappedTextBuilder.add(Text.translatable("jugglestruggle.tcs.screen.desc").asOrderedText());
+				
+				wrappedTextBuilder.addAll(wrappedText);
+			}
 		}
-		
 		
 		return wrappedTextBuilder.build();
 	}
@@ -1382,10 +1399,8 @@ public class TimeChangerScreen extends Screen
 	 * @return the same text passed from the parameter, just grayed out
 	 * @since 0.0.2
 	 */
-	public static MutableText setAsGrayText(MutableText textToGrayOut)
-	{
-		textToGrayOut.styled(s -> s.withColor(Formatting.GRAY));
-		return textToGrayOut;
+	public static MutableText setAsGrayText(MutableText textToGrayOut) {
+		return textToGrayOut.styled(s -> s.withColor(Formatting.GRAY));
 	}
 	/**
 	 * Helper method to avoid the need of creating a translatable and then 
@@ -2197,7 +2212,7 @@ public class TimeChangerScreen extends Screen
 		public void onLocSizeUpdate() {}
 		
 		
-		// v0.0.2+1.21.9 change: update children list entries in regards to their
+		// v0.0.3+1.21.9 change: update children list entries in regards to their
 		// position and size as they're not managed by the list entry's render anymore.
 		public void updateChildrenPosSize() {
 			this.recalculateAllChildrenPositions();

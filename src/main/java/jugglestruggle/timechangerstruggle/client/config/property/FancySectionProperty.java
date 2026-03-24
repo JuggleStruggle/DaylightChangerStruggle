@@ -4,10 +4,10 @@ import jugglestruggle.timechangerstruggle.client.config.widget.WidgetConfigInter
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
 import jugglestruggle.timechangerstruggle.config.property.BaseProperty;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+
 import net.minecraft.text.Text;
+
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -23,7 +23,6 @@ import com.mojang.brigadier.context.CommandContext;
  * @author JuggleStruggle
  * @implNote Created on 01-Feb-2022, Tuesday
  */
-@Environment(EnvType.CLIENT)
 public class FancySectionProperty extends BaseProperty<FancySectionProperty, Text>
 {
 	public static final FancySectionProperty EMPTY = new FancySectionProperty("", null);
@@ -72,7 +71,7 @@ public class FancySectionProperty extends BaseProperty<FancySectionProperty, Tex
 	 * @param prop the "child" property that's part of this section
 	 * @return a boolean value; by default this returns {@code true} to allow all of them
 	 * 
-	 * @implNote Implemented in v0.0.1
+	 * @implNote Introduced in v0.0.1
 	 */
 	public boolean shouldCreatePropertyConfigElem(int sectionPropIndex, BaseProperty<?, ?> prop) {
 		return true;

@@ -122,10 +122,10 @@
 	"jugglestruggle.tcs.dnt.randomizer.properties.daylightrandomtime.minimumrandomtime": "Minimum",
 	"jugglestruggle.tcs.dnt.randomizer.properties.daylightrandomtime.maximumrandomtime": "Maximum",
 	"jugglestruggle.tcs.dnt.randomizer.properties.ticksuntilnextrng": "Ticks Until Next RNG",
-	"jugglestruggle.tcs.dnt.randomizer.properties.ticksuntilnextrng.ticksuntilnextrng": "Ticks Until Next RNG (Non-Random)",
+	"jugglestruggle.tcs.dnt.randomizer.properties.ticksuntilnextrng.ticksuntilnextrng": "Ticks (Keep Randomize disabled)",
 	"jugglestruggle.tcs.dnt.randomizer.properties.ticksuntilnextrng.randomizeticksuntilnextrng": "Randomize",
-	"jugglestruggle.tcs.dnt.randomizer.properties.ticksuntilnextrng.ticksuntilnextrngmin": "Minimum",
-	"jugglestruggle.tcs.dnt.randomizer.properties.ticksuntilnextrng.ticksuntilnextrngmax": "Maximum",
+	"jugglestruggle.tcs.dnt.randomizer.properties.ticksuntilnextrng.ticksuntilnextrngmin": "Minimum (Only if Randomize is enabled)",
+	"jugglestruggle.tcs.dnt.randomizer.properties.ticksuntilnextrng.ticksuntilnextrngmax": "Maximum (Only if Randomize is enabled)",
 	"jugglestruggle.tcs.dnt.randomizer.properties.easings": "Easings",
 	"jugglestruggle.tcs.dnt.randomizer.properties.easings.randomizeeasingbetweenticks": "Randomize Interpolation",
 	"jugglestruggle.tcs.dnt.randomizer.properties.easings.easingbetweenticks": "Interpolation",
@@ -151,5 +151,5 @@
 	"jugglestruggle.tcs.keytype.control": "Control",
 	"jugglestruggle.tcs.keytype.super": "Super",
 
-	"modmenu.descriptionTranslation.timechangerstruggle": "Allows you to modify the client's daylight cycle without ever needing to have operator permissions. It also allows you to see how a world would look like in that time!"
+	"modmenu.descriptionTranslation.daylightchangerstruggle": "Allows you to modify the client's daylight cycle without ever needing to have operator permissions. It also allows you to see how a world would look like in that time!"
 }

@@ -1,5 +1,6 @@
 package jugglestruggle.timechangerstruggle.daynight.type;
 
+import jugglestruggle.timechangerstruggle.client.TimeChangerStruggleClient;
 import jugglestruggle.timechangerstruggle.client.config.property.FancySectionProperty;
 import jugglestruggle.timechangerstruggle.client.config.widget.NumericFieldWidgetConfig;
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
@@ -10,8 +11,12 @@ import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
 import jugglestruggle.timechangerstruggle.daynight.DayNightGetterType;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.input.SystemKeycodes;
@@ -19,11 +24,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -37,7 +38,6 @@ import com.google.common.collect.Lists;
  * @author JuggleStruggle
  * @implNote Created on 26-Jan-2022, Wednesday
  */
-@Environment(EnvType.CLIENT)
 public class StaticTime implements DayNightCycleBasis
 {
 	final static String PROPERTIES_KEY = "jugglestruggle.tcs.dnt.statictime.properties.";
@@ -85,8 +85,13 @@ public class StaticTime implements DayNightCycleBasis
 	{
 		final String belongingKey = property.property();
 		
-		if (belongingKey.equals("worldtime") && property instanceof LongValue lv)
-			this.timeSet = lv.get();
+		if (belongingKey.equals("worldtime") && property instanceof LongValue lv) 
+		{
+			this.timeSet = lv.get(); 
+			
+			if (writer == PropertyWriterSource.USER)
+				TimeChangerStruggleClient.updateWorldDaylightCycle(true);
+		}
 	}
 	
 	

@@ -6,8 +6,6 @@ import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 import com.google.gson.JsonElement;
@@ -18,7 +16,6 @@ import com.mojang.brigadier.context.CommandContext;
  * @author JuggleStruggle
  * @implNote Created on 31-Jan-2022, Monday
  */
-@Environment(EnvType.CLIENT)
 public abstract class BaseProperty<B extends BaseProperty<B, V>, V>
 {
 	protected final String propertyKey;

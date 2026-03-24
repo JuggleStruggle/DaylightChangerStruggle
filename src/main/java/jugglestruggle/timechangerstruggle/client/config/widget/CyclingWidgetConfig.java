@@ -8,24 +8,23 @@ import jugglestruggle.timechangerstruggle.config.property.BooleanValue;
 import jugglestruggle.timechangerstruggle.config.property.EnumValue;
 import jugglestruggle.timechangerstruggle.mixin.client.widget.CyclingButtonWidgetBuilderAccessor;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.Supplier;
+
 import com.google.common.collect.ImmutableList;
 
 /**
  * @author JuggleStruggle
  * @implNote Created on 30-Jan-2022, Sunday
  */
-@Environment(EnvType.CLIENT)
 public class CyclingWidgetConfig<B extends BaseProperty<B, T>, T> extends CyclingButtonWidget<T> 
 implements WidgetConfigInterface<B, T>, SelfWidgetRendererInheritor<CyclingWidgetConfig<B, T>>
 {

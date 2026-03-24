@@ -5,11 +5,15 @@
     "compatibilityLevel": "JAVA_21",
     "client": [
 		"MinecraftClientMixin",
-        "render.GameRendererMixin",
-        "render.SkyRenderingMixin",
-        "world.ClientWorldMixin",
+		"render.CameraMixin",
+		"render.GameRendererMixinNightVision",
+		"render.GameRendererAccessor",
+		"render.SkyRenderingMixin",
+		"render.LightmapTextureManagerMixin",
+		"render.WorldRendererMixin",
         "widget.CyclingButtonWidgetAccessor",
-        "widget.CyclingButtonWidgetBuilderAccessor"
+        "widget.CyclingButtonWidgetBuilderAccessor",
+        "world.ClientWorldMixin"
     ],
     "injectors": {
         "defaultRequire": 1

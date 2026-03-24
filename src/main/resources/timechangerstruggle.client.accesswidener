@@ -26,3 +26,20 @@ accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState
 #accessible field net/minecraft/client/gui/render/state/GuiTextRenderState includeEmpty Z
 #accessible field net/minecraft/client/gui/render/state/GuiTextRenderState preparedText Lnet/minecraft/client/gui/Font$PreparedText;
 #accessible field net/minecraft/client/gui/render/state/GuiTextRenderState bounds Lnet/minecraft/client/gui/navigation/ScreenRectangle;
+
+## Environment Attributes
+# > WorldEnvironmentAttributeAccess
+accessible method net/minecraft/world/attribute/WorldEnvironmentAttributeAccess getEntry (Lnet/minecraft/world/attribute/EnvironmentAttribute;)Lnet/minecraft/world/attribute/WorldEnvironmentAttributeAccess$Entry;
+# > WorldEnvironmentAttributeAccess$Entry
+extendable class net/minecraft/world/attribute/WorldEnvironmentAttributeAccess$Entry
+accessible field net/minecraft/world/attribute/WorldEnvironmentAttributeAccess$Entry age I
+# > EnvironmentAttributeInterpolator
+accessible field net/minecraft/world/attribute/EnvironmentAttributeInterpolator world Lnet/minecraft/world/World;
+accessible field net/minecraft/world/attribute/EnvironmentAttributeInterpolator pos Lnet/minecraft/util/math/Vec3d;
+accessible field net/minecraft/world/attribute/EnvironmentAttributeInterpolator entries Ljava/util/Map;
+accessible field net/minecraft/world/attribute/EnvironmentAttributeInterpolator pool Lnet/minecraft/world/attribute/WeightedAttributeList; 
+# > EnvironmentAttributeInterpolator$Entry
+extendable class net/minecraft/world/attribute/EnvironmentAttributeInterpolator$Entry
+accessible field net/minecraft/world/attribute/EnvironmentAttributeInterpolator$Entry last Ljava/lang/Object;
+accessible field net/minecraft/world/attribute/EnvironmentAttributeInterpolator$Entry current Ljava/lang/Object;
+extendable method net/minecraft/world/attribute/EnvironmentAttributeInterpolator$Entry compute (Lnet/minecraft/world/attribute/EnvironmentAttribute;)Ljava/lang/Object;

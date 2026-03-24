@@ -1,8 +1,5 @@
 package jugglestruggle.timechangerstruggle.client.util.color;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-
 /**
  * A base class used exactly to help with RGB colorization rather
  * than create hacky elements when it can be combined all at once!
@@ -10,7 +7,6 @@ import net.fabricmc.api.Environment;
  * @author JuggleStruggle
  * @implNote Created on 11-Feb-2022, Friday
  */
-@Environment(EnvType.CLIENT)
 public abstract class AbstractRGB
 {
 	protected int color;

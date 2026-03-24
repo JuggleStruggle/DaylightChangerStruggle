@@ -5,24 +5,22 @@ import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
 import jugglestruggle.timechangerstruggle.daynight.DayNightGetterType;
 import jugglestruggle.timechangerstruggle.util.DaylightUtils;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import java.util.Calendar;
+
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.Text;
-import java.util.Calendar;
 
 /**
  * @author JuggleStruggle
  * @implNote Created on 26-Jan-2022, Wednesday
  */
-@Environment(EnvType.CLIENT)
 public class SystemTime implements DayNightCycleBasis
 {
 	private long cachedTime;
 	private long previousCachedTime;
 
 	public SystemTime() {
-		this.tick();
+		this.tick(); this.previousCachedTime = this.cachedTime;
 	}
 	
 	@Override

@@ -37,8 +37,21 @@ processResources
 	}
 }
 
-tasks.withType(JavaCompile).configureEach {
+// Inspired by C2ME-fabric's Gradle build.
+// Allows reproducible builds, skip file timestamps and skip archive versioning being added
+// at the end of the JAR file name when the base{} task already adds both the version and
+// the minecraft version made for it.
+tasks.withType(AbstractArchiveTask) 
+{
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+	archiveVersion = ""
+}
+
+tasks.withType(JavaCompile).configureEach
+{
 	it.options.release = 21
+	options.encoding = "UTF-8"
 }
 
 loom {
