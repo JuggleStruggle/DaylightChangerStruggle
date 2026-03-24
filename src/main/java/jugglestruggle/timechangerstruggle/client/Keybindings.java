@@ -2,7 +2,8 @@ package jugglestruggle.timechangerstruggle.client;
 
 import jugglestruggle.timechangerstruggle.TimeChangerStruggle;
 
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Identifier;
@@ -34,7 +35,7 @@ public class Keybindings
 	
 	private static KeyBinding register(String keyName)
 	{
-		return KeyBindingHelper.registerKeyBinding
+		return KeyMappingHelper.registerKeyMapping
 		(
 			new KeyBinding
 			(

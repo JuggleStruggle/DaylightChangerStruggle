@@ -1,48 +1,90 @@
 plugins 
 {
-	id 'fabric-loom' version "${loom_version}"
+	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
 	id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_21
-targetCompatibility = JavaVersion.VERSION_21
+java {
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+
+	withSourcesJar()
+}
 
 version = project.mod_version
 group = project.maven_group
 
-base {
-	archivesName = "${project.archives_base_name}-${project.version}+${project.minecraft_version}"
+loom
+{
+	intermediaryUrl = 'https://repo.codemc.io/repository/relativitymc/org/relativitymc/intermediary/%1$s/intermediary-%1$s-v2.jar'
+	useIntermediateMappings = true
+
+	accessWidenerPath = file("src/main/resources/timechangerstruggle.client.accesswidener");
 }
 
-dependencies 
+dependencies
 {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	mappings "org.relativitymc:modern-yarn:${project.yarn_mappings}:v2"
 
     // Fabric Loader and Fabric API (Required)
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	// modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	
+	// v0.0.3+26.1 info: Fabric API causes so much trouble when it comes to certain modules when
+	// debugging due to Yarn mapping, which led to the decision to stick using individualized 
+	// modules that are actually used, as listed below. This sacrifices some nice-to-use modules
+	// such as language being applied due to Fabric's resource APIs crashing everytime 
+	// they're included.
+	["fabric-command-api-v2", "fabric-key-mapping-api-v1", "fabric-lifecycle-events-v1"]
+	 .forEach{modCompileOnly(fabricApi.module(it, "${project.fabric_version}"))}
 }
 
-java {
-	withSourcesJar()
-}
-
-processResources 
+processResources
 {
-	inputs.property "version", project.version
+	inputs.property "version", project.mod_version
 
 	filesMatching("fabric.mod.json") {
 		expand "version": inputs.properties.version
 	}
 }
 
-tasks.withType(JavaCompile).configureEach {
-	it.options.release = 21
+// Source: C2ME-fabric (26.1-beta)
+afterEvaluate {
+	if (it.plugins.hasPlugin("fabric-loom")) {
+		afterEvaluate {
+			migrateMappings.configure {
+				outputDir = project.file("build/remappedSrc")
+				doLast {
+					copy {
+						from project.file("build/remappedSrc")
+						into project.file("src/main/java")
+					}
+				}
+			}
+		}
+	}
 }
 
-loom {
-	accessWidenerPath = file("src/main/resources/timechangerstruggle.client.accesswidener");
+base {
+	archivesName = "${project.name}-${project.version}+${project.minecraft_version}"
+}
+
+// Inspired by C2ME-fabric's Gradle build.
+// Allows reproducible builds, skip file timestamps and skip archive versioning being added
+// at the end of the JAR file name when the base{} task already adds both the version and
+// the minecraft version made for it.
+tasks.withType(AbstractArchiveTask) 
+{
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+	archiveVersion = ""
+}
+
+tasks.withType(JavaCompile).configureEach 
+{
+	it.options.release = 25
+	options.encoding = "UTF-8"
 }
 
 jar 
@@ -65,4 +107,9 @@ publishing {
 	repositories {}
 }
 
-repositories {}
+
+repositories {
+	maven {
+		url = "https://repo.codemc.io/repository/relativitymc/"
+	}
+}

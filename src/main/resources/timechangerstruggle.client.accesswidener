@@ -16,13 +16,30 @@ extendable method net/minecraft/client/gui/widget/EntryListWidget recalculateAll
 ## Shader and Rendering
 # > ColoredQuad: Make its static method publicly accessible in order to avoid needlessly copying
 accessible method net/minecraft/client/gui/render/state/ColoredQuadGuiElementRenderState createBounds (IIIILorg/joml/Matrix3x2fc;Lnet/minecraft/client/gui/ScreenRect;)Lnet/minecraft/client/gui/ScreenRect;
-#accessible method net/minecraft/client/gui/render/state/ColoredRectangleRenderState getBounds (IIIILorg/joml/Matrix3x2fc;Lnet/minecraft/client/gui/navigation/ScreenRectangle;)Lnet/minecraft/client/gui/navigation/ScreenRectangle;
 # > TextGuiElementRenderState: Avoid using ints for its position and use floats instead (in fact, the textRenderer.prepare() uses x and y as floats!)
 extendable class net/minecraft/client/gui/render/state/TextGuiElementRenderState
 accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState trackEmpty Z
 accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState preparation Lnet/minecraft/client/font/TextRenderer$GlyphDrawable;
 accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState bounds Lnet/minecraft/client/gui/ScreenRect;
-#extendable class net/minecraft/client/gui/render/state/GuiTextRenderState
-#accessible field net/minecraft/client/gui/render/state/GuiTextRenderState includeEmpty Z
-#accessible field net/minecraft/client/gui/render/state/GuiTextRenderState preparedText Lnet/minecraft/client/gui/Font$PreparedText;
-#accessible field net/minecraft/client/gui/render/state/GuiTextRenderState bounds Lnet/minecraft/client/gui/navigation/ScreenRectangle;
+# > Make the Render State field and Scissor Stack's field + class public
+accessible class net/minecraft/client/gui/DrawContext$ScissorStack
+accessible field net/minecraft/client/gui/DrawContext state Lnet/minecraft/client/gui/render/state/GuiRenderState;
+accessible field net/minecraft/client/gui/DrawContext scissorStack Lnet/minecraft/client/gui/DrawContext$ScissorStack;
+
+## Environment Attributes
+# > WorldEnvironmentAttributeAccess
+accessible method net/minecraft/world/attribute/WorldEnvironmentAttributeAccess getEntry (Lnet/minecraft/world/attribute/EnvironmentAttribute;)Lnet/minecraft/world/attribute/WorldEnvironmentAttributeAccess$Entry;
+# > WorldEnvironmentAttributeAccess$Entry
+extendable class net/minecraft/world/attribute/WorldEnvironmentAttributeAccess$Entry
+accessible field net/minecraft/world/attribute/WorldEnvironmentAttributeAccess$Entry age I
+# > EnvironmentAttributeInterpolator
+accessible field net/minecraft/world/attribute/EnvironmentAttributeInterpolator world Lnet/minecraft/world/World;
+accessible field net/minecraft/world/attribute/EnvironmentAttributeInterpolator pos Lnet/minecraft/util/math/Vec3d;
+accessible field net/minecraft/world/attribute/EnvironmentAttributeInterpolator entries Ljava/util/Map;
+accessible field net/minecraft/world/attribute/EnvironmentAttributeInterpolator pool Lnet/minecraft/world/attribute/WeightedAttributeList; 
+# > EnvironmentAttributeInterpolator$Entry
+extendable class net/minecraft/world/attribute/EnvironmentAttributeInterpolator$Entry
+accessible field net/minecraft/world/attribute/EnvironmentAttributeInterpolator$Entry last Ljava/lang/Object;
+accessible field net/minecraft/world/attribute/EnvironmentAttributeInterpolator$Entry current Ljava/lang/Object;
+extendable method net/minecraft/world/attribute/EnvironmentAttributeInterpolator$Entry compute (Lnet/minecraft/world/attribute/EnvironmentAttribute;)Ljava/lang/Object;
+

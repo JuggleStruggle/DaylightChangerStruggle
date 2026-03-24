@@ -25,7 +25,7 @@
 	"jugglestruggle.tcs.screen.switchcyclemenu.daylightcycleswitch.title": "Ciclos del Tiempo (%1$s)",
 	"jugglestruggle.tcs.screen.switchcyclemenu.daylightcycleproperties.title": "Propiedades Para el Cíclo: %1$s",
 	"jugglestruggle.tcs.screen.switchcyclemenu.propertylist.autosave.desc.firstline": "Auto-Guardar propiedades: %1$s",
-	"jugglestruggle.tcs.screen.switchcyclemenu.propertylist.autosave.desc": "¡No es necesario guardar manualmente porque Auto-Guardar lo hará cada vez que quieras actualizar tu propiedades!",
+	"jugglestruggle.tcs.screen.switchcyclemenu.propertylist.autosave.desc": "¡No es necesario guardar manualmente porque Auto-Guardar lo hará cada vez que quieras actualizar tus propiedades!",
 	"jugglestruggle.tcs.screen.switchcyclemenu.propertylist.save": "Guardar",
 	"jugglestruggle.tcs.screen.switchcyclemenu.propertylist.save.desc": "Guardar propiedades a '%1$s'",
 	"jugglestruggle.tcs.screen.switchcyclemenu.propertylist.reset.desc": "Reiniciar estados de propiedades para '%1$s' antes",
@@ -122,10 +122,10 @@
 	"jugglestruggle.tcs.dnt.randomizer.properties.daylightrandomtime.minimumrandomtime": "Mínimo",
 	"jugglestruggle.tcs.dnt.randomizer.properties.daylightrandomtime.maximumrandomtime": "Máximo",
 	"jugglestruggle.tcs.dnt.randomizer.properties.ticksuntilnextrng": "Ticks Para el Siguiente RNG",
-	"jugglestruggle.tcs.dnt.randomizer.properties.ticksuntilnextrng.ticksuntilnextrng": "Ticks Para el Siguiente RNG (Non-Aleatorio)",
+	"jugglestruggle.tcs.dnt.randomizer.properties.ticksuntilnextrng.ticksuntilnextrng": "Ticks (Aleatorio Apagado)",
 	"jugglestruggle.tcs.dnt.randomizer.properties.ticksuntilnextrng.randomizeticksuntilnextrng": "Aleatoriar",
-	"jugglestruggle.tcs.dnt.randomizer.properties.ticksuntilnextrng.ticksuntilnextrngmin": "Mínimo",
-	"jugglestruggle.tcs.dnt.randomizer.properties.ticksuntilnextrng.ticksuntilnextrngmax": "Máximo",
+	"jugglestruggle.tcs.dnt.randomizer.properties.ticksuntilnextrng.ticksuntilnextrngmin": "Mínimo (Aleatorio Encendido)",
+	"jugglestruggle.tcs.dnt.randomizer.properties.ticksuntilnextrng.ticksuntilnextrngmax": "Máximo (Aleatorio Encendido)",
 	"jugglestruggle.tcs.dnt.randomizer.properties.easings": "Easings",
 	"jugglestruggle.tcs.dnt.randomizer.properties.easings.randomizeeasingbetweenticks": "Aleatoriar Interpolación",
 	"jugglestruggle.tcs.dnt.randomizer.properties.easings.easingbetweenticks": "Interpolación",
@@ -151,5 +151,5 @@
 	"jugglestruggle.tcs.keytype.control": "Control",
 	"jugglestruggle.tcs.keytype.super": "Super",
 
-	"modmenu.descriptionTranslation.timechangerstruggle": "Te permite a modificar el ciclo del tiempo para el cliente sin tener los permisos de operador. ¡También te permite ver cómo un mundo se ve en ese tiempo si eres usado(a) en ese tiempo!"
+	"modmenu.descriptionTranslation.daylightchangerstruggle": "Te permite a modificar el ciclo del tiempo para el cliente sin tener los permisos de operador. ¡También te permite ver cómo un mundo se ve en ese tiempo si eres usado(a) en ese tiempo!"
 }

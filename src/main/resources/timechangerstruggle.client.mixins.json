@@ -2,14 +2,20 @@
     "required": true,
     "minVersion": "0.8",
     "package": "jugglestruggle.timechangerstruggle.mixin.client",
-    "compatibilityLevel": "JAVA_21",
+    "compatibilityLevel": "JAVA_25",
     "client": [
 		"MinecraftClientMixin",
-        "render.GameRendererMixin",
+        "render.CameraMixin",
+        "render.GameRendererMixinNightVision",
+        "render.GameRendererAccessor",
         "render.SkyRenderingMixin",
-        "world.ClientWorldMixin",
+        "render.LightmapTextureManagerMixin",
+        "render.WorldRendererMixin",
         "widget.CyclingButtonWidgetAccessor",
-        "widget.CyclingButtonWidgetBuilderAccessor"
+        "widget.CyclingButtonWidgetBuilderAccessor",
+        "widget.TextFieldWidgetAccessor",
+        "world.ClientWorldMixin",
+        "world.ClientWorldAccessor"
     ],
     "injectors": {
         "defaultRequire": 1

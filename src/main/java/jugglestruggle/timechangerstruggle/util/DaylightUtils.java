@@ -2,7 +2,9 @@ package jugglestruggle.timechangerstruggle.util;
 
 import jugglestruggle.timechangerstruggle.client.TimeChangerStruggleClient;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
+
 import net.minecraft.world.World;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -55,8 +57,7 @@ public final class DaylightUtils
 		
 		
 		// Divide the ticks by the amount of days then subtract our created
-		// daylight ticks to avoid getting larger values in hours, so on and
-		// so for
+		// daylight ticks to avoid getting larger values in hours
 		long days = newTicks / (long)ONE_DAY;
 		newTicks -= days * ONE_DAY;
 		
@@ -90,7 +91,7 @@ public final class DaylightUtils
 		
 		if (TimeChangerStruggleClient.useWorldTime()) 
 		{
-			ticksToParse = world.getTimeOfDay();
+			ticksToParse = world.getDimensionTime();
 			addDay = true;
 		}
 		else

@@ -2,19 +2,18 @@ package jugglestruggle.timechangerstruggle.client.widget;
 
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import java.util.List;
+
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-import java.util.List;
+
 import com.google.common.collect.ImmutableList;
 
 /**
  * @author JuggleStruggle
  * @implNote Created on 06-Feb-2022, Sunday
  */
-@Environment(EnvType.CLIENT)
 public interface WidgetPositionedTooltip extends WidgetOrderedTooltip
 {
 	int getTooltipWidth();

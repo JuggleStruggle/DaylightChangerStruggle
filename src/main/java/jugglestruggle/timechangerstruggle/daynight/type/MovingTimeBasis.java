@@ -1,5 +1,6 @@
 package jugglestruggle.timechangerstruggle.daynight.type;
 
+import jugglestruggle.timechangerstruggle.client.TimeChangerStruggleClient;
 import jugglestruggle.timechangerstruggle.client.config.property.FancySectionProperty;
 import jugglestruggle.timechangerstruggle.config.property.BaseProperty;
 import jugglestruggle.timechangerstruggle.config.property.EnumValue;
@@ -191,6 +192,8 @@ public abstract class MovingTimeBasis implements DayNightCycleBasis
             		{
             			this.previousInterpolatedTime = this.nextInterpolatedTime =
             			this.previousCachedTime = this.cachedTime = v;
+
+            			TimeChangerStruggleClient.updateWorldDaylightCycle(true);
             		}
             		else {
             			this.cachedTime = v;

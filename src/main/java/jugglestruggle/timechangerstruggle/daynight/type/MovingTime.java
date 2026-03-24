@@ -7,11 +7,11 @@ import jugglestruggle.timechangerstruggle.config.property.IntValue;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import java.util.Set;
+
 import net.minecraft.client.gui.Element;
 import net.minecraft.text.Text;
-import java.util.Set;
+
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -21,7 +21,6 @@ import com.google.common.collect.ImmutableSet;
  * @author JuggleStruggle
  * @implNote Created on 26-Jan-2022, Wednesday
  */
-@Environment(EnvType.CLIENT)
 public class MovingTime extends MovingTimeBasis
 {
 	final static String PROPERTIES_KEY = "jugglestruggle.tcs.dnt.movingtime.properties.";

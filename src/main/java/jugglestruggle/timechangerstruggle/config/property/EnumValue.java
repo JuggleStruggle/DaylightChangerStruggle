@@ -2,25 +2,25 @@ package jugglestruggle.timechangerstruggle.config.property;
 
 import jugglestruggle.timechangerstruggle.client.config.property.FancySectionProperty;
 import jugglestruggle.timechangerstruggle.client.config.widget.CyclingWidgetConfig;
-import jugglestruggle.timechangerstruggle.client.config.widget.WidgetConfigInterface;
 import jugglestruggle.timechangerstruggle.client.config.widget.CyclingWidgetConfig.WidgetConfigBuilderEnum;
+import jugglestruggle.timechangerstruggle.client.config.widget.WidgetConfigInterface;
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
 import jugglestruggle.timechangerstruggle.util.InterchangeableFunction;
 
-import net.fabricmc.api.EnvType;
-
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
+
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import net.minecraft.client.gui.widget.CyclingButtonWidget;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableTextContent;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
@@ -35,7 +35,6 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
  * @author JuggleStruggle
  * @implNote Created on 31-Jan-2022, Monday
  */
-@Environment(EnvType.CLIENT)
 public class EnumValue<EV extends Enum<EV>> extends BaseProperty<EnumValue<EV>, EV>
 {
 	protected final EV[] enumValues;

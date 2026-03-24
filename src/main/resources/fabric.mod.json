@@ -14,8 +14,8 @@
 
 	"depends": {
 		"fabricloader": ">=0.18.1",
-		"minecraft": ">=1.21.11",
-		"java": ">=21",
+		"minecraft": ">=26.1",
+		"java": ">=25",
 		"fabric-api": "*"
 	},
 
@@ -38,7 +38,7 @@
 			"links": {
 				"modmenu.github_releases": "https://github.com/JuggleStruggle/DaylightChangerStruggle/releases",
 				"modmenu.modrinth": "https://modrinth.com/mod/daylightchangerstruggle",
-				"modmenu.curseforge": "https://legacy.curseforge.com/minecraft/mc-mods/daylightchangerstruggle"
+				"modmenu.curseforge": "https://curseforge.com/minecraft/mc-mods/daylightchangerstruggle"
 			}
 		}
 	}

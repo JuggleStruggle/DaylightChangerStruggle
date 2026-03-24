@@ -4,15 +4,18 @@ import jugglestruggle.timechangerstruggle.client.widget.WidgetPositionedTooltip;
 import jugglestruggle.timechangerstruggle.config.property.BaseNumber;
 import jugglestruggle.timechangerstruggle.config.property.BaseProperty.ValueConsumer;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
+import jugglestruggle.timechangerstruggle.mixin.client.widget.TextFieldWidgetAccessor;
 import jugglestruggle.timechangerstruggle.util.SimpleCharacterVisitor;
+
+import java.util.List;
+import java.util.function.Consumer;
+
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
+import net.minecraft.util.StringHelper;
 
 /**
  * @author JuggleStruggle
@@ -34,13 +37,13 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 	
 	public NumericFieldWidgetConfig(TextRenderer textRenderer, int width, int height, BaseNumber<N> property) 
 	{
-		super(textRenderer, 18, 18, width, height, Text.empty());
+		super(textRenderer, 0, 0, width, height, Text.empty());
 		
 		this.property = property;
 		this.isNewTextValid = true;
 		
+		this.setMaxLength(32);
 		this.setChangedListener(null);
-		this.setTextPredicate(null);
 		
 		this.setText(this.property.get().toString());
 		this.initialNumber = this.property.get();
@@ -54,20 +57,100 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 		this.textChangedListener = changedListener;
 		super.setChangedListener(this::onTextChanged);
 	}
+
 	/**
-	 * Note: Numeric Field Widget snatches the setTextPredicate as 
-	 * the class itself only uses numbers as predicate.
-	 *
-	 * @param textPredicate useless if provided; this method is used
-	 * to create the predicates for an specific number type and to
-	 * avoid problems.
+	 * Verifies if this text, based on a set of conditions, passes the requirements
+	 * for it to be displayed as a number in this property.
+	 * 
+	 * @implNote Introduced in v0.0.4
 	 */
-	@Override
-	public void setTextPredicate(Predicate<String> textPredicate)
+	protected boolean verifyTextPredicate(String text)
 	{
-		super.setTextPredicate(text -> text.isBlank() ? true : 
-			NumericFieldWidgetConfig.canParseString(this.property.getDefaultValue(), text));
+		return text == null || text.isEmpty() || NumericFieldWidgetConfig.isDashOnly(text) || 
+			NumericFieldWidgetConfig.canParseString(this.property.getDefaultValue(), text);
 	}
+	
+	@Override
+	public void setText(String text)
+	{
+		if (this.verifyTextPredicate(text))
+			super.setText(text);
+	}
+
+	// v0.0.4+26.1: Due to removal of predicates dictating 
+	// whether the new text shall get through. 
+	@Override
+	public void write(final String newText)
+	{
+		final TextFieldWidgetAccessor acc = (TextFieldWidgetAccessor)this;
+		final String oldText = this.getText();
+		
+		int start = Math.min(acc.getSelectionStart(), acc.getSelectionEnd());
+		int end = Math.max(acc.getSelectionStart(), acc.getSelectionEnd());
+		int maxInsertionLength = acc.getMaxLength() - oldText.length() - (start - end);
+		
+		if (maxInsertionLength <= 0)
+			return;
+
+		String newTextM = StringHelper.stripInvalidChars(newText);
+		int insertionLength = newTextM.length();
+		
+		if (maxInsertionLength < insertionLength) 
+		{
+			if (Character.isHighSurrogate(newTextM.charAt(maxInsertionLength - 1)))
+				maxInsertionLength--;
+
+			newTextM = newTextM.substring(0, maxInsertionLength);
+			insertionLength = maxInsertionLength;
+		}
+
+		// Reuse newTextM as the new text which now accounts for the previous text 
+		// alongside parts that need to be replaced by the new text.
+		newTextM = new StringBuilder(oldText).replace(start, end, newTextM).toString();
+		
+		// If verification fails, return and do nothing.
+		if (!this.verifyTextPredicate(newTextM))
+			return;
+		
+		acc.setDirectText(newTextM);
+		
+		this.setSelectionStart(start + insertionLength);
+		this.setSelectionEnd(acc.getSelectionStart());
+		acc.onDirectChanged(newTextM);
+	}
+
+	// Introduced in v0.0.4+26.1, see #write() for the reason.
+	@Override
+	public void eraseCharactersTo(final int position) 
+	{
+		final TextFieldWidgetAccessor acc = (TextFieldWidgetAccessor)this;
+		final String oldText = this.getText();
+		
+		if (oldText.isEmpty())
+			return;
+		
+		if (acc.getSelectionEnd() != acc.getSelectionStart()) {
+			this.write(""); return;
+		}
+		
+		int start = Math.min(position, acc.getSelectionStart());
+		int end = Math.max(position, acc.getSelectionStart());
+		
+		if (start == end) 
+			return;
+		
+		String newTextM = new StringBuilder(oldText).delete(start, end).toString();
+		
+		// If verification fails, return and do nothing.
+		if (!this.verifyTextPredicate(newTextM))
+			return;
+		
+		acc.setDirectText(newTextM);
+		this.setSelectionStart(start);
+		acc.onDirectChanged(newTextM);
+		this.setCursor(start, false);
+	}
+	
 	
 	
 	
@@ -85,10 +168,7 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 		if (!this.isNewTextValid || this.property.get() == null)
 			return false;
 		
-		if (this.property.getMin() == null || this.property.getMax() == null)
-			return true;
-		
-		return this.property.isWithinRange();
+		return !this.hasMinAndMaxValues() || this.property.isWithinRange();
 	}
 	@Override
 	public N getInitialValue() {
@@ -137,19 +217,20 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 	}
 	private void onTextChanged(String newText)
 	{
-		boolean valid = !(newText.isEmpty() || newText.isBlank());
+		boolean valid = !(newText == null || newText.isEmpty() || newText.isBlank());
 		
 		if (valid)
 		{
-			N parsedNumber = NumericFieldWidgetConfig.parseString(this.property.getDefaultValue(), newText);
+			N parsedNumber = NumericFieldWidgetConfig.isDashOnly(newText) ? this.getZero() : 
+				NumericFieldWidgetConfig.parseString(this.property.getDefaultValue(), newText);
 			
 			if (parsedNumber == null) {
 				valid = false;
 			}
 			else
 			{
-				boolean tempNewTextValid = this.isNewTextValid;
-				N previousNumber = this.property.get();
+				final boolean prevNewTextValid = this.isNewTextValid;
+				final N previousNumber = this.property.get();
 				
 				// to avoid the numbers from not being valid despite them being it
 				this.isNewTextValid = true; 
@@ -159,9 +240,10 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 				
 				// just set it back after we are done :)
 				this.property.set(previousNumber);
-				this.isNewTextValid = tempNewTextValid;
+				this.isNewTextValid = prevNewTextValid;
 			}
 			
+			// If valid, actually set the new value into the property as it is
 			if (valid)
 			{
 				ValueConsumer<BaseNumber<N>, N> consumer = this.property.getConsumer();
@@ -174,10 +256,20 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 		}
 		
 		this.isNewTextValid = valid;
-		this.setEditableColor(valid ? DEFAULT_EDITABLE_COLOR : 0xE06060);
+		this.setEditableColor(valid ? DEFAULT_EDITABLE_COLOR : 0xFFE06060);
 		
 		if (this.textChangedListener != null)
 			this.textChangedListener.accept(newText);
+	}
+
+	/**
+	 * Extracted function for the sake of knowing if the {@link #property} has both a
+	 * minimum and a maximum applied.
+	 * 
+	 * @implNote Introduced in v0.0.4
+	 */
+	public boolean hasMinAndMaxValues() {
+		return this.property.getMin() != null && this.property.getMax() != null;
 	}
 	
 	
@@ -222,6 +314,10 @@ implements WidgetConfigInterface<BaseNumber<N>, N>, WidgetPositionedTooltip
 	
 	
 	
+	
+	protected static final boolean isDashOnly(String val) {
+		return val != null && val.length() == 1 && val.equals("-");
+	}
 	
 	protected static final boolean canParseString(Number n, String val) {
 		return NumericFieldWidgetConfig.parseString(n, val) != null;

@@ -3,15 +3,23 @@ package jugglestruggle.timechangerstruggle.client;
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
 import jugglestruggle.timechangerstruggle.config.property.LongValue;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis;
-import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
 import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBasis.PropertyWriterSource;
+import jugglestruggle.timechangerstruggle.daynight.DayNightCycleBuilder;
 import jugglestruggle.timechangerstruggle.util.DaylightUtils;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
+
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.TimeArgumentType;
 import net.minecraft.screen.ScreenTexts;
@@ -21,12 +29,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BooleanSupplier;
-import java.util.function.UnaryOperator;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.Command;
@@ -42,7 +45,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
  * @author JuggleStruggle
  * @implNote Created on 27-Feb-2022, Thursday
  */
-@Environment(EnvType.CLIENT)
 public class Commands
 {
 	private boolean commandsRegistered;
@@ -61,7 +63,7 @@ public class Commands
         LiteralCommandNode<FabricClientCommandSource> baseCommand = dispatcher.register(this.getBaseCommand());
 
         for (String alias : this.getAliases()) {
-            dispatcher.register(ClientCommandManager.literal(alias).redirect(baseCommand));
+            dispatcher.register(ClientCommands.literal(alias).redirect(baseCommand));
         }
         
         this.commandsRegistered = true;
@@ -69,40 +71,32 @@ public class Commands
 	
 	public LiteralArgumentBuilder<FabricClientCommandSource> getBaseCommand()
 	{
-		LiteralArgumentBuilder<FabricClientCommandSource> base = ClientCommandManager.literal("daylightchanger");
+		LiteralArgumentBuilder<FabricClientCommandSource> base = ClientCommands.literal("daylightchanger");
 		
 		base.executes(this::displayWorldTime);
 		
-		//
 		// World Time: Toggle between world time and user time
-		//
 		base.then
 		(
-			ClientCommandManager.literal("worldtime")
+			ClientCommands.literal("worldtime")
 			.executes(new WorldTimeCommand(true)).then
 			(
-				ClientCommandManager.argument("enabled", BoolArgumentType.bool())
+				ClientCommands.argument("enabled", BoolArgumentType.bool())
 				.executes(new WorldTimeCommand(false))
 			)
 		);
 		
-		//
 		// Cycles: Gives the user a list of available cycles and modify their option or use them
-		//
 		base.then(this.generateCycleSubcommand());
 		
-		//
 		// Option: A list of options which does not fit as a command itself (like World Time)
-		//
 		base.then(this.generateOptionSubcommand());
 		
-		//
 		// Time: Quick-way to use Static Time elements and is changed to if done so,
 		// just not directly when using "time" subcommand alone
-		//
 		base.then
 		(
-			ClientCommandManager.literal("time")
+			ClientCommands.literal("time")
 			.executes(this::displayWorldTime)
 			.then(StaticTimeSetCommand.addSubtimeCommands(StaticTimeMode.ADD))
 			.then(StaticTimeSetCommand.addSubtimeCommands(StaticTimeMode.SET))
@@ -117,7 +111,7 @@ public class Commands
 	
 	private LiteralArgumentBuilder<FabricClientCommandSource> generateCycleSubcommand()
 	{
-		LiteralArgumentBuilder<FabricClientCommandSource> cycleSubcommand = ClientCommandManager.literal("cycle");
+		LiteralArgumentBuilder<FabricClientCommandSource> cycleSubcommand = ClientCommands.literal("cycle");
 		
 		cycleSubcommand.executes
 		(
@@ -164,11 +158,7 @@ public class Commands
 					displayNameAsDisplay.styled(style -> 
 					{
 						Text displayDesc = cycle.getTranslatableDescription();
-						
-						if (displayDesc == null)
-							return style;
-						else
-							return style.withHoverEvent(new HoverEvent.ShowText(displayDesc));
+						return (displayDesc == null) ? style : style.withHoverEvent(new HoverEvent.ShowText(displayDesc));
 					});
 					
 					Commands.sendTextToChat(ctx, Text.translatable("%1$s %2$s %3$s", options, useCycle, displayNameAsDisplay));
@@ -181,7 +171,7 @@ public class Commands
 		
 		cycleSubcommand.then
 		(
-			ClientCommandManager.literal("remove")
+			ClientCommands.literal("remove")
 			.executes(ctx -> 
 			{
 				if (TimeChangerStruggleClient.getTimeChanger() == null)
@@ -229,25 +219,26 @@ public class Commands
 			if (cycleName.toLowerCase(Locale.ROOT).equals("remove"))
 				continue;
 			
-			LiteralArgumentBuilder<FabricClientCommandSource> cycleArg = ClientCommandManager.literal(cycleName);
+			LiteralArgumentBuilder<FabricClientCommandSource> cycleArg = ClientCommands.literal(cycleName);
 			
 			cycleArg.executes(new CycleUseCommand(cycle));
 			
-			cycleArg.then(ClientCommandManager.literal("use").executes(new CycleUseCommand(cycle)));
+			cycleArg.then(ClientCommands.literal("use").executes(new CycleUseCommand(cycle)));
 			
 			// Only add "option" if the cycle supports or has any options
 			// Unfortunately, if there were a way to load the configs related to the cycle once we need them then
 			// we wouldn't already create an artificial barrier for this
 			if (cycle.hasOptionsToEdit())
 			{
-				LiteralArgumentBuilder<FabricClientCommandSource> cycleOptionArg = ClientCommandManager.literal("option");
+				LiteralArgumentBuilder<FabricClientCommandSource> cycleOptionArg = ClientCommands.literal("option");
 				
 				cycleOptionArg.executes(ctx -> 
 				{
 					// TODO: This doesn't work when executing it directly. This is as a result of the chat history
 					// screen clearing its own screen when the TCS screen is set before that happens and as a result,
 					// it seems like nothing happened. Clicking on the chat history opens this screen without any issues.
-					ctx.getSource().getClient().setScreen(new TimeChangerScreen(cycle));
+					MinecraftClient client = ctx.getSource().getClient();
+					client.setScreen(new TimeChangerScreen(client.currentScreen, cycle));
 					
 					return 1;
 				});
@@ -263,55 +254,65 @@ public class Commands
 	
 	private LiteralArgumentBuilder<FabricClientCommandSource> generateOptionSubcommand()
 	{
-		return ClientCommandManager.literal("option")
+		return ClientCommands.literal("option")
 			.then(this.generateOptionSubcommandBoolAction
 			(
 				"dateOverTicks", 
 				Text.translatable("jugglestruggle.tcs.screen.toggledate"), 
 				() -> TimeChangerStruggleClient.dateOverTicks, 
-				currentValue -> TimeChangerStruggleClient.dateOverTicks = currentValue
+				v -> TimeChangerStruggleClient.dateOverTicks = v, null
 			))
 			.then(this.generateOptionSubcommandBoolAction
 			(
 				"butterySmoothCycle", 
 				Text.translatable("jugglestruggle.tcs.screen.togglesmoothbutterdaylightcycle"), 
 				() -> TimeChangerStruggleClient.smoothButterCycle, 
-				currentValue -> TimeChangerStruggleClient.smoothButterCycle = currentValue
+				v -> TimeChangerStruggleClient.smoothButterCycle = v, null
 			))
 			.then(this.generateOptionSubcommandBoolAction
 			(
 				"disableNightVisionEffect", 
 				Text.translatable("jugglestruggle.tcs.cmd.option.disablenightvision"), 
 				() -> TimeChangerStruggleClient.disableNightVisionEffect, 
-				currentValue -> TimeChangerStruggleClient.disableNightVisionEffect = currentValue
+				v -> TimeChangerStruggleClient.disableNightVisionEffect = v, null
 			))
 			.then(this.generateOptionSubcommandBoolAction
 			(
 				"disableWorldTimeOnCycleUsage", 
 				Text.translatable("jugglestruggle.tcs.cmd.option.disableworldtimeoncycleusage"), 
 				() -> TimeChangerStruggleClient.commandsDisableWorldTimeOnCycleUsage, 
-				currentValue -> TimeChangerStruggleClient.commandsDisableWorldTimeOnCycleUsage = currentValue
+				v -> TimeChangerStruggleClient.commandsDisableWorldTimeOnCycleUsage = v, null
 			))
 			.then(this.generateOptionSubcommandBoolAction
 			(
 				"commandFeedbackOnLessImportant", 
 				Text.translatable("jugglestruggle.tcs.cmd.option.commandfeedbackonlessimportant"), 
 				() -> TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant, 
-				currentValue -> TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant = currentValue
+				v -> TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant = v, null
 			))
 			.then(this.generateOptionSubcommandBoolAction
 			(
 				"allowWorldChangeCyclesToWriteToDisk", 
 				Text.translatable("jugglestruggle.tcs.cmd.option.allowworldchangecyclestowritetodisk"), 
 				() -> TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk, 
-				currentValue -> TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk = currentValue
+				v -> TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk = v, null
 			));
 	}
 	
-	private LiteralArgumentBuilder<FabricClientCommandSource> generateOptionSubcommandBoolAction
-	(String subcommandName, Text displayName, BooleanSupplier suppliedValue, UnaryOperator<Boolean> onApplyConsumer)
+	/**
+	 * Generates sub-command boolean-based arguments in a more common way.
+	 * 
+	 * @param suppliedValue the most recent value this currently holds
+	 * @param onApplyConsumer apply the new value into the option itself
+	 * @param onSuccessRes invoked after everything else is done and was 
+	 *        successful in changing to the new value
+	 *        
+	 * @return a literal argument builder with the name of the sub-command
+	 */
+	private LiteralArgumentBuilder<FabricClientCommandSource> generateOptionSubcommandBoolAction(String subcommandName, 
+		Text displayName, BooleanSupplier suppliedValue, UnaryOperator<Boolean> onApplyConsumer, Consumer<Boolean> onSuccessRes)
 	{
-		LiteralArgumentBuilder<FabricClientCommandSource> subcommand = ClientCommandManager.literal(subcommandName);
+		LiteralArgumentBuilder<FabricClientCommandSource> subcommand = ClientCommands.literal(subcommandName);
 		
 		subcommand.executes(ctx -> 
 		{
@@ -326,7 +327,7 @@ public class Commands
 		
 		subcommand.then
 		(
-			ClientCommandManager.argument("enable", BoolArgumentType.bool())
+			ClientCommands.argument("enable", BoolArgumentType.bool())
 			.executes(ctx ->
 			{
 				final boolean previousValue = suppliedValue.getAsBoolean();
@@ -354,13 +355,13 @@ public class Commands
 	
 	private int displayWorldTime(CommandContext<FabricClientCommandSource> ctx) 
 	{
-		World w = ctx.getSource().getWorld();
+		World w = ctx.getSource().getLevel();
 		
 		Commands.sendTextToChat
 		(
 			ctx, s -> s.withColor(0xFFDD22),
 			"jugglestruggle.tcs.cmd.time.use", 
-			w.getTimeOfDay(), DaylightUtils.getParsedTime(w, true)
+			w.getDimensionTime(), DaylightUtils.getParsedTime(w, true)
 		);
 		
 		return 1;
@@ -379,7 +380,7 @@ public class Commands
 		Commands.sendTextToChat(ctx, text);
 	}
 	public static void sendTextToChat(CommandContext<FabricClientCommandSource> ctx, Text text) {
-		ctx.getSource().getClient().inGameHud.getChatHud().addMessage(text);
+		ctx.getSource().getClient().inGameHud.getChatHud().addClientSystemMessage(text);
 	}
 	
 	// Don't mind the silly method wording
@@ -410,7 +411,6 @@ public class Commands
 				return 0;
 			
 			TimeChangerStruggleClient.worldTime = setWorldTime;
-			
 			
 			if (TimeChangerStruggleClient.useWorldTime() && setWorldTime == false)
 			{
@@ -503,16 +503,16 @@ public class Commands
 	{
 		public static LiteralArgumentBuilder<FabricClientCommandSource> addSubtimeCommands(final StaticTimeMode mode)
 		{
-			final LiteralArgumentBuilder<FabricClientCommandSource> base = ClientCommandManager.literal(mode.name().toLowerCase(Locale.ROOT))
+			final LiteralArgumentBuilder<FabricClientCommandSource> base = ClientCommands.literal(mode.name().toLowerCase(Locale.ROOT))
 			.then
 			(
-				ClientCommandManager.argument("time", TimeArgumentType.time())
+				ClientCommands.argument("time", TimeArgumentType.time())
 				.executes(new StaticTimeSetCommand(null, mode))
 			);
 			
 			Lists.newArrayList(jugglestruggle.timechangerstruggle.daynight.type.StaticTime.PresetSetTimes.values())
 			.stream().filter(presetTime -> presetTime.shouldShowInCommand()).forEach(presetTime -> 
-				base.then(ClientCommandManager.literal(presetTime.name().toLowerCase(Locale.ROOT))
+				base.then(ClientCommands.literal(presetTime.name().toLowerCase(Locale.ROOT))
 					.executes(new StaticTimeSetCommand(presetTime.getTime(), mode)))
 			);
 			
@@ -561,8 +561,8 @@ public class Commands
 				jugglestruggle.timechangerstruggle.daynight.type.MovingTime movingTime = isMovingTime ?
 					(jugglestruggle.timechangerstruggle.daynight.type.MovingTime)TimeChangerStruggleClient.getTimeChanger() : null;
 				
-				final World w = ctx.getSource().getWorld();
-				final long previousTimeOfDay = w.getTimeOfDay();
+				final World w = ctx.getSource().getLevel();
+				final long previousTimeOfDay = w.getDimensionTime();
 				
 				long totalTimeOfDay;
 				long timeToActuallySet;

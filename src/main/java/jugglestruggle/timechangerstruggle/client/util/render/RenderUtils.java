@@ -73,7 +73,7 @@ public final class RenderUtils
 			this.vertex(v, this.x2, this.y2, this.z).color(this.brCol);
 		}
 		
-		// Introduced in v0.0.2+1.21.9 as the transformation for the Z axis was removed.
+		// Introduced in v0.0.3+1.21.9 as the transformation for the Z axis was removed.
 		VertexConsumer vertex(VertexConsumer v, float x, float y, float z)
 		{
 			Vector2f vector2f = this.pose.transformPosition(x, y, new Vector2f());
@@ -101,8 +101,8 @@ public final class RenderUtils
 		{
 			if (this.preparation == null) 
 			{
-				this.preparation = this.textRenderer.prepare(this.orderedText, this.fX, this.fY, this.color, 
-					this.shadow, this.trackEmpty, this.backgroundColor);
+				this.preparation = this.textRenderer.prepare(this.orderedText, this.fX, this.fY, 
+					this.color, this.shadow, this.trackEmpty, this.backgroundColor);
 				ScreenRect rect = this.preparation.getScreenRect();
 			
 				if (rect != null) 

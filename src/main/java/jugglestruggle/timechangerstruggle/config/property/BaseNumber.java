@@ -5,9 +5,6 @@ import jugglestruggle.timechangerstruggle.client.config.widget.NumericFieldWidge
 import jugglestruggle.timechangerstruggle.client.config.widget.WidgetConfigInterface;
 import jugglestruggle.timechangerstruggle.client.screen.TimeChangerScreen;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.internal.LazilyParsedNumber;
@@ -22,7 +19,6 @@ import com.google.gson.internal.LazilyParsedNumber;
  * @author JuggleStruggle
  * @implNote 23-11-2021, Tuesday
  */
-@Environment(EnvType.CLIENT)
 public abstract class BaseNumber<N extends Number> extends BaseProperty<BaseNumber<N>, N>
 {
 	/** Hard minimum; {@code null} to avoid checking. */

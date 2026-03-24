@@ -7,22 +7,21 @@ import jugglestruggle.timechangerstruggle.config.property.BaseProperty;
 import jugglestruggle.timechangerstruggle.config.property.IntValue;
 import jugglestruggle.timechangerstruggle.config.property.StringValue;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.MathHelper;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
 import com.google.common.collect.ImmutableSet;
 
 /**
  * @author JuggleStruggle
  * @implNote Created on 26-Jan-2022, Wednesday
  */
-@Environment(EnvType.CLIENT)
 public interface DayNightCycleBasis
 {
 	/**
@@ -259,7 +258,7 @@ public interface DayNightCycleBasis
 	 * if it was loaded from disk, which shouldn't write much else on certain cycles.
 	 *
 	 * @author JuggleStruggle
-	 * @implNote Implemented in v0.0.1
+	 * @implNote Introduced in v0.0.1
 	 */
 	public enum PropertyWriterSource
 	{
