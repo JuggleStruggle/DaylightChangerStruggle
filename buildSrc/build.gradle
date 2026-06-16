@@ -1,0 +1,26 @@
+// Directly taken from C2ME's 26.2's source code on GitHub and slightly adjusted to better
+// match DaylightChangerStruggle's format as it is required to maintain Yarn mapping. Source:
+// https://raw.githubusercontent.com/RelativityMC/C2ME-fabric/refs/heads/dev/26.2.0/buildSrc/build.gradle
+
+plugins 
+{
+	id 'java'
+	id 'java-library'
+	id 'java-gradle-plugin'
+}
+
+group = "jugglestruggle.timechanger"
+
+repositories 
+{
+	mavenCentral()
+	maven { url = "https://maven.fabricmc.net/" }
+}
+
+dependencies {
+	implementation "net.fabricmc.fabric-loom-remap:net.fabricmc.fabric-loom-remap.gradle.plugin:1.16-SNAPSHOT"
+}
+
+// gradlePlugin {
+// 	plugins {}
+// }

@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-import net.minecraft.client.render.SkyRendering;
+import net.minecraft.client.render.SkyRenderer;
 
 /**
  * Created in response to how 1.21.11 now smooths out the daylight cycle and was
@@ -17,7 +17,7 @@ import net.minecraft.client.render.SkyRendering;
  * @author JuggleStruggle
  * @implNote Introduced in v0.0.3+1.21.11
  */
-@Mixin(SkyRendering.class)
+@Mixin(SkyRenderer.class)
 public class SkyRenderingMixin
 {
 	@ModifyVariable(

@@ -44,7 +44,8 @@ public class EnvironmentAttributeInterpolatorDCS extends EnvironmentAttributeInt
 	}
 	
 	/**
-	 * Invokes {@link #clear()} first then {@link #update()} while remembering the position and world.
+	 * Invokes {@link #clear()} first then {@link #update()} while remembering 
+	 * both the position and the world.
 	 */
 	public void refresh()
 	{

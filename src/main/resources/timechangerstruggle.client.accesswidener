@@ -18,6 +18,11 @@ extendable method net/minecraft/client/gui/widget/EntryListWidget recalculateAll
 accessible method net/minecraft/client/gui/render/state/ColoredQuadGuiElementRenderState createBounds (IIIILorg/joml/Matrix3x2fc;Lnet/minecraft/client/gui/ScreenRect;)Lnet/minecraft/client/gui/ScreenRect;
 # > TextGuiElementRenderState: Avoid using ints for its position and use floats instead (in fact, the textRenderer.prepare() uses x and y as floats!)
 extendable class net/minecraft/client/gui/render/state/TextGuiElementRenderState
+accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState textRenderer Lnet/minecraft/client/font/TextRenderer;
+accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState orderedText Lnet/minecraft/text/OrderedText;
+accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState color I
+accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState backgroundColor I
+accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState shadow Z
 accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState trackEmpty Z
 accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState preparation Lnet/minecraft/client/font/TextRenderer$GlyphDrawable;
 accessible field net/minecraft/client/gui/render/state/TextGuiElementRenderState bounds Lnet/minecraft/client/gui/ScreenRect;

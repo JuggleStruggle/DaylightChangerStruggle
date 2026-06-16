@@ -21,7 +21,7 @@ import net.minecraft.world.clock.WorldClockKey;
  * as it is the case with {@link ClientWorld}.
  * 
  * @author JuggleStruggle
- * @implNote Introduced in v0.0.4+26.1
+ * @implNote Introduced in v0.0.4
  */
 public class ClientClocksDCS extends ClientClocks
 {
@@ -65,25 +65,25 @@ public class ClientClocksDCS extends ClientClocks
 	@Override
 	public void setTicks(long ticks) 
 	{
-		if (!this.useDcsClock)
-		{
-			ClientWorld w = MinecraftClient.getInstance().world;
-			
-			if (w != null)
-				((ClientWorldAccessor)w).getClientNetworkHandler().getClocks().setTicks(ticks);
-		}
+		if (this.useDcsClock)
+			return;
+		
+		ClientWorld w = MinecraftClient.getInstance().world;
+		
+		if (w != null)
+			((ClientWorldAccessor)w).getClientNetworkHandler().getClocks().setTicks(ticks);
 	}
 	
 	@Override
 	public void update(long ticks, Map<RegistryEntry<WorldClockKey>, ClockUpdate> clockDataByKey) 
 	{
-		if (!this.useDcsClock)
-		{
-			ClientWorld w = MinecraftClient.getInstance().world;
-			
-			if (w != null)
-				((ClientWorldAccessor)w).getClientNetworkHandler().getClocks().update(ticks, clockDataByKey);
-		}
+		if (this.useDcsClock)
+			return;
+		
+		ClientWorld w = MinecraftClient.getInstance().world;
+		
+		if (w != null)
+			((ClientWorldAccessor)w).getClientNetworkHandler().getClocks().update(ticks, clockDataByKey);
 	}
 
 	/**

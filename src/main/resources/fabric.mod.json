@@ -13,8 +13,8 @@
 	"license": "LGPL-3.0-only",
 
 	"depends": {
-		"fabricloader": ">=0.18.1",
-		"minecraft": ">=26.1",
+		"fabricloader": ">=0.19.2",
+		"minecraft": ">=26.2",
 		"java": ">=25",
 		"fabric-api": "*"
 	},

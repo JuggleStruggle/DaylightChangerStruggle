@@ -1,6 +1,6 @@
 plugins 
 {
-	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+    id 'fabric-loom'
 	id 'maven-publish'
 }
 
@@ -14,14 +14,6 @@ java {
 version = project.mod_version
 group = project.maven_group
 
-loom
-{
-	intermediaryUrl = 'https://repo.codemc.io/repository/relativitymc/org/relativitymc/intermediary/%1$s/intermediary-%1$s-v2.jar'
-	useIntermediateMappings = true
-
-	accessWidenerPath = file("src/main/resources/timechangerstruggle.client.accesswidener");
-}
-
 dependencies
 {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -31,13 +23,29 @@ dependencies
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	// modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
-	// v0.0.3+26.1 info: Fabric API causes so much trouble when it comes to certain modules when
+	// v0.0.4+26.1 info: Fabric API causes so much trouble when it comes to certain modules when
 	// debugging due to Yarn mapping, which led to the decision to stick using individualized 
 	// modules that are actually used, as listed below. This sacrifices some nice-to-use modules
 	// such as language being applied due to Fabric's resource APIs crashing everytime 
 	// they're included.
 	["fabric-command-api-v2", "fabric-key-mapping-api-v1", "fabric-lifecycle-events-v1"]
 	 .forEach{modCompileOnly(fabricApi.module(it, "${project.fabric_version}"))}
+}
+
+loom
+{
+//	intermediaryUrl = 'https://repo.codemc.io/repository/relativitymc/org/relativitymc/intermediary/%1$s/intermediary-%1$s-v2.jar';
+    // Directly uses C2ME's Maven Intermediary from 26.2
+    setIntermediateMappingsProvider(com.ishland.c2me.gradle.MavenIntermediaryProvider.class) {
+        it.refreshDeps = loom.refreshDeps();
+        it.intermediaryUrl = 'https://repo.codemc.io/repository/relativitymc/org/relativitymc/intermediary/%1$s/intermediary-%1$s-v2.jar'; // placeholder
+        it.intermediaryNotation = "org.relativitymc:intermediary:${minecraft_version}:v2"
+    }
+
+	useIntermediateMappings = true
+    enableTransitiveAccessWideners = false
+
+	accessWidenerPath = file("src/main/resources/timechangerstruggle.client.accesswidener");
 }
 
 processResources
@@ -96,7 +104,8 @@ jar
 	}
 }
 
-publishing {
+publishing
+{
 	publications {
 		create("mavenJava", MavenPublication) {
 			artifactId = project.archives_base_name
@@ -106,7 +115,6 @@ publishing {
 
 	repositories {}
 }
-
 
 repositories {
 	maven {

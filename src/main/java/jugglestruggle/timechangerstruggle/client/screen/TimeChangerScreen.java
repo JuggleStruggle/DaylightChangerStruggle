@@ -647,7 +647,7 @@ public class TimeChangerScreen extends Screen
 				break;
 		}
 		
-		this.client.setScreen(this.parentScreen);
+		this.client.guiManager.setScreen(this.parentScreen);
 	}
 	
 	@Override

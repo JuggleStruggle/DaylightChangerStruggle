@@ -238,7 +238,7 @@ public class Commands
 					// screen clearing its own screen when the TCS screen is set before that happens and as a result,
 					// it seems like nothing happened. Clicking on the chat history opens this screen without any issues.
 					MinecraftClient client = ctx.getSource().getClient();
-					client.setScreen(new TimeChangerScreen(client.currentScreen, cycle));
+					client.guiManager.setScreen(new TimeChangerScreen(client.guiManager.getCurrentScreen(), cycle));
 					
 					return 1;
 				});
@@ -380,7 +380,7 @@ public class Commands
 		Commands.sendTextToChat(ctx, text);
 	}
 	public static void sendTextToChat(CommandContext<FabricClientCommandSource> ctx, Text text) {
-		ctx.getSource().getClient().inGameHud.getChatHud().addClientSystemMessage(text);
+		ctx.getSource().getClient().guiManager.inGameHud.getChatHud().addClientSystemMessage(text);
 	}
 	
 	// Don't mind the silly method wording

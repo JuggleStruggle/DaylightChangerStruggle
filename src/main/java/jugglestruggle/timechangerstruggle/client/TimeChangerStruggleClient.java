@@ -411,10 +411,10 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 	
 	private void onClientTick(MinecraftClient client)
 	{
-		if (client.currentScreen == null && client.world != null)
+		if (client.guiManager.getCurrentScreen() == null && client.world != null)
 		{
 			if (Keybindings.timeChangerMenuKey.isPressed())
-				client.setScreen(new TimeChangerScreen());
+				client.guiManager.setScreen(new TimeChangerScreen());
 			
 			final boolean previousWorldTime = TimeChangerStruggleClient.worldTime;
 			while (Keybindings.toggleWorldTimeKey.wasPressed()) {

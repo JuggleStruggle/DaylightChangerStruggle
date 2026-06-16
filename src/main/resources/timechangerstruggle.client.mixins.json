@@ -10,7 +10,6 @@
         "render.GameRendererAccessor",
         "render.SkyRenderingMixin",
         "render.LightmapTextureManagerMixin",
-        "render.WorldRendererMixin",
         "widget.CyclingButtonWidgetAccessor",
         "widget.CyclingButtonWidgetBuilderAccessor",
         "widget.TextFieldWidgetAccessor",
