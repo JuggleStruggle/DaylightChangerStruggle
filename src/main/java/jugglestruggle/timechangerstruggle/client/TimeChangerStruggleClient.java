@@ -44,6 +44,7 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 	 * they were first added.
 	 */
 	private static final Map<String, DayNightCycleBuilder> CYCLE_BUILDERS;
+	
 	/**
 	 * Uses the client world's time. 
 	 * 
@@ -162,14 +163,24 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 	 * hosts extra variables for the sake of continuing with the core features
 	 * DCS offers. 
 	 * 
-	 * <p> Those cycle features would have been made made redundant due to the 
-	 * clock itself only offering the time and nothing else for cycle control. 
-	 * A solution was made to still invoke the clock but with different parameters 
-	 * to yield different results.
+	 * <p> Those cycle features would have been made redundant due to the clock
+	 * itself only offering the time and nothing else for cycle control. A solution
+	 * was made to still invoke the clock but with different parameters to yield
+	 * different results.
 	 * 
 	 * @implNote Introduced in v0.0.4
 	 */
 	public static ClientClocksDCS dcsClock = new ClientClocksDCS();
+	
+	/**
+	 * Performs a world change save regardless on whether the cycle save is allowed. 
+	 * 
+	 * <p> This is reset back to {@code false} once the world change event is invoked or
+	 * the Time Changer screen saves them to disk, whichever comes first.
+	 * 
+	 * @implNote Introduced in v0.0.5
+	 */
+	public static boolean doGeneralWorldChangeSave = false;
 	
 	
 	static
@@ -329,23 +340,36 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 	// Introduced in v0.0.1
 	public static void onWorldChanged(MinecraftClient client, ClientWorld world)
 	{
+		// v0.0.5: Updated to account for new ways to save
+		boolean save = TimeChangerStruggleClient.doGeneralWorldChangeSave;
+		
 		if (!TimeChangerStruggleClient.useWorldTime() && TimeChangerStruggleClient.worldExistedPreviously && 
 			TimeChangerStruggleClient.timeChanger.saveOnWorldChange()) 
 		{
 			TimeChangerStruggleClient.config.createOrModifyDaylightCycleConfig(TimeChangerStruggleClient.timeChanger, true);
 			
 			if (TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk)
-				TimeChangerStruggleClient.config.writeIfModified();
+				save = true;
 		}
 		
+		if (save)
+			TimeChangerStruggleClient.config.writeIfModified();
+		
 		TimeChangerStruggleClient.worldExistedPreviously = world != null;
+		TimeChangerStruggleClient.doGeneralWorldChangeSave = false;
 	}
 
 	/**
 	 * Fixes the single-player bug when pausing the game and the block/sky 
 	 * visuals remain as it was before ticking to update to newly defined
 	 * values. This is done by simply ticking in the relevant places so
-	 * they're updated.
+	 * they're updated. 
+	 * 
+	 * <p> It is skipped if:
+	 * <ul>
+	 * <li> The world is not paused and {@code skipIfNotPaused} is set </li> 
+	 * <li> The game world is not available </li> 
+	 * </ul>
 	 * 
 	 * @param skipIfNotPaused skips further execution only if the game instance is not paused
 	 * @implNote Introduced in v0.0.4
@@ -378,7 +402,7 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 	@Override
 	public void onInitializeClient()
 	{
-		// Register keybindings to client
+		// Begin by registering keybindings first and foremost
 		Keybindings.registerKeybindings();
 
 		// Load the configuration settings
@@ -415,9 +439,40 @@ public class TimeChangerStruggleClient implements ClientModInitializer
 			if (Keybindings.timeChangerMenuKey.isPressed())
 				client.setScreen(new TimeChangerScreen());
 			
-			final boolean previousWorldTime = TimeChangerStruggleClient.worldTime;
-			while (Keybindings.toggleWorldTimeKey.wasPressed()) {
-				TimeChangerStruggleClient.worldTime = !previousWorldTime;
+			boolean prev = TimeChangerStruggleClient.worldTime;
+			
+			while (Keybindings.toggleWorldTimeKey.wasPressed()) 
+			{
+				TimeChangerStruggleClient.worldTime = !prev;
+				TimeChangerStruggleClient.doGeneralWorldChangeSave = true;
+			}
+			
+			// Introduced in v0.0.5: disable night vision toggle, prev & next cycle
+			prev = TimeChangerStruggleClient.disableNightVisionEffect;
+			while (Keybindings.disableNightVisionKey.wasPressed()) 
+			{
+				TimeChangerStruggleClient.disableNightVisionEffect = !prev;
+				TimeChangerStruggleClient.doGeneralWorldChangeSave = true;
+			}
+			
+			// Previous and Next Cycle keys forces them to execute only once
+			prev = true;
+			while (Keybindings.prevCycleKey.wasPressed()) 
+			{
+				if (prev) 
+				{
+					TimeChangerStruggleClient.quickSwitchCachedCycleType(true); prev = false; 
+					TimeChangerStruggleClient.doGeneralWorldChangeSave = true;
+				}
+			}
+			prev = true;
+			while (Keybindings.nextCycleKey.wasPressed()) 
+			{
+				if (prev) 
+				{
+					TimeChangerStruggleClient.quickSwitchCachedCycleType(false); prev = false; 
+					TimeChangerStruggleClient.doGeneralWorldChangeSave = true;
+				}
 			}
 		}
 	}

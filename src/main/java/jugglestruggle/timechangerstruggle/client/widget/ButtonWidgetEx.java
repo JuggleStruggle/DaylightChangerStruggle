@@ -1,14 +1,22 @@
 package jugglestruggle.timechangerstruggle.client.widget;
 
 import jugglestruggle.timechangerstruggle.util.SimpleCharacterVisitor;
+
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.screen.narration.NarrationPart;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.input.AbstractInput;
+import net.minecraft.client.input.MouseInput;
 import net.minecraft.text.OrderedText;
+
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
+import org.lwjgl.glfw.GLFW;
 
 /**
  * @author JuggleStruggle
@@ -17,34 +25,57 @@ import java.util.function.BiConsumer;
 public class ButtonWidgetEx extends ButtonWidget
 	implements WidgetPositionedTooltip, SelfWidgetRendererInheritor<ButtonWidgetEx>
 {
+	// Both fields introduced in v0.0.5
+	public static final Predicate<MouseInput> LEFT_CLICK_BUTTON = i -> 
+		i.button() == GLFW.GLFW_MOUSE_BUTTON_1;
+	public static final Predicate<MouseInput> LEFT_AND_RIGHT_CLICK_BUTTONS = i -> 
+		i.button() == GLFW.GLFW_MOUSE_BUTTON_1 || i.button() == GLFW.GLFW_MOUSE_BUTTON_2;
+	
 	private int tooltipWidth;
 	private int tooltipHeight;
 	
 	private List<OrderedText> compiledTooltipText;
 	private BiConsumer<ButtonWidgetEx, NarrationMessageBuilder> narrationBuilder;
+	private Predicate<MouseInput> validClickButtons;
 	
 	private final SelfWidgetRender<ButtonWidgetEx> renderer;
-	
-	public ButtonWidgetEx(int width, int height, net.minecraft.text.Text message, net.minecraft.text.Text tooltipDescText, 
-		net.minecraft.text.Text tooltipText, TextRenderer renderer, PressAction onPress)
-	{
-		super(0, 0, width, height, message, onPress, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
-		this.updateTooltip(tooltipDescText, tooltipText, renderer);
-		this.renderer = new SelfWidgetRender<>(this, renderer);
-		this.narrationBuilder = (bw, b) -> this.appendNarrationMessage(b, (byte)1, 0);
-	}
-	
+	private final Consumer<AbstractInput> onPress;
+
+	// v0.0.5 change: Cut down on initialization repeats and make changes to onPress
 	public ButtonWidgetEx(int width, int height, net.minecraft.text.Text message, 
-		List<OrderedText> compiledTooltip, TextRenderer renderer, PressAction onPress)
+		List<OrderedText> compiledTooltip, TextRenderer renderer, Consumer<AbstractInput> onPress)
 	{
-		super(0, 0, width, height, message, onPress, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
+		super(0, 0, width, height, message, null, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
 		this.compiledTooltipText = compiledTooltip;
 		this.renderer = new SelfWidgetRender<>(this, renderer);
 		this.narrationBuilder = (bw, b) -> this.appendNarrationMessage(b, (byte)1, 0);
+		this.validClickButtons = ButtonWidgetEx.LEFT_CLICK_BUTTON;
+		this.onPress = onPress;
+	}
+	
+	public ButtonWidgetEx(int width, int height, net.minecraft.text.Text message, net.minecraft.text.Text tooltipDescText, 
+		net.minecraft.text.Text tooltipText, TextRenderer renderer, Consumer<AbstractInput> onPress)
+	{
+		this(width, height, message, null, renderer, onPress);
+		this.updateTooltip(tooltipDescText, tooltipText, renderer);
 	}
 
-	public ButtonWidgetEx(int width, int height, net.minecraft.text.Text message, TextRenderer renderer, PressAction onPress) {
+	public ButtonWidgetEx(int width, int height, net.minecraft.text.Text message, TextRenderer renderer, Consumer<AbstractInput> onPress) {
 		this(width, height, message, null, renderer, onPress);
+	}
+
+	// v0.0.5 change: To allow input presses to go through due to some button presses 
+	// requiring certain input actions such as right-clicking. Completely replaces the 
+	// old approach where the value being passed was this button widget itself.
+	@Override
+	public void onPress(AbstractInput input) {
+		this.onPress.accept(input);
+	}
+	// Introduced in v0.0.5: Allows other mouse inputs (most specifically buttons) to
+	// be valid based on a predicate
+	@Override
+	protected boolean isValidClickButton(MouseInput input) {
+		return this.validClickButtons.test(input);
 	}
 	
 	@Override
@@ -139,5 +170,17 @@ public class ButtonWidgetEx extends ButtonWidget
 		
 		if (messageOrder == 2)
 			builder.put(NarrationPart.USAGE, titleText);
+	}
+	
+	/**
+	 * Determines whether the mouse click is considered valid for this button.
+	 * 
+	 * @param p the predicate to set
+	 * @return the current widget instance
+	 * 
+	 * @implNote Introduced in v0.0.5
+	 */
+	public ButtonWidgetEx setValidClickButtons(Predicate<MouseInput> p) {
+		this.validClickButtons = p; return this;
 	}
 }

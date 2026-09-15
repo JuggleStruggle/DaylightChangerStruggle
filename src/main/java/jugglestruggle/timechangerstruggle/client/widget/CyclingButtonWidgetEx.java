@@ -9,10 +9,15 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.lwjgl.glfw.GLFW;
+
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.screen.narration.NarrationPart;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
+import net.minecraft.client.input.AbstractInput;
+import net.minecraft.client.input.MouseInput;
 import net.minecraft.client.option.SimpleOption.TooltipFactory;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.MutableText;
@@ -70,6 +75,20 @@ implements SelfWidgetRendererInheritor<CyclingButtonWidgetEx<T>>, WidgetOrderedT
 	@Override
 	public void drawIcon(DrawContext ctx, int mouseX, int mouseY, float delta) {
 		this.renderer.renderButton(ctx, mouseX, mouseY, delta);
+	}
+
+	// Introduced in v0.0.5: Allow right-clicking to reverse the cycle aside from shift key
+	@Override @SuppressWarnings("rawtypes")
+	public void onPress(AbstractInput input) {
+		((CyclingButtonWidgetAccessor)this).dcs_cycle(CyclingButtonWidgetEx.shallCyclePrevious(input) ? -1 : 1);
+	}
+	
+	// Introduced in v0.0.5: Allows right-click to be a valid button
+	@Override
+	protected boolean isValidClickButton(MouseInput input)
+	{
+		return input.button() == GLFW.GLFW_MOUSE_BUTTON_1 || 
+			   input.button() == GLFW.GLFW_MOUSE_BUTTON_2;
 	}
 
 	@Override
@@ -130,7 +149,7 @@ implements SelfWidgetRendererInheritor<CyclingButtonWidgetEx<T>>, WidgetOrderedT
 	}
 	
 	
-
+	
 	
 	public static WidgetBuilder<Boolean> booleanCycle(boolean initial, Text trueText, Text falseText)
 	{
@@ -154,10 +173,27 @@ implements SelfWidgetRendererInheritor<CyclingButtonWidgetEx<T>>, WidgetOrderedT
 		return wcbb;
 	}
 	
+	/**
+	 * Returns whether the input requests the option to use previous values.
+	 * In the meantime, only Shift (left or right) and right-clicking return
+	 * {@code true}.
+	 * 
+	 * @param input used for determining previous value returns
+	 * @return a boolean value
+	 */
+	public static boolean shallCyclePrevious(AbstractInput input) 
+	{
+		if (input.hasShift())
+			return true;
+		else if (input instanceof Click c)
+			return c.button() == GLFW.GLFW_MOUSE_BUTTON_2;
+		else
+			return false;
+	}
 	
 	
 	
-
+	
 	public static abstract class WidgetBuilderAbstract<V> extends CyclingButtonWidget.Builder<V>
 	{
 		protected TooltipFactoryEx<V> tooltipFactoryEx = v -> null;

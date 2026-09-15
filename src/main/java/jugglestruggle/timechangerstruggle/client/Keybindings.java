@@ -15,6 +15,9 @@ public class Keybindings
 {
 	public static KeyBinding timeChangerMenuKey;
 	public static KeyBinding toggleWorldTimeKey;
+	public static KeyBinding disableNightVisionKey;
+	public static KeyBinding prevCycleKey;
+	public static KeyBinding nextCycleKey;
 	
 	// 0.0.3+1.21.9 port: required due to vanilla changes
 	// also removes the unused category naming in the meantime
@@ -30,6 +33,9 @@ public class Keybindings
 		
 		Keybindings.timeChangerMenuKey = Keybindings.register("timechangermenu");
 		Keybindings.toggleWorldTimeKey = Keybindings.register("toggleworldtime");
+		Keybindings.disableNightVisionKey = Keybindings.register("disablenightvision");
+		Keybindings.prevCycleKey = Keybindings.register("prevcycle");
+		Keybindings.nextCycleKey = Keybindings.register("nextcycle");
 	}
 	
 	private static KeyBinding register(String keyName)

@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 import net.minecraft.client.MinecraftClient;
@@ -27,6 +28,7 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.world.World;
 
 import com.google.common.collect.ImmutableSet;
@@ -50,10 +52,8 @@ public class Commands
 	
 	public void registerCommands()
 	{
-		if (this.commandsRegistered)
-			return;
-		
-		ClientCommandRegistrationCallback.EVENT.register(this::register);
+		if (!this.commandsRegistered)
+			ClientCommandRegistrationCallback.EVENT.register(this::register);
 	}
 	
 
@@ -120,47 +120,49 @@ public class Commands
 				// and formatted!
 				TimeChangerStruggleClient.getCachedCycleTypeBuilders().forEach(cycle -> 
 				{
-					MutableText options = Text.literal("[\u26A1]");
+					MutableText properties = Text.literal("[\u26A1]");
 					MutableText useCycle = Text.literal("[\u2192]");
 					
 					final String baseName = cycle.getKeyName();
 					final Text displayName = cycle.getTranslatableName();
 					boolean isCurrentCycle = TimeChangerStruggleClient.isCycleTypeCurrentCycle(baseName);
 					
-					useCycle.styled(style -> 
+					useCycle.styled(s -> 
 					{
-						return style
-							.withColor(isCurrentCycle ? 0xFF5511 : 0x55FF11)
+						return s
+							.withColor(isCurrentCycle ? 0x55FF11 : 0xAAAAAA)
 							.withClickEvent(new ClickEvent.RunCommand("/tcs cycle "+baseName))
 							.withHoverEvent(new HoverEvent.ShowText(Text.translatable
 								("jugglestruggle.tcs.cmd.cycle.listing.use", displayName)))
 							.withBold(true);
 					});
 					
-					options.styled(style -> 
+					properties.styled(s -> 
 					{
-						Style currentStyle = style.withBold(true)
-							.withColor(cycle.hasOptionsToEdit() ? 0xFFDD00 : 0x666666);
+						s = s.withBold(true).withColor(cycle.hasOptionsToEdit() ? 0xFFDD00 : 0x666666);
 						
 						if (cycle.hasOptionsToEdit())
 						{
-							currentStyle = currentStyle.withHoverEvent(new HoverEvent.ShowText
-								(Text.translatable("jugglestruggle.tcs.cmd.cycle.listing.option", displayName)))
-							.withClickEvent(new ClickEvent.RunCommand("/tcs cycle "+baseName+" option"));
+							s = s.withHoverEvent(new HoverEvent.ShowText
+									(Text.translatable("jugglestruggle.tcs.cmd.cycle.listing.option", displayName)))
+								.withClickEvent(new ClickEvent.RunCommand("/tcs cycle "+baseName+" propertyScreen"));
 						}
 							
-						return currentStyle;
+						return s;
 					});
 					
 					MutableText displayNameAsDisplay = displayName.copy();
 					
-					displayNameAsDisplay.styled(style -> 
+					displayNameAsDisplay.styled(s -> 
 					{
+						if (isCurrentCycle)
+							s = s.withColor(0x55FF11).withUnderline(true);
+						
 						Text displayDesc = cycle.getTranslatableDescription();
-						return (displayDesc == null) ? style : style.withHoverEvent(new HoverEvent.ShowText(displayDesc));
+						return (displayDesc == null) ? s : s.withHoverEvent(new HoverEvent.ShowText(displayDesc));
 					});
 					
-					Commands.sendTextToChat(ctx, Text.translatable("%1$s %2$s %3$s", options, useCycle, displayNameAsDisplay));
+					Commands.sendTextToChat(ctx, Text.translatable("%1$s %2$s %3$s", properties, useCycle, displayNameAsDisplay));
 				});
 				
 				
@@ -199,7 +201,7 @@ public class Commands
 				
 				Commands.sendTextToChat
 				(
-					ctx, style -> style.withColor(0x22FF22).withBold(true),
+					ctx, s -> s.withColor(0x22FF22).withBold(true),
 					"jugglestruggle.tcs.cmd.cycle.remove.use",
 					cycleRemovedText, worldTimeText
 				);
@@ -229,20 +231,17 @@ public class Commands
 			// we wouldn't already create an artificial barrier for this
 			if (cycle.hasOptionsToEdit())
 			{
-				LiteralArgumentBuilder<FabricClientCommandSource> cycleOptionArg = ClientCommandManager.literal("option");
+				LiteralArgumentBuilder<FabricClientCommandSource> cyclePropScreenArg = ClientCommandManager.literal("propertyScreen");
 				
-				cycleOptionArg.executes(ctx -> 
+				cyclePropScreenArg.executes(ctx -> 
 				{
-					// TODO: This doesn't work when executing it directly. This is as a result of the chat history
-					// screen clearing its own screen when the TCS screen is set before that happens and as a result,
-					// it seems like nothing happened. Clicking on the chat history opens this screen without any issues.
 					MinecraftClient client = ctx.getSource().getClient();
-					client.setScreen(new TimeChangerScreen(client.currentScreen, cycle));
+					client.executeSync(() -> client.setScreen(new TimeChangerScreen(client.currentScreen, cycle)));
 					
 					return 1;
 				});
-					
-				cycleArg.then(cycleOptionArg);
+				
+				cycleArg.then(cyclePropScreenArg);
 			}
 			
 			cycleSubcommand.then(cycleArg);
@@ -253,73 +252,119 @@ public class Commands
 	
 	private LiteralArgumentBuilder<FabricClientCommandSource> generateOptionSubcommand()
 	{
-		return ClientCommandManager.literal("option")
-			.then(this.generateOptionSubcommandBoolAction
+		LiteralArgumentBuilder<FabricClientCommandSource> optionArg = ClientCommandManager.literal("option");
+		
+		OptionSubcommandBool[] boolOptions = new OptionSubcommandBool[] 
+		{
+			new OptionSubcommandBool
 			(
 				"dateOverTicks", 
 				Text.translatable("jugglestruggle.tcs.screen.toggledate"), 
 				() -> TimeChangerStruggleClient.dateOverTicks, 
-				currentValue -> TimeChangerStruggleClient.dateOverTicks = currentValue
-			))
-			.then(this.generateOptionSubcommandBoolAction
+				v -> TimeChangerStruggleClient.dateOverTicks = v, null
+			),
+			new OptionSubcommandBool
 			(
 				"butterySmoothCycle", 
 				Text.translatable("jugglestruggle.tcs.screen.togglesmoothbutterdaylightcycle"), 
 				() -> TimeChangerStruggleClient.smoothButterCycle, 
-				currentValue -> TimeChangerStruggleClient.smoothButterCycle = currentValue
-			))
-			.then(this.generateOptionSubcommandBoolAction
+				v -> TimeChangerStruggleClient.smoothButterCycle = v, null
+			),
+			new OptionSubcommandBool
 			(
 				"disableNightVisionEffect", 
 				Text.translatable("jugglestruggle.tcs.cmd.option.disablenightvision"), 
 				() -> TimeChangerStruggleClient.disableNightVisionEffect, 
-				currentValue -> TimeChangerStruggleClient.disableNightVisionEffect = currentValue
-			))
-			.then(this.generateOptionSubcommandBoolAction
+				v -> TimeChangerStruggleClient.disableNightVisionEffect = v, null
+			),
+			new OptionSubcommandBool
 			(
 				"disableWorldTimeOnCycleUsage", 
 				Text.translatable("jugglestruggle.tcs.cmd.option.disableworldtimeoncycleusage"), 
 				() -> TimeChangerStruggleClient.commandsDisableWorldTimeOnCycleUsage, 
-				currentValue -> TimeChangerStruggleClient.commandsDisableWorldTimeOnCycleUsage = currentValue
-			))
-			.then(this.generateOptionSubcommandBoolAction
+				v -> TimeChangerStruggleClient.commandsDisableWorldTimeOnCycleUsage = v, null
+			),
+			new OptionSubcommandBool
 			(
 				"commandFeedbackOnLessImportant", 
 				Text.translatable("jugglestruggle.tcs.cmd.option.commandfeedbackonlessimportant"), 
 				() -> TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant, 
-				currentValue -> TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant = currentValue
-			))
-			.then(this.generateOptionSubcommandBoolAction
+				v -> TimeChangerStruggleClient.commandsCommandFeedbackOnLessImportant = v, null
+			),
+			new OptionSubcommandBool
 			(
 				"allowWorldChangeCyclesToWriteToDisk", 
 				Text.translatable("jugglestruggle.tcs.cmd.option.allowworldchangecyclestowritetodisk"), 
 				() -> TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk, 
-				currentValue -> TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk = currentValue
-			));
+				v -> TimeChangerStruggleClient.allowWorldChangeCyclesToWriteToDisk = v, null
+			)
+		};
+		
+		for (OptionSubcommandBool opt : boolOptions) {
+			optionArg.then(this.generateOptionSubcommandBoolAction(opt));
+		}
+		
+		// Introduced in v0.0.5: Show all available options alongside their values
+		optionArg.executes(ctx -> 
+		{
+			final String langOpt = "jugglestruggle.tcs.cmd.option.exec";
+			Commands.sendTextToChat(ctx, s -> s.withColor(0xAAAAAA), langOpt);
+			
+			final String starterCommand = Commands.getStarterCommand(ctx);
+			
+			for (OptionSubcommandBool opt : boolOptions) 
+			{
+				boolean currentValue = opt.suppliedValue.getAsBoolean();
+				
+				MutableText tooltipDisplayName = opt.displayName().copy();
+				MutableText tooltipDescription = opt.getDescription();
+				MutableText displayedText = Text.literal(opt.subcommandName());
+				MutableText value = Text.literal(currentValue ? "\u2611" : "\u2612");
+				
+				tooltipDisplayName.styled(s -> s.withColor(0xFFDD00));
+				TimeChangerScreen.setAsGrayText(displayedText);
+				TimeChangerScreen.setAsGrayText(tooltipDescription);
+				
+				displayedText.styled(s -> s
+					.withClickEvent(new ClickEvent.RunCommand
+						(String.format("%1$s option %2$s", starterCommand, opt.subcommandName)))
+					.withHoverEvent(new HoverEvent.ShowText(Text.translatable("%1$s: %2$s", tooltipDisplayName, tooltipDescription)))
+				);
+
+				value.styled(s -> s
+					.withColor(currentValue ? 0x00FF00 : 0xFF0000)
+					.withClickEvent(new ClickEvent.RunCommand
+						(String.format("%1$s option %2$s %3$s", starterCommand, opt.subcommandName,
+						(currentValue ? "true" : "false"))))
+					.withHoverEvent(new HoverEvent.ShowText(
+						Text.translatable("jugglestruggle.tcs.cmd.option.set", 
+						tooltipDisplayName, ScreenTexts.onOrOff(currentValue))))
+				);
+				
+				Commands.sendTextToChat(ctx, Text.translatable("%1$s %2$s", value, displayedText));
+			}
+			
+			return 1;
+		});
+		
+		return optionArg;
 	}
 
 	/**
 	 * Generates sub-command boolean-based arguments in a more common way.
-	 * 
-	 * @param suppliedValue the most recent value this currently holds
-	 * @param onApplyConsumer apply the new value into the option itself
-	 * @param onSuccessRes invoked after everything else is done and was 
-	 *        successful in changing to the new value
-	 *        
 	 * @return a literal argument builder with the name of the sub-command
 	 */
-	private LiteralArgumentBuilder<FabricClientCommandSource> generateOptionSubcommandBoolAction
-	(String subcommandName, Text displayName, BooleanSupplier suppliedValue, UnaryOperator<Boolean> onApplyConsumer)
+	private LiteralArgumentBuilder<FabricClientCommandSource> generateOptionSubcommandBoolAction(OptionSubcommandBool opt)
 	{
-		LiteralArgumentBuilder<FabricClientCommandSource> subcommand = ClientCommandManager.literal(subcommandName);
+		LiteralArgumentBuilder<FabricClientCommandSource> subcommand = ClientCommandManager.literal(opt.subcommandName);
 		
 		subcommand.executes(ctx -> 
 		{
-			final boolean newValue = onApplyConsumer.apply(!suppliedValue.getAsBoolean());
+			final boolean newValue = opt.onApplyConsumer.apply(!opt.suppliedValue.getAsBoolean());
 			TimeChangerStruggleClient.config.writeIfModified();
 			
 			Commands.sendTextToChat(ctx, "jugglestruggle.tcs.cmd.option.set", 
-				displayName, ScreenTexts.onOrOff(newValue));
+				opt.displayName, ScreenTexts.onOrOff(newValue));
 			
 			return 1;
 		});
@@ -329,19 +374,22 @@ public class Commands
 			ClientCommandManager.argument("enable", BoolArgumentType.bool())
 			.executes(ctx ->
 			{
-				final boolean previousValue = suppliedValue.getAsBoolean();
-				final boolean newValue = onApplyConsumer.apply(BoolArgumentType.getBool(ctx, "enable"));
+				final boolean previousValue = opt.suppliedValue.getAsBoolean();
+				final boolean newValue = opt.onApplyConsumer.apply(BoolArgumentType.getBool(ctx, "enable"));
 				
 				final boolean prevAndNewValueEquals = previousValue == newValue;
 				
 				Commands.sendTextToChat
 				(
 					ctx, "jugglestruggle.tcs.cmd.option.set" + (prevAndNewValueEquals ? ".error.equals" : ""), 
-					displayName, ScreenTexts.onOrOff(newValue)
+					opt.displayName, ScreenTexts.onOrOff(newValue)
 				);
 				
 				if (prevAndNewValueEquals)
 					return 0;
+
+				if (opt.onSuccessRes != null)
+					opt.onSuccessRes.accept(newValue);
 				
 				TimeChangerStruggleClient.config.writeIfModified();
 				
@@ -427,7 +475,7 @@ public class Commands
 				
 				Commands.sendTextToChat
 				(
-					ctx, style -> style.withColor(0xFFDD00).withBold(true),
+					ctx, s -> s.withColor(0xFFDD00).withBold(true),
 					langCmd, clickableText
 				);
 			}
@@ -435,7 +483,7 @@ public class Commands
 			{
 				Commands.sendTextToChat
 				(
-					ctx, style -> style.withColor(0x44FF00).withBold(true),
+					ctx, s -> s.withColor(0x44FF00).withBold(true),
 					"jugglestruggle.tcs.cmd.worldtime.set",
 					ScreenTexts.onOrOff(TimeChangerStruggleClient.worldTime)
 				);
@@ -462,11 +510,11 @@ public class Commands
 			if (previousCycle.isPresent() && previousCycle.get().getKeyName().equals(this.cycleToUse.getKeyName()))
 			{
 				MutableText cycleText = Text.translatable(langCmd+"cycle", 
-					this.cycleToUse.getTranslatableName().copy().styled(style -> style.withColor(0xFF22FF)));
+					this.cycleToUse.getTranslatableName().copy().styled(s -> s.withColor(0xFF22FF)));
 				
 				Commands.sendTextToChat
 				(
-					ctx, style -> style.withColor(0xFF2222).withBold(true),
+					ctx, s -> s.withColor(0xFF2222).withBold(true),
 					langCmd + "use.error.inuse", cycleText
 				);
 				
@@ -488,7 +536,7 @@ public class Commands
 				
 				Commands.sendTextToChat
 				(
-					ctx, style -> style.withColor(0x22FF22).withBold(true),
+					ctx, s -> s.withColor(0x22FF22).withBold(true),
 					langCmd + "use.success", cycleText
 				);
 			}
@@ -629,7 +677,7 @@ public class Commands
 					
 					Commands.sendTextToChat
 					(
-						ctx, style -> style.withColor(0x22FF22).withBold(true), 
+						ctx, s -> s.withColor(0x22FF22).withBold(true), 
 						langCmd + modeName, myTimeTicks, totalTicks, prevTicks
 					);
 				}
@@ -640,7 +688,7 @@ public class Commands
 			{
 				Commands.sendTextToChat
 				(
-					ctx, style -> style.withColor(0xFF2222).withBold(true), 
+					ctx, s -> s.withColor(0xFF2222).withBold(true), 
 					"jugglestruggle.tcs.cmd.time.error.statictimenotfound", 
 					new Object[0]
 				);
@@ -652,5 +700,29 @@ public class Commands
 	
 	public enum StaticTimeMode {
 		SET, ADD, REMOVE
+	}
+
+	/**
+	 * A way to let both the base option subcommand and its child arguments to
+	 * do what they need to be doing.
+	 *
+	 * @author JuggleStruggle
+	 * @implNote Introduced in v0.0.5
+	 * 
+	 * @param suppliedValue the most recent value this currently holds
+	 * @param onApplyConsumer apply the new value into the option itself
+	 * @param onSuccessRes invoked after everything else is done and was 
+	 *        successful in changing to the new value
+	 */
+	record OptionSubcommandBool(String subcommandName, MutableText displayName, BooleanSupplier suppliedValue, 
+		UnaryOperator<Boolean> onApplyConsumer, Consumer<Boolean> onSuccessRes)
+	{
+		public MutableText getDescription() 
+		{
+			if (this.displayName.getContent() instanceof TranslatableTextContent ttc)
+				return Text.translatable(ttc.getKey()+".desc");
+			else
+				return Text.empty();
+		}
 	}
 }
