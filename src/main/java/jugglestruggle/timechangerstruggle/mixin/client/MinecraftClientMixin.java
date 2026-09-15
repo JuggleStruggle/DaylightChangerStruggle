@@ -20,7 +20,7 @@ public class MinecraftClientMixin
 	// the world parameter not be null. This variant requires that to be in order to
 	// be able to save certain cycles to disk and identify changes as it goes.
 	@Inject(method = "setWorld(Lnet/minecraft/client/world/ClientWorld;Z)V", at = @At("TAIL"))
-	private void daylightChangerStruggle_onAfterClientWorldChange(ClientWorld world, boolean stopSoundManager, CallbackInfo ci) {
+	private void dcsOnAfterClientWorldChange(ClientWorld world, boolean stopSoundManager, CallbackInfo ci) {
 		TimeChangerStruggleClient.onWorldChanged((MinecraftClient)(Object)this, world);
 	}
 }

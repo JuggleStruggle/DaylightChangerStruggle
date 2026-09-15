@@ -19,7 +19,7 @@ import java.util.Set;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.input.SystemKeycodes;
+import net.minecraft.client.input.SystemUiFlags;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
@@ -116,7 +116,7 @@ public class StaticTime implements DayNightCycleBasis
 		MinecraftClient client = screen.getClient();
 		
 		MutableText lShiftKey = StaticTime.createQuickOptElemKey("shift");
-		MutableText lCtrlKey = StaticTime.createQuickOptElemKey(SystemKeycodes.IS_MAC_OS ? "super" : "control");
+		MutableText lCtrlKey = StaticTime.createQuickOptElemKey(SystemUiFlags.IS_MAC_OS ? "super" : "control");
 		MutableText lAltKey = StaticTime.createQuickOptElemKey("alt");
 		
 		int i; 

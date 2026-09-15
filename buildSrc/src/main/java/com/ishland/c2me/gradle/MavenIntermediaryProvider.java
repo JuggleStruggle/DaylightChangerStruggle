@@ -1,5 +1,6 @@
 // Directly taken from C2ME's 26.2's source code on GitHub and slightly adjusted to better
-// match DaylightChangerStruggle's format as it is required to maintain Yarn mapping. Source:
+// match DaylightChangerStruggle's format as it is required to maintain Yarn mapping. This file 
+// is licensed under MIT, source:
 // https://raw.githubusercontent.com/RelativityMC/C2ME-fabric/refs/heads/dev/26.2.0/buildSrc/src/main/java/com/ishland/c2me/gradle/MavenIntermediaryProvider.java
 
 package com.ishland.c2me.gradle;

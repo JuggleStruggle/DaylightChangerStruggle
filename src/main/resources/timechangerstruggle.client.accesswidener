@@ -48,3 +48,7 @@ accessible field net/minecraft/world/attribute/EnvironmentAttributeInterpolator$
 accessible field net/minecraft/world/attribute/EnvironmentAttributeInterpolator$Entry current Ljava/lang/Object;
 extendable method net/minecraft/world/attribute/EnvironmentAttributeInterpolator$Entry compute (Lnet/minecraft/world/attribute/EnvironmentAttribute;)Ljava/lang/Object;
 
+## Client Clocks
+accessible field net/minecraft/client/world/ClientClocks$Entry ticks J
+accessible field net/minecraft/client/world/ClientClocks$Entry partialTick F
+accessible field net/minecraft/client/world/ClientClocks$Entry rate F

@@ -17,4 +17,8 @@ public interface CyclingButtonWidgetAccessor<T>
 	
 	@Invoker(value = "composeText")
 	Text dcs_composeText(T value); 
+
+	// Introduced in v0.0.5
+	@Invoker(value = "cycle")
+	void dcs_cycle(int amount); 
 }

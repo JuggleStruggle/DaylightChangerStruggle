@@ -43,6 +43,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.ElementListWidget;
+import net.minecraft.client.input.AbstractInput;
 import net.minecraft.client.input.CharInput;
 import net.minecraft.client.input.KeyInput;
 import net.minecraft.screen.ScreenTexts;
@@ -228,11 +229,12 @@ public class TimeChangerScreen extends Screen
 						this.textRenderer, b -> this.updateMenuType(Menu.SWITCH_DAYLIGHT_CYCLE_MENU)));
 					
 					// Quick-Switch Cycle
-					elements.add(new ButtonWidgetEx(20, 20, Text.of("\u21C6"), 
+					elements.add(new ButtonWidgetEx(20, 20, Text.of("\u21C6"),
 						this.mainMenu_getButtonWidgetTooltipFirstLine_switchGetterMenu(),
 						TimeChangerScreen.translateTextAsGrayColor("jugglestruggle.tcs.screen.switchcyclemenu.quick.desc"),
 						this.textRenderer, this::mainMenu_quickSwitchDaylightCycleType)
-						.setNarrationBuilder((bwx, b) -> bwx.appendNarrationTooltipLine(b, (byte)1, 1, 0)));
+						.setNarrationBuilder((bwx, b) -> bwx.appendNarrationTooltipLine(b, (byte)1, 1, 0))
+						.setValidClickButtons(ButtonWidgetEx.LEFT_AND_RIGHT_CLICK_BUTTONS));
 					
 					// Configuration (not used yet as of version 0.0.0)
 					elements.add(ButtonWidget.builder(Text.empty(), btn -> {}).build());
@@ -322,12 +324,6 @@ public class TimeChangerScreen extends Screen
 					// Property List (Index 4) (Index 1 if prop list only is shown)
 					if (cycleChangerExists)
 						this.switchDaylightCycleMenu_buildConfigFromType(cycleBasis, elements, true);
-					
-					break;
-				}
-				// (not used yet as of version 0.0.0)
-				case CONFIGURATION_MENU:
-				{
 					
 					break;
 				}
@@ -530,10 +526,11 @@ public class TimeChangerScreen extends Screen
 							cyclePropertyList.modifyingCycleType.getBuilderClass()).get().getTranslatableName();
 						
 						// Save Properties
-						bwe = new ButtonWidgetEx(74, 20, 
+						bwe = new ButtonWidgetEx(120, 20, 
 							Text.translatable("jugglestruggle.tcs.screen.switchcyclemenu.propertylist.save"),
-							Text.translatable("jugglestruggle.tcs.screen.switchcyclemenu.propertylist.save.desc", cachedBuilderName), 
-							null, this.getTextRenderer(), this::switchDaylightCycleMenu_propertyList_saveProperties)
+							Text.translatable("jugglestruggle.tcs.screen.switchcyclemenu.propertylist.save.desc.firstline", cachedBuilderName), 
+							TimeChangerScreen.translateTextAsGrayColor("jugglestruggle.tcs.screen.switchcyclemenu.propertylist.save.desc"), 
+							this.getTextRenderer(), this::switchDaylightCycleMenu_propertyList_saveProperties)
 							.setNarrationBuilder((cb, b) -> cb.appendNarrationTooltipLine(b, (byte)1, 1, 0));
 						
 						bwe.active = !TimeChangerStruggleClient.applyOnPropertyListValueUpdate;
@@ -544,8 +541,9 @@ public class TimeChangerScreen extends Screen
 						
 						// Reset Properties to Previous State
 						bwe = new ButtonWidgetEx(20, 20, Text.of("\u21BA"), 
-							Text.translatable("jugglestruggle.tcs.screen.switchcyclemenu.propertylist.reset.desc", cachedBuilderName), 
-							null, this.getTextRenderer(), this::switchDaylightCycleMenu_propertyList_resetProperties)
+							Text.translatable("jugglestruggle.tcs.screen.switchcyclemenu.propertylist.reset.desc.firstline"), 
+							TimeChangerScreen.translateTextAsGrayColor("jugglestruggle.tcs.screen.switchcyclemenu.propertylist.reset.desc", cachedBuilderName), 
+							this.getTextRenderer(), this::switchDaylightCycleMenu_propertyList_resetProperties)
 							.setNarrationBuilder((cb, b) -> cb.appendNarrationTooltipLine(b, (byte)1, 1, 0));
 						
 						bwe.active = !TimeChangerStruggleClient.applyOnPropertyListValueUpdate;
@@ -595,11 +593,6 @@ public class TimeChangerScreen extends Screen
 				
 				break;
 			}
-			
-			case CONFIGURATION_MENU:
-			{
-				break;
-			}
 		}
 		
 		elements.stream().forEach(elem -> 
@@ -630,7 +623,6 @@ public class TimeChangerScreen extends Screen
 	{
 		switch (this.currentMenu)
 		{
-			case CONFIGURATION_MENU:
 			case SWITCH_DAYLIGHT_CYCLE_MENU:
 			{
 				if (this.currentMenu == Menu.SWITCH_DAYLIGHT_CYCLE_MENU)
@@ -656,9 +648,12 @@ public class TimeChangerScreen extends Screen
 		this.menuElements.clear();
 		
 		this.mainMenu_saveQuickOptionElements();
-			
-		if (this.menuDirty)
+		
+		if (this.menuDirty || TimeChangerStruggleClient.doGeneralWorldChangeSave)
+		{
 			TimeChangerStruggleClient.config.writeIfModified();
+			TimeChangerStruggleClient.doGeneralWorldChangeSave = false;
+		}
 	}
 	
 	@Override
@@ -907,11 +902,11 @@ public class TimeChangerScreen extends Screen
 			"jugglestruggle.tcs.screen.switchcyclemenu.desc.using", usingText
 		);
 	}
-	private void mainMenu_quickSwitchDaylightCycleType(ButtonWidget b)
+	private void mainMenu_quickSwitchDaylightCycleType(AbstractInput i)
 	{
 		this.mainMenu_onSwitchDaylightCycleType(true, () -> {
 			this.mainMenu_saveQuickOptionElements();
-			TimeChangerStruggleClient.quickSwitchCachedCycleType(this.client.isShiftPressed());
+			TimeChangerStruggleClient.quickSwitchCachedCycleType(CyclingButtonWidgetEx.shallCyclePrevious(i));
 			TimeChangerStruggleClient.updateWorldDaylightCycle(true);
 		});
 	}
@@ -1141,13 +1136,13 @@ public class TimeChangerScreen extends Screen
 		
 		return Text.translatable("jugglestruggle.tcs.screen.switchcyclemenu.switchduallist.desc.switchto", formattedTextSupport);
 	}
-	private void switchDaylightCycleMenu_propertyList_saveProperties(ButtonWidget b)
+	private void switchDaylightCycleMenu_propertyList_saveProperties(AbstractInput i)
 	{
 		this.switchDaylightCycleMenu_propertyList_forEachProperty((modifyingCycleType, propElem) -> 
 			modifyingCycleType.writePropertyValueToCycle(propElem.getProperty(), PropertyWriterSource.USER)
 		);
 	}
-	private void switchDaylightCycleMenu_propertyList_resetProperties(ButtonWidget b)
+	private void switchDaylightCycleMenu_propertyList_resetProperties(AbstractInput i)
 	{
 		this.switchDaylightCycleMenu_propertyList_forEachProperty((modifyingCycleType, propElem) -> 
 		{
@@ -1850,7 +1845,7 @@ public class TimeChangerScreen extends Screen
 			this.options.active = !this.onEdit && this.builder.hasOptionsToEdit();
 		}
 		
-		private void onCreateAndUseClick(ButtonWidget widget)
+		private void onCreateAndUseClick(AbstractInput i)
 		{
 			// Firstly, check if this builder is already in use before attempting to
 			// make changes to certain elements.
@@ -1881,7 +1876,7 @@ public class TimeChangerScreen extends Screen
 			this.setSelectedIfTimeChangerMatches();
 		}
 		
-		private void onCreateOptionClick(ButtonWidget widget)
+		private void onCreateOptionClick(AbstractInput i)
 		{
 			if (this.parent.parent.switchDaylightCycleMenu_isCycleBuilderInMenu(this.builder))
 				return;
@@ -2252,7 +2247,6 @@ public class TimeChangerScreen extends Screen
 	private enum Menu
 	{
 		MAIN_MENU,
-		CONFIGURATION_MENU,
 		SWITCH_DAYLIGHT_CYCLE_MENU;
 		
 		public final boolean clearMenuOnSwitch()

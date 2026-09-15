@@ -39,35 +39,57 @@ public class ClientClocksDCS extends ClientClocks
 	 */
 	public boolean useDcsClock;
 	
-	public ClientClocksDCS() {
+	/**
+	 * Only used when getting the clock's entry without a world so it wouldn't have
+	 * to constantly be recreated.
+	 * 
+	 * @implNote Introduced v0.0.5+26.3
+	 */
+	public ClientClocks.Entry emptyCC;
+	
+	public ClientClocksDCS() 
+	{
 		this.defaults(); this.useDcsClock = false;
+		this.emptyCC = new ClientClocks.Entry();
 	}
 	
 	@Override
-	public long getTime(RegistryEntry<WorldClockKey> clock)
+	public ClientClocks.Entry get(RegistryEntry<WorldClockKey> key)
 	{
 		ClientWorld w = MinecraftClient.getInstance().world;
-
-		if (this.useDcsClock)
+		
+		ClientClocks.Entry cc;
+		
+		if (w == null)
+			cc = super.get(key);
+		else
 		{
-			DayNightCycleBasis cycle = TimeChangerStruggleClient.getTimeChanger();
+			ClientClocks.Entry nh = ((ClientWorldAccessor)w)
+				.getClientNetworkHandler().getClocks().get(key);
 			
-			return (w == null) ? cycle.getCachedTime() : 
-				cycle.getModifiedTime(w, this.forExecutor, this.forPreviousTime);
+			// Return the original client clock if DCS clock is not in use.
+			if (!this.useDcsClock)
+				return nh;
+			
+			// Pass values from the network handler's clock to our entry
+			cc = super.get(key);
+			
+			cc.partialTick = nh.partialTick;
+			cc.rate = nh.rate;
 		}
-		else 
-		{
-			return (w == null) ? 0L : ((ClientWorldAccessor)w)
-				.getClientNetworkHandler().getClocks().getTime(clock);
-		}
+		
+		
+		DayNightCycleBasis cycle = TimeChangerStruggleClient.getTimeChanger();
+		
+		cc.ticks = (w == null) ? cycle.getCachedTime() : 
+			cycle.getModifiedTime(w, this.forExecutor, this.forPreviousTime);
+		
+		return cc;
 	}
 	
 	@Override
 	public void setTicks(long ticks) 
 	{
-		if (this.useDcsClock)
-			return;
-		
 		ClientWorld w = MinecraftClient.getInstance().world;
 		
 		if (w != null)
@@ -77,9 +99,6 @@ public class ClientClocksDCS extends ClientClocks
 	@Override
 	public void update(long ticks, Map<RegistryEntry<WorldClockKey>, ClockUpdate> clockDataByKey) 
 	{
-		if (this.useDcsClock)
-			return;
-		
 		ClientWorld w = MinecraftClient.getInstance().world;
 		
 		if (w != null)

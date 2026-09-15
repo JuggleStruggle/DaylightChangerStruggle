@@ -21,7 +21,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.input.AbstractInput;
 import net.minecraft.text.Text;
 
 import com.google.common.collect.ImmutableSet;
@@ -270,8 +270,8 @@ public class RandomizedTime extends MovingTimeBasis
 		// props.add(new LongValue("currentRngSeed", this.rng.setSeed(maximumRandomTime), null, null));
 		
 		props.add(new FancySectionProperty("daylightrandomtime", Text.translatable(PROPERTIES_KEY+"daylightrandomtime")));
-		props.add(new LongValue("minimumRandomTime", this.minimumRandomTime, 0L, Long.MAX_VALUE));
-		props.add(new LongValue("maximumRandomTime", this.maximumRandomTime, 0L, Long.MAX_VALUE));
+		props.add(new LongValue("minimumRandomTime", this.minimumRandomTime, Long.MIN_VALUE, Long.MAX_VALUE));
+		props.add(new LongValue("maximumRandomTime", this.maximumRandomTime, Long.MIN_VALUE, Long.MAX_VALUE));
 		
 		props.add(new FancySectionProperty("ticksuntilnextrng", Text.translatable(PROPERTIES_KEY+"ticksuntilnextrng")));
 		props.add(new BooleanValue("randomizeTicksUntilNextRNG", this.randomizeTicksUntilNextRNG));
@@ -448,7 +448,7 @@ public class RandomizedTime extends MovingTimeBasis
 		return new ResetSeedButton(this, screen, prop);
 	}
 	
-	protected void onResetSeedPropClicked(ButtonWidget b) {
+	protected void onResetSeedPropClicked(AbstractInput i) {
 		this.createRNG(this.startingSeed, true);
 	}
 	
