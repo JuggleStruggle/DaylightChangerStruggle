@@ -57,29 +57,33 @@ public class ClientClocksDCS extends ClientClocks
 	public ClientClocks.Entry get(RegistryEntry<WorldClockKey> key)
 	{
 		ClientWorld w = MinecraftClient.getInstance().world;
+		DayNightCycleBasis cycle = TimeChangerStruggleClient.getTimeChanger();
 		
 		ClientClocks.Entry cc;
 		
 		if (w == null)
+		{
 			cc = super.get(key);
+			
+			// Return what we got if the cycle itself is empty.
+			if (cycle == null)
+				return cc;
+		}
 		else
 		{
 			ClientClocks.Entry nh = ((ClientWorldAccessor)w)
 				.getClientNetworkHandler().getClocks().get(key);
 			
-			// Return the original client clock if DCS clock is not in use.
-			if (!this.useDcsClock)
+			// Return the original client clock if DCS clock is not in use or the active cycle is null.
+			if (!this.useDcsClock || cycle == null)
 				return nh;
 			
-			// Pass values from the network handler's clock to our entry
+			// Pass values from the network handler's clock to our entry.
 			cc = super.get(key);
 			
 			cc.partialTick = nh.partialTick;
 			cc.rate = nh.rate;
 		}
-		
-		
-		DayNightCycleBasis cycle = TimeChangerStruggleClient.getTimeChanger();
 		
 		cc.ticks = (w == null) ? cycle.getCachedTime() : 
 			cycle.getModifiedTime(w, this.forExecutor, this.forPreviousTime);
